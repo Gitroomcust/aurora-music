@@ -1,0 +1,284 @@
+<Grid xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Background="Transparent" Margin="26,15,26,18">
+
+    <Grid.RowDefinitions>
+        <RowDefinition Height="52" />
+        <RowDefinition Height="14" />
+        <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <!-- ============================== HEADER ============================== -->
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <Button x:Name="BackButton" Style="{StaticResource IconButtonStyle}"
+                Width="42" Height="42" VerticalAlignment="Center" ToolTip="Назад">
+            <TextBlock Text="&#xE72B;" FontFamily="{StaticResource IconFont}" FontSize="15" />
+        </Button>
+
+        <StackPanel Grid.Column="1" Margin="14,0,16,0" VerticalAlignment="Center">
+            <TextBlock Text="Захват звука" Style="{StaticResource H1TextStyle}" FontSize="25" />
+            <TextBlock Text="Системный звук со всех приложений · WASAPI loopback"
+                       Style="{StaticResource CaptionTextStyle}" FontSize="11.5" Margin="0,1,0,0" />
+        </StackPanel>
+
+        <Border x:Name="HeaderChip" Grid.Column="2" Background="#0F2FBF8F" CornerRadius="14"
+                Padding="11,6" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal">
+                <Ellipse x:Name="HeaderChipDot" Width="7" Height="7" Fill="{StaticResource SuccessBrush}"
+                         VerticalAlignment="Center" Margin="0,0,7,0" />
+                <TextBlock x:Name="HeaderChipText" Text="ПАУЗА"
+                           FontFamily="{StaticResource TextFont}" FontSize="10" FontWeight="Bold"
+                           Foreground="#177B5D" VerticalAlignment="Center" />
+            </StackPanel>
+        </Border>
+    </Grid>
+
+    <!-- ============================== CONTENT ============================== -->
+    <Grid Grid.Row="2">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="16" />
+            <ColumnDefinition Width="342" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ==================== LIVE VISUAL ==================== -->
+        <Border x:Name="VisualCard" CornerRadius="30" Padding="24,20,24,20" ClipToBounds="True">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#17131F" Offset="0" />
+                    <GradientStop Color="#211832" Offset="0.55" />
+                    <GradientStop Color="#34203E" Offset="1" />
+                </LinearGradientBrush>
+            </Border.Background>
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="30" ShadowDepth="10" Direction="270"
+                                  Color="#25123B" Opacity="0.24" />
+            </Border.Effect>
+            <Grid>
+                <Canvas IsHitTestVisible="False" Opacity="0.9">
+                    <Ellipse Canvas.Left="440" Canvas.Top="-30" Width="310" Height="310">
+                        <Ellipse.Fill>
+                            <RadialGradientBrush>
+                                <GradientStop Color="#3DFF6F87" Offset="0" />
+                                <GradientStop Color="#00FF6F87" Offset="1" />
+                            </RadialGradientBrush>
+                        </Ellipse.Fill>
+                    </Ellipse>
+                    <Ellipse Canvas.Left="-60" Canvas.Top="260" Width="350" Height="350">
+                        <Ellipse.Fill>
+                            <RadialGradientBrush>
+                                <GradientStop Color="#337C5CFF" Offset="0" />
+                                <GradientStop Color="#007C5CFF" Offset="1" />
+                            </RadialGradientBrush>
+                        </Ellipse.Fill>
+                    </Ellipse>
+                </Canvas>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Background="#18FFFFFF" CornerRadius="11" Padding="9,4">
+                                <TextBlock Text="СИСТЕМНЫЙ ЗВУК" FontFamily="{StaticResource TextFont}"
+                                           FontSize="9" FontWeight="Bold" Foreground="#D9CCEE" />
+                            </Border>
+                            <TextBlock Text="Поток с этого компьютера"
+                                       FontFamily="{StaticResource TextFont}" FontSize="11.5"
+                                       Foreground="#8E82A6" VerticalAlignment="Center" Margin="10,0,0,0" />
+                        </StackPanel>
+
+                        <Border x:Name="LiveBadge" Background="#22FF6F87" CornerRadius="11"
+                                Padding="9,4" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse x:Name="LiveBadgeDot" Width="6" Height="6" Fill="#FF8FA2"
+                                         VerticalAlignment="Center" Margin="0,0,6,0" />
+                                <TextBlock x:Name="LiveBadgeText" Text="LIVE"
+                                           FontFamily="{StaticResource TextFont}" FontSize="9"
+                                           FontWeight="Bold" Foreground="#FFC3CF" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Grid x:Name="WaveformHost" Grid.Row="1" Margin="-8,8,-8,0" MinHeight="190" />
+
+                    <Grid Grid.Row="2" Margin="0,2,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel VerticalAlignment="Bottom">
+                            <TextBlock Text="ДЛИТЕЛЬНОСТЬ" FontFamily="{StaticResource TextFont}"
+                                       FontSize="9" FontWeight="SemiBold" Foreground="#7E718F" />
+                            <TextBlock x:Name="ElapsedText" Text="00:00"
+                                       FontFamily="{StaticResource DisplayFont}" FontSize="45"
+                                       FontWeight="SemiBold" Foreground="{StaticResource OnDarkBrush}"
+                                       Margin="0,-2,0,0" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="22,0,22,5" VerticalAlignment="Bottom">
+                            <Grid>
+                                <TextBlock Text="ПИК" FontFamily="{StaticResource TextFont}" FontSize="9"
+                                           FontWeight="SemiBold" Foreground="#7E718F" />
+                                <TextBlock x:Name="PeakText" Text="— дБ" FontFamily="{StaticResource TextFont}"
+                                           FontSize="10" FontWeight="SemiBold" Foreground="#D9CCEE"
+                                           HorizontalAlignment="Right" />
+                            </Grid>
+                            <Border Height="6" CornerRadius="3" Background="#20FFFFFF" Margin="0,7,0,0">
+                                <Border x:Name="LevelBar" Width="0" HorizontalAlignment="Left"
+                                        CornerRadius="3" Background="{StaticResource WarmGradientBrush}" />
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                            <TextBlock Text="ФОРМАТ" FontFamily="{StaticResource TextFont}"
+                                       FontSize="9" FontWeight="SemiBold" Foreground="#7E718F"
+                                       HorizontalAlignment="Right" />
+                            <TextBlock x:Name="FormatText" Text="48 000 Гц · стерео · 16 бит"
+                                       FontFamily="{StaticResource TextFont}" FontSize="10.5"
+                                       Foreground="#B9AECC" Margin="0,3,0,0" />
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- ==================== RIGHT COLUMN ==================== -->
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="292" />
+                <RowDefinition Height="16" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Style="{StaticResource CardStyle}" Padding="20,18,20,14">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="ЗАХВАТ" Style="{StaticResource LabelTextStyle}"
+                                   Foreground="{StaticResource SecondaryBrush}" />
+                        <TextBlock Text="Системный звук" Style="{StaticResource H2TextStyle}"
+                                   FontSize="21" Margin="0,3,0,0" />
+                        <TextBlock Text="Всё, что сейчас играет на компьютере"
+                                   Style="{StaticResource CaptionTextStyle}" FontSize="11"
+                                   Margin="0,2,0,0" />
+                    </StackPanel>
+
+                    <Button x:Name="CaptureToggleButton" Grid.Row="1"
+                            Style="{StaticResource BareButtonStyle}" Width="82" Height="82"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            ToolTip="Остановить захват">
+                        <Grid Width="82" Height="82" RenderTransformOrigin="0.5,0.5">
+                            <Grid.RenderTransform>
+                                <ScaleTransform x:Name="CaptureButtonScale" />
+                            </Grid.RenderTransform>
+                            <Ellipse Width="82" Height="82" Fill="#12FF6F87" />
+                            <Ellipse Width="70" Height="70" Stroke="#1FFF6F87" StrokeThickness="1" />
+                            <Border Width="58" Height="58" CornerRadius="29"
+                                    Background="{StaticResource WarmGradientBrush}">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="18" ShadowDepth="5" Direction="270"
+                                                      Color="#FF5D8A" Opacity="0.36" />
+                                </Border.Effect>
+                                <TextBlock x:Name="CaptureGlyph" Text="&#xE71A;"
+                                           FontFamily="{StaticResource IconFont}" FontSize="18"
+                                           Foreground="White" HorizontalAlignment="Center"
+                                           VerticalAlignment="Center" />
+                            </Border>
+                        </Grid>
+                    </Button>
+
+                    <StackPanel Grid.Row="2" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Ellipse x:Name="CaptureStatusDot" Width="7" Height="7"
+                                     Fill="{StaticResource SuccessBrush}" VerticalAlignment="Center"
+                                     Margin="0,0,7,0" />
+                            <TextBlock x:Name="CaptureStatusText" Text="Подключение…"
+                                       FontFamily="{StaticResource TextFont}" FontSize="12"
+                                       FontWeight="SemiBold" Foreground="{StaticResource OnSurfaceBrush}" />
+                        </StackPanel>
+                        <TextBlock x:Name="CaptureHintText" Text="Запустите захват, чтобы начать эфир"
+                                   Style="{StaticResource CaptionTextStyle}" FontSize="9.5"
+                                   HorizontalAlignment="Center" Margin="0,3,0,0" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="18,15,18,14">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Width="30" Height="30" CornerRadius="10"
+                                    Background="{StaticResource PrimaryContainerBrush}">
+                                <TextBlock Text="&#xE701;" FontFamily="{StaticResource IconFont}"
+                                           FontSize="13" Foreground="{StaticResource PrimaryBrush}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock Text="Трансляция по Wi-Fi" FontFamily="{StaticResource TextFont}"
+                                       FontSize="12.5" FontWeight="SemiBold"
+                                       Foreground="{StaticResource OnSurfaceBrush}"
+                                       VerticalAlignment="Center" Margin="9,0,0,0" />
+                        </StackPanel>
+                        <Border x:Name="StreamStateChip" Background="#0F2FBF8F" CornerRadius="9"
+                                Padding="7,3" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <TextBlock x:Name="StreamStateText" Text="LIVE"
+                                       FontFamily="{StaticResource TextFont}" FontSize="8.5"
+                                       FontWeight="Bold" Foreground="#177B5D" />
+                        </Border>
+                    </Grid>
+
+                    <Border Grid.Row="1" Height="37" Margin="0,10,0,0" Background="{StaticResource SurfaceSoftBrush}"
+                            CornerRadius="12" Padding="10,0,3,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="StreamUrlText" Text="http://localhost:8737"
+                                       FontFamily="{StaticResource TextFont}" FontSize="10.5"
+                                       Foreground="{StaticResource PrimaryBrush}"
+                                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            <Button x:Name="CopyStreamButton" Grid.Column="1"
+                                    Style="{StaticResource IconButtonStyle}" Width="30" Height="30"
+                                    Background="Transparent" ToolTip="Скопировать ссылку">
+                                <TextBlock Text="&#xE8C8;" FontFamily="{StaticResource IconFont}" FontSize="11" />
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <Button x:Name="OpenWebButton" Grid.Row="2" Style="{StaticResource TonalButtonStyle}"
+                            Content="Открыть веб-плеер" Height="34" FontSize="11.5" Padding="14,0"
+                            Margin="0,8,0,0" />
+
+                    <TextBlock Grid.Row="3" Text="Откройте ссылку на телефоне в той же Wi-Fi сети."
+                               Style="{StaticResource CaptionTextStyle}" FontSize="9.5"
+                               TextWrapping="Wrap" Margin="2,7,2,0" />
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Grid>

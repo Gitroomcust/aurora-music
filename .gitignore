@@ -1,0 +1,23 @@
+# Build output and release artifacts
+dist/
+.tools/
+
+# Local settings and logs
+*.log
+settings.ini
+
+# Test media / temporary files
+TestMusic/
+TestLong/
+TempTest/
+BrowserProfile/
+lumen-headless/
+
+# IDE and OS
+.vs/
+.idea/
+*.user
+*.suo
+Thumbs.db
+Desktop.ini
+.DS_Store

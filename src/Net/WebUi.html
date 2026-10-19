@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f8f5ff">
+<title>Lumen — {{COMPUTER}}</title>
+<style>
+  :root{
+    --bg:#f8f5ff; --bg2:#fff8f4; --ink:#1d1926; --muted:#6d647c; --soft:#8b829a;
+    --surface:rgba(255,255,255,.78); --surface-strong:#ffffff; --line:rgba(29,25,38,.08);
+    --primary:#684ee8; --primary-soft:#e9e1ff; --rose:#ff6f87; --warm:#ffb36b;
+    --shadow:0 28px 70px -30px rgba(44,28,84,.38);
+    --shadow-soft:0 18px 45px -28px rgba(44,28,84,.35);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#16121e; --bg2:#1d1524; --ink:#f5f0ff; --muted:#bbb0cc; --soft:#8f849f;
+      --surface:rgba(38,31,49,.78); --surface-strong:#261f31; --line:rgba(245,240,255,.10);
+      --primary:#b6a2ff; --primary-soft:#382a5a; --shadow:0 28px 70px -30px rgba(0,0,0,.7);
+      --shadow-soft:0 18px 45px -28px rgba(0,0,0,.6);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);}
+  body{
+    font-family:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  .wash{position:fixed;inset:0;pointer-events:none;z-index:-1;background:
+    radial-gradient(520px 420px at 8% 2%, rgba(196,170,255,.36), transparent 70%),
+    radial-gradient(520px 460px at 92% 8%, rgba(255,183,166,.28), transparent 72%),
+    radial-gradient(620px 520px at 50% 100%, rgba(255,216,238,.25), transparent 70%),
+    linear-gradient(180deg,var(--bg),var(--bg2));}
+  .app{width:min(780px,100%);margin:0 auto;padding:20px 18px 150px;}
+  .hero{
+    position:relative;overflow:hidden;border-radius:34px;padding:25px 26px 27px;color:#fff;
+    background:linear-gradient(132deg,#1b1429 0%,#34224f 48%,#67375f 82%,#a4475c 100%);
+    box-shadow:var(--shadow);
+  }
+  .hero::before{
+    content:"";position:absolute;width:330px;height:330px;right:-110px;top:-145px;border-radius:50%;
+    border:1px solid rgba(255,255,255,.12);
+  }
+  .hero::after{
+    content:"";position:absolute;width:240px;height:240px;right:-50px;top:-100px;border-radius:50%;
+    border:1px solid rgba(255,255,255,.08);
+  }
+  .hero-top{display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative;z-index:2}
+  .brand{display:flex;align-items:center;gap:9px;font-family:"Segoe UI Variable Display","Segoe UI",sans-serif;font-weight:650;font-size:16px;letter-spacing:.1px}
+  .mark{width:31px;height:31px;border-radius:11px;background:linear-gradient(135deg,#8a6cff,#ff6f87 60%,#ffb36b);display:flex;align-items:center;justify-content:center;gap:2px;box-shadow:0 7px 18px rgba(0,0,0,.22)}
+  .mark i{display:block;width:2.5px;border-radius:3px;background:#fff}
+  .mark i:nth-child(1){height:9px}.mark i:nth-child(2){height:16px}.mark i:nth-child(3){height:12px}.mark i:nth-child(4){height:6px;opacity:.75}
+  .net{font-size:9px;font-weight:700;letter-spacing:.8px;padding:4px 7px;border-radius:8px;background:rgba(255,255,255,.11);color:#ded2ef;margin-left:2px}
+  .hostname{font-size:11px;color:#cbbce0;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  h1{position:relative;z-index:2;margin:23px 0 0;font-family:"Segoe UI Variable Display","Segoe UI",sans-serif;font-size:36px;line-height:1.06;letter-spacing:-.8px;font-weight:650}
+  h1 span{background:linear-gradient(90deg,#c4b2ff,#ffacc2 55%,#ffd0a0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{position:relative;z-index:2;margin:9px 0 0;max-width:410px;color:#c9bbdc;font-size:13px;line-height:1.55}
+  .hero-art{position:absolute;right:24px;bottom:15px;height:100px;display:flex;align-items:flex-end;gap:5px;z-index:1;opacity:.85}
+  .hero-art b{display:block;width:5px;border-radius:4px;background:linear-gradient(180deg,#ffd6a7,#ff7291 55%,#8d74ff);animation:eq 1.8s ease-in-out infinite}
+  .hero-art b:nth-child(1){height:22px;animation-delay:-.2s}.hero-art b:nth-child(2){height:49px;animation-delay:-.6s}
+  .hero-art b:nth-child(3){height:78px;animation-delay:-1s}.hero-art b:nth-child(4){height:36px;animation-delay:-.4s}
+  .hero-art b:nth-child(5){height:63px;animation-delay:-1.3s}.hero-art b:nth-child(6){height:28px;animation-delay:-.8s}
+  .hero-art b:nth-child(7){height:46px;animation-delay:-1.6s}
+  @keyframes eq{0%,100%{transform:scaleY(.42)}50%{transform:scaleY(1)}}
+  .tabs{display:flex;gap:6px;margin:17px 0 20px;padding:6px;border-radius:21px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow-soft);backdrop-filter:blur(18px)}
+  .tab{flex:1;border:0;border-radius:16px;padding:12px 10px;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:650;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:.2s ease}
+  .tab.active{background:#241a37;color:#fff;box-shadow:0 10px 24px -12px rgba(36,26,55,.7)}
+  @media (prefers-color-scheme: dark){.tab.active{background:#b6a2ff;color:#1b1429}}
+  .mini{width:6px;height:6px;border-radius:50%;background:#62d6b3;display:none}
+  .mini.on{display:inline-block;box-shadow:0 0 0 4px rgba(98,214,179,.15)}
+  .section-title{display:flex;align-items:center;justify-content:space-between;margin:0 5px 10px}
+  .section-title h2{margin:0;font-family:"Segoe UI Variable Display","Segoe UI",sans-serif;font-size:19px;font-weight:650;letter-spacing:-.2px}
+  .pill{font-size:10px;font-weight:650;color:var(--primary);background:var(--primary-soft);padding:5px 9px;border-radius:9px}
+  .playlist{background:var(--surface);border:1px solid var(--line);border-radius:27px;padding:9px;box-shadow:var(--shadow-soft);backdrop-filter:blur(18px)}
+  .track{display:flex;align-items:center;gap:11px;width:100%;border:0;border-radius:18px;padding:9px 10px;background:transparent;color:var(--ink);text-align:left;font:inherit;cursor:pointer;transition:background .16s ease}
+  .track:hover{background:rgba(104,78,232,.06)}
+  .track.playing{background:var(--primary-soft)}
+  .cover{--c1:#7C5CFF;--c2:#5A86FF;flex:0 0 auto;width:43px;height:43px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:17px;color:rgba(255,255,255,.88);background:linear-gradient(135deg,var(--c1),var(--c2));box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+  .track-text{min-width:0;flex:1}
+  .track-title{font-size:13px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.05px}
+  .track-artist{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+  .ext{font-size:8.5px;font-weight:700;letter-spacing:.5px;color:var(--soft);border:1px solid var(--line);padding:4px 6px;border-radius:7px}
+  .track.playing .ext{color:var(--primary);border-color:transparent;background:rgba(104,78,232,.1)}
+  .empty{padding:44px 22px;border-radius:27px;background:var(--surface);border:1px solid var(--line);text-align:center;box-shadow:var(--shadow-soft)}
+  .empty-icon{width:64px;height:64px;border-radius:22px;background:var(--primary-soft);display:flex;align-items:center;justify-content:center;margin:0 auto 13px;font-size:26px;color:var(--primary)}
+  .empty h3{margin:0;font-size:16px;font-weight:650}
+  .empty p{margin:7px auto 0;max-width:330px;color:var(--muted);font-size:12px;line-height:1.6}
+  .live-card{position:relative;overflow:hidden;border-radius:31px;padding:20px;color:#fff;background:linear-gradient(142deg,#17131f,#251a36 55%,#49263c);box-shadow:var(--shadow)}
+  .live-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .eyebrow{font-size:9px;font-weight:700;letter-spacing:1.2px;color:#d9cbec}
+  .live-pill{font-size:9px;font-weight:700;letter-spacing:.5px;padding:5px 8px;border-radius:8px;background:rgba(255,255,255,.1);color:#b8abc9}
+  .live-pill.on{background:rgba(255,111,135,.16);color:#ffc0cb}
+  .visual{height:190px;margin:15px -2px 6px;position:relative}
+  #visualizer{width:100%;height:100%;display:block}
+  .live-info h2{margin:0;font-family:"Segoe UI Variable Display","Segoe UI",sans-serif;font-size:23px;font-weight:650}
+  .live-info p{margin:6px 0 0;color:#b8abc9;font-size:12px;line-height:1.55}
+  .primary{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;border:0;border-radius:17px;padding:14px;margin-top:16px;background:linear-gradient(120deg,#ff7d6b,#ff5d9e);color:#fff;font:inherit;font-size:13px;font-weight:650;cursor:pointer;box-shadow:0 15px 30px -16px rgba(255,93,158,.65);transition:.2s}
+  .primary:hover{filter:brightness(1.05)}
+  .primary:disabled{opacity:.38;cursor:not-allowed;box-shadow:none}
+  .live-note{margin-top:11px;text-align:center;font-size:10px;color:#8f839f}
+  footer{text-align:center;color:var(--soft);font-size:10px;margin:24px 0 0;line-height:1.7}
+  .player{
+    position:fixed;left:50%;bottom:18px;transform:translate(-50%,150%);z-index:20;
+    width:min(744px,calc(100% - 24px));display:grid;grid-template-columns:minmax(0,1.25fr) 46px minmax(150px,1fr) 98px;
+    align-items:center;gap:12px;padding:10px 14px 11px;border-radius:25px;
+    background:rgba(255,255,255,.88);border:1px solid var(--line);box-shadow:0 26px 60px -20px rgba(34,20,66,.48);
+    backdrop-filter:blur(24px);opacity:0;transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .25s;
+  }
+  @media (prefers-color-scheme: dark){.player{background:rgba(38,31,49,.9)}}
+  .player.visible{transform:translate(-50%,0);opacity:1}
+  .now{display:flex;align-items:center;gap:10px;min-width:0}
+  .now .cover{width:42px;height:42px;border-radius:13px;font-size:16px}
+  .now-text{min-width:0}
+  #nowTitle{font-size:12px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #nowArtist{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+  .play{width:44px;height:44px;border-radius:50%;border:0;background:linear-gradient(135deg,#7c5cff,#5a86ff);color:#fff;font-size:15px;cursor:pointer;box-shadow:0 12px 24px -12px rgba(104,78,232,.8);display:flex;align-items:center;justify-content:center;padding-left:2px}
+  .progress-wrap{min-width:0}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:16px;background:transparent;margin:0;cursor:pointer}
+  input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--primary) var(--p,0%),rgba(110,96,134,.18) var(--p,0%))}
+  input[type=range]::-moz-range-track{height:4px;border-radius:4px;background:rgba(110,96,134,.18)}
+  input[type=range]::-moz-range-progress{height:4px;border-radius:4px;background:var(--primary)}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;margin-top:-4px;border-radius:50%;background:#fff;border:3px solid var(--primary);box-shadow:0 2px 5px rgba(0,0,0,.18)}
+  input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--primary)}
+  .times{display:flex;justify-content:space-between;font-size:9px;color:var(--soft);margin-top:1px}
+  .volume{display:flex;align-items:center;gap:6px;color:var(--soft);font-size:11px}
+  .volume input{width:64px}
+  .toast{position:fixed;left:50%;bottom:112px;transform:translate(-50%,16px);z-index:30;background:rgba(24,19,32,.95);color:#fff;padding:11px 16px;border-radius:14px;font-size:11.5px;opacity:0;pointer-events:none;transition:.22s;box-shadow:0 18px 40px -16px rgba(0,0,0,.5);max-width:90vw;text-align:center}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  @media (max-width:640px){
+    .app{padding:12px 12px 150px}
+    .hero{border-radius:28px;padding:21px 20px 24px}
+    h1{font-size:29px;margin-top:21px}.hero p{font-size:12px;max-width:300px}
+    .hero-art{right:13px;bottom:12px;height:74px;opacity:.62}
+    .tabs{border-radius:19px;margin:12px 0 16px}
+    .tab{font-size:12px;padding:11px 7px}
+    .player{grid-template-columns:minmax(0,1fr) 44px;gap:8px 10px;padding:10px 12px;bottom:10px;border-radius:22px}
+    .progress-wrap{grid-column:1 / -1}
+    .volume{display:none}
+    .live-card{padding:17px;border-radius:27px}
+    .visual{height:170px}
+    .toast{bottom:125px}
+  }
+</style>
+</head>
+<body>
+<div class="wash"></div>
+<main class="app">
+  <header class="hero">
+    <div class="hero-top">
+      <div class="brand"><span class="mark"><i></i><i></i><i></i><i></i></span>Lumen<span class="net">WI-FI</span></div>
+      <span class="hostname">{{COMPUTER}}</span>
+    </div>
+    <h1>Привет, <span>{{USER}}</span></h1>
+    <p>Музыка с этого компьютера — прямо в браузере. Без приложений и проводов.</p>
+    <div class="hero-art" aria-hidden="true"><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" id="tabLocal" type="button" role="tab">Моя музыка</button>
+    <button class="tab" id="tabLive" type="button" role="tab">Прямой эфир <span class="mini" id="liveMini"></span></button>
+  </nav>
+
+  <section id="panelLocal">
+    <div class="section-title"><h2>Плейлист</h2><span class="pill" id="count">0 треков</span></div>
+    <div class="playlist" id="playlist"></div>
+    <div class="empty" id="empty">
+      <div class="empty-icon">♫</div>
+      <h3>Пока тихо</h3>
+      <p>Откройте Lumen на компьютере и выберите папку с музыкой — треки сразу появятся здесь.</p>
+    </div>
+  </section>
+
+  <section id="panelLive" hidden>
+    <div class="live-card">
+      <div class="live-head"><span class="eyebrow">СИСТЕМНЫЙ ЗВУК</span><span class="live-pill" id="liveState">ОФЛАЙН</span></div>
+      <div class="visual"><canvas id="visualizer"></canvas></div>
+      <div class="live-info"><h2 id="liveTitle">Эфир выключен</h2><p id="liveText">Запустите захват звука в приложении Lumen на компьютере — и слушайте здесь всё, что играет на ПК.</p></div>
+      <button class="primary" id="liveButton" type="button" disabled>Слушать эфир</button>
+      <div class="live-note">Звук идёт напрямую с компьютера по локальной сети</div>
+    </div>
+  </section>
+
+  <footer>Lumen · {{COMPUTER}}<br><span id="footerUrl"></span></footer>
+</main>
+
+<div class="player" id="player">
+  <div class="now">
+    <div class="cover" id="cover">♫</div>
+    <div class="now-text"><div id="nowTitle">Ничего не играет</div><div id="nowArtist">Выберите трек</div></div>
+  </div>
+  <button class="play" id="playButton" type="button" aria-label="Играть">▶</button>
+  <div class="progress-wrap">
+    <input id="progress" type="range" min="0" max="1000" value="0" step="1" aria-label="Позиция трека">
+    <div class="times"><span id="cur">0:00</span><span id="dur">0:00</span></div>
+  </div>
+  <div class="volume">🔊<input id="volume" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Громкость"></div>
+</div>
+
+<audio id="audio" preload="metadata"></audio>
+<audio id="liveAudio" preload="none"></audio>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+  var audio = $("audio"), liveAudio = $("liveAudio");
+  var tracks = [], current = -1, state = {live:false, seconds:0};
+  var seeking = false, livePlaying = false, activeTab = "local";
+  var palette = [["#7C5CFF","#5A86FF"],["#FF7D6B","#FF5D9E"],["#2FBF8F","#4F8DFF"],["#B56BFF","#FF7DAF"],["#FFB36B","#FF6F87"],["#5B8CFF","#8E7CFF"]];
+  var toastTimer = null;
+
+  function showToast(text){
+    var t = $("toast"); t.textContent = text; t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2600);
+  }
+  function fmt(seconds){
+    if (!isFinite(seconds) || seconds < 0) seconds = 0;
+    var s = Math.floor(seconds), m = Math.floor(s/60), r = s%60;
+    return m + ":" + (r < 10 ? "0" : "") + r;
+  }
+  function esc(value){ return String(value == null ? "" : value); }
+
+  function renderTracks(){
+    var list = $("playlist"), empty = $("empty");
+    list.innerHTML = "";
+    if (!tracks.length){
+      list.style.display = "none"; empty.style.display = "block";
+      $("count").textContent = "0 треков";
+      return;
+    }
+    list.style.display = "block"; empty.style.display = "none";
+    $("count").textContent = tracks.length + " " + (tracks.length === 1 ? "трек" : (tracks.length < 5 ? "трека" : "треков"));
+    tracks.forEach(function(t, index){
+      var button = document.createElement("button");
+      button.type = "button";
+      button.className = "track";
+      button.setAttribute("data-index", String(index));
+      var pair = palette[index % palette.length];
+      var cover = document.createElement("span");
+      cover.className = "cover";
+      cover.style.setProperty("--c1", pair[0]);
+      cover.style.setProperty("--c2", pair[1]);
+      cover.textContent = "♫";
+      var text = document.createElement("span");
+      text.className = "track-text";
+      var title = document.createElement("div");
+      title.className = "track-title"; title.textContent = esc(t.title);
+      var artist = document.createElement("div");
+      artist.className = "track-artist"; artist.textContent = esc(t.artist);
+      text.appendChild(title); text.appendChild(artist);
+      var ext = document.createElement("span");
+      ext.className = "ext"; ext.textContent = esc(t.ext || "AUDIO");
+      button.appendChild(cover); button.appendChild(text); button.appendChild(ext);
+      button.addEventListener("click", function(){ playTrack(index); });
+      list.appendChild(button);
+    });
+  }
+
+  function updateActiveRow(){
+    var rows = document.querySelectorAll(".track");
+    for (var i=0;i<rows.length;i++){
+      rows[i].classList.toggle("playing", Number(rows[i].getAttribute("data-index")) === current);
+    }
+  }
+
+  function playTrack(index){
+    if (index < 0 || index >= tracks.length) return;
+    if (index === current){
+      if (audio.paused) audio.play().catch(function(){ showToast("Не удалось продолжить трек."); });
+      else audio.pause();
+      return;
+    }
+    current = index;
+    var track = tracks[index];
+    audio.src = "/audio/" + index;
+    audio.play().then(function(){
+      $("player").classList.add("visible");
+      $("nowTitle").textContent = esc(track.title);
+      $("nowArtist").textContent = esc(track.artist);
+      var pair = palette[index % palette.length];
+      $("cover").style.setProperty("--c1", pair[0]);
+      $("cover").style.setProperty("--c2", pair[1]);
+      updateActiveRow();
+    }).catch(function(){
+      showToast("Не удалось запустить трек. Попробуйте ещё раз.");
+    });
+  }
+
+  function togglePlay(){
+    if (current < 0 && tracks.length){ playTrack(0); return; }
+    if (!audio.src) return;
+    if (audio.paused) audio.play(); else audio.pause();
+  }
+
+  function syncPlayGlyph(){
+    $("playButton").textContent = audio.paused ? "▶" : "Ⅱ";
+  }
+
+  function updateProgress(){
+    var duration = audio.duration;
+    if (isFinite(duration) && duration > 0){
+      if (!seeking){
+        var p = (audio.currentTime / duration) * 1000;
+        $("progress").value = String(p);
+        $("progress").style.setProperty("--p", (p/10) + "%");
+        $("cur").textContent = fmt(audio.currentTime);
+      }
+      $("dur").textContent = fmt(duration);
+    }
+  }
+
+  $("playButton").addEventListener("click", togglePlay);
+  audio.addEventListener("play", syncPlayGlyph);
+  audio.addEventListener("pause", syncPlayGlyph);
+  audio.addEventListener("timeupdate", updateProgress);
+  audio.addEventListener("loadedmetadata", updateProgress);
+  audio.addEventListener("ended", function(){
+    if (current + 1 < tracks.length) playTrack(current + 1);
+    else { audio.currentTime = 0; syncPlayGlyph(); }
+  });
+  audio.addEventListener("error", function(){
+    if (current >= 0) showToast("Формат не поддерживается браузером.");
+  });
+  $("progress").addEventListener("input", function(){
+    seeking = true;
+    var duration = audio.duration;
+    if (isFinite(duration) && duration > 0){
+      $("cur").textContent = fmt(duration * Number(this.value) / 1000);
+      this.style.setProperty("--p", (Number(this.value)/10) + "%");
+    }
+  });
+  $("progress").addEventListener("change", function(){
+    var duration = audio.duration;
+    if (isFinite(duration) && duration > 0) audio.currentTime = duration * Number(this.value) / 1000;
+    seeking = false;
+  });
+  $("volume").addEventListener("input", function(){
+    audio.volume = Number(this.value); liveAudio.volume = Number(this.value);
+    localStorage.setItem("lumen.volume", this.value);
+  });
+  try {
+    var stored = localStorage.getItem("lumen.volume");
+    if (stored != null){ $("volume").value = stored; audio.volume = Number(stored); liveAudio.volume = Number(stored); }
+  } catch(e){}
+
+  // ============================================================ LIVE ============================================================
+  var audioContext = null, analyser = null, sourceNode = null, freqData = null, canvas = $("visualizer"), ctx2d = canvas.getContext("2d");
+  var bars = [], raf = null;
+
+  function setupAnalyser(){
+    if (audioContext) {
+      if (audioContext.state === "suspended") audioContext.resume();
+      return;
+    }
+    var AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    audioContext = new AudioCtx();
+    sourceNode = audioContext.createMediaElementSource(liveAudio);
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 128;
+    analyser.smoothingTimeConstant = 0.82;
+    freqData = new Uint8Array(analyser.frequencyBinCount);
+    sourceNode.connect(analyser);
+    analyser.connect(audioContext.destination);
+  }
+
+  function resizeCanvas(){
+    var ratio = Math.min(2, window.devicePixelRatio || 1);
+    var rect = canvas.getBoundingClientRect();
+    canvas.width = Math.max(1, Math.floor(rect.width * ratio));
+    canvas.height = Math.max(1, Math.floor(rect.height * ratio));
+    ctx2d = canvas.getContext("2d");
+    ctx2d.setTransform(ratio, 0, 0, ratio, 0, 0);
+  }
+
+  function drawBars(){
+    raf = requestAnimationFrame(drawBars);
+    if (activeTab !== "live" || canvas.offsetWidth === 0) return;
+    var w = canvas.clientWidth, h = canvas.clientHeight;
+    if (canvas.width !== Math.floor(w * Math.min(2, window.devicePixelRatio || 1))) resizeCanvas();
+    ctx2d.clearRect(0, 0, w, h);
+    var count = 58, slot = w / count, barW = Math.max(2, slot * 0.42), mid = h * 0.53;
+    var values = new Array(count);
+    if (analyser && livePlaying){
+      analyser.getByteFrequencyData(freqData);
+      for (var i=0;i<count;i++){
+        var bin = Math.floor(i * freqData.length / count);
+        values[i] = freqData[bin] / 255;
+      }
+    } else {
+      for (var j=0;j<count;j++) values[j] = 0.018 + 0.012 * Math.sin(Date.now()/850 + j*0.42);
+    }
+    for (var k=0;k<count;k++){
+      var target = Math.max(0.012, Math.pow(values[k], 0.82));
+      bars[k] = bars[k] == null ? target : bars[k] * 0.72 + target * 0.28;
+      var bh = 4 + bars[k] * h * 0.74;
+      var x = k * slot + (slot - barW) / 2;
+      var y = mid - bh / 2;
+      var grad = ctx2d.createLinearGradient(0, h, 0, 0);
+      grad.addColorStop(0, "rgba(124,92,255,.92)");
+      grad.addColorStop(.45, "rgba(214,105,255,.96)");
+      grad.addColorStop(.76, "rgba(255,111,145,.96)");
+      grad.addColorStop(1, "rgba(255,195,122,.98)");
+      ctx2d.fillStyle = grad;
+      ctx2d.beginPath();
+      if (ctx2d.roundRect) ctx2d.roundRect(x, y, barW, bh, barW/2);
+      else ctx2d.rect(x, y, barW, bh);
+      ctx2d.fill();
+    }
+    var baseline = ctx2d.createLinearGradient(0, 0, w, 0);
+    baseline.addColorStop(0, "rgba(255,255,255,.04)");
+    baseline.addColorStop(.5, "rgba(255,255,255,.16)");
+    baseline.addColorStop(1, "rgba(255,255,255,.04)");
+    ctx2d.fillStyle = baseline; ctx2d.fillRect(0, mid, w, 1);
+  }
+
+  function setLiveUi(){
+    var on = !!state.live;
+    $("liveMini").classList.toggle("on", on);
+    $("liveState").textContent = on ? "В ЭФИРЕ" : "ОФЛАЙН";
+    $("liveState").classList.toggle("on", on);
+    $("liveTitle").textContent = on ? "Системный звук" : "Эфир выключен";
+    $("liveText").textContent = on
+      ? "Сейчас в эфире: " + fmt(state.seconds || 0) + ". Всё, что играет на компьютере, слышно здесь."
+      : "Запустите захват звука в приложении Lumen на компьютере — и слушайте здесь всё, что играет на ПК.";
+    $("liveButton").disabled = !on;
+    if (!on){
+      $("liveButton").textContent = "Слушать эфир";
+      if (!liveAudio.paused){ liveAudio.pause(); livePlaying = false; }
+    } else if (!livePlaying){
+      $("liveButton").textContent = "Слушать эфир";
+    } else {
+      $("liveButton").textContent = "Остановить эфир";
+    }
+  }
+
+  $("liveButton").addEventListener("click", function(){
+    if (!state.live) return;
+    if (livePlaying){
+      liveAudio.pause(); livePlaying = false; $("liveButton").textContent = "Слушать эфир"; return;
+    }
+    if (audio && !audio.paused) audio.pause();
+    $("player").classList.remove("visible");
+    try { setupAnalyser(); } catch(e){}
+    liveAudio.src = "/live.wav?t=" + Date.now();
+    liveAudio.play().then(function(){
+      livePlaying = true;
+      $("liveButton").textContent = "Остановить эфир";
+      showToast("Подключаемся к прямому эфиру…");
+    }).catch(function(){
+      livePlaying = false;
+      $("liveButton").textContent = "Слушать эфир";
+      showToast("Не удалось подключиться к эфиру.");
+    });
+  });
+  liveAudio.addEventListener("pause", function(){ livePlaying = false; });
+  liveAudio.addEventListener("playing", function(){ livePlaying = true; });
+  liveAudio.addEventListener("error", function(){
+    if (livePlaying){ showToast("Эфир прервался. Попробуйте ещё раз."); livePlaying = false; }
+    $("liveButton").textContent = "Слушать эфир";
+  });
+
+  function showTab(name){
+    activeTab = name;
+    $("tabLocal").classList.toggle("active", name === "local");
+    $("tabLive").classList.toggle("active", name === "live");
+    $("panelLocal").hidden = name !== "local";
+    $("panelLive").hidden = name !== "live";
+    if (name === "live"){
+      if (!audio.paused) audio.pause();
+      $("player").classList.remove("visible");
+      resizeCanvas();
+    } else if (current >= 0 && audio.src){
+      $("player").classList.add("visible");
+    }
+  }
+  $("tabLocal").addEventListener("click", function(){ showTab("local"); });
+  $("tabLive").addEventListener("click", function(){ showTab("live"); });
+
+  async function refreshState(){
+    try {
+      var response = await fetch("/api/state", {cache:"no-store"});
+      if (!response.ok) return;
+      var data = await response.json();
+      state = data;
+      setLiveUi();
+      $("footerUrl").textContent = "http://" + location.host + "/";
+    } catch(e){}
+  }
+  async function loadTracks(){
+    try {
+      var response = await fetch("/api/tracks", {cache:"no-store"});
+      if (!response.ok) return;
+      var data = await response.json();
+      tracks = data.tracks || [];
+      if (current >= tracks.length){ current = -1; audio.removeAttribute("src"); $("player").classList.remove("visible"); }
+      renderTracks();
+    } catch(e){}
+  }
+
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+  drawBars();
+  loadTracks();
+  refreshState();
+  setInterval(refreshState, 2500);
+  setInterval(loadTracks, 12000);
+})();
+</script>
+</body>
+</html>
