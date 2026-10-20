@@ -40,4 +40,4 @@ APK собран в **debug**‑варианте и подписан отлад�
 - Android 7.0+ (minSdk 24);
 - общая Wi‑Fi/LAN‑сеть с компьютером для музыки с ПК и эфира.
 
-Подробнее: [android/README.md](README.md).
+Подробнее: [android/README.md](https://github.com/Gitroomcust/aurora-music/blob/main/android/README.md).
