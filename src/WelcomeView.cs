@@ -32,9 +32,12 @@ namespace Lumen
             FrameworkElement root = XamlLoader.Load("Welcome.xaml");
             Content = root;
 
-            ((TextBlock)root.FindName("GreetingText")).Text = state.Greeting;
-            ((TextBlock)root.FindName("UserNameText")).Text = state.DisplayUserName;
-            ((TextBlock)root.FindName("UserInitialText")).Text = state.UserInitial;
+            TextBlock greetingText = (TextBlock)root.FindName("GreetingText");
+            if (greetingText != null) greetingText.Text = "Добро пожаловать";
+            TextBlock userNameText = (TextBlock)root.FindName("UserNameText");
+            if (userNameText != null) userNameText.Text = "";
+            TextBlock userInitialText = (TextBlock)root.FindName("UserInitialText");
+            if (userInitialText != null) userInitialText.Text = "\uE8D6";
 
             _localCard = (Button)root.FindName("LocalCardButton");
             _captureCard = (Button)root.FindName("CaptureCardButton");

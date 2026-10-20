@@ -102,7 +102,8 @@ namespace Lumen.Audio
                 if (_startError != null)
                 {
                     _running = false;
-                    _thread = null;
+                    // Leave _thread in place: the capture thread clears it in its
+                    // finally block, so a new Start cannot overlap with the old one.
                     throw new InvalidOperationException("Не удалось открыть системный звук: " + _startError.Message, _startError);
                 }
 
@@ -125,21 +126,31 @@ namespace Lumen.Audio
                 catch { }
             }
 
+            _stopwatch.Stop();
             lock (_sync)
             {
-                _thread = null;
                 _isRunning = false;
+                // A slow WASAPI call can outlive the join timeout. Keep _thread
+                // non-null in that case so Start cannot open a second capture in
+                // parallel; the thread clears it in its own finally block.
+                if (_thread != null && !_thread.IsAlive)
+                {
+                    _thread = null;
+                }
             }
-            _stopwatch.Stop();
         }
 
         public void Dispose()
         {
             Stop();
-            if (_ready != null)
+            lock (_sync)
             {
-                _ready.Dispose();
-                _ready = null;
+                bool threadAlive = _thread != null && _thread.IsAlive;
+                if (!threadAlive && _ready != null)
+                {
+                    _ready.Dispose();
+                    _ready = null;
+                }
             }
         }
 
@@ -320,6 +331,14 @@ namespace Lumen.Audio
                 Release(enumerator);
 
                 _running = false;
+
+                lock (_sync)
+                {
+                    if (object.ReferenceEquals(_thread, Thread.CurrentThread))
+                    {
+                        _thread = null;
+                    }
+                }
 
                 Exception error = _runtimeError;
                 if (error != null)

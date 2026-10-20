@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Net;
 using System.Reflection;
 
 namespace Lumen.Net
@@ -10,13 +9,9 @@ namespace Lumen.Net
         private static readonly object Sync = new object();
         private static string _template;
 
-        public static string Render(string userName, string computerName)
+        public static string Render()
         {
-            string template = GetTemplate();
-            return template
-                .Replace("{{USER}}", WebUtility.HtmlEncode(userName ?? ""))
-                .Replace("{{COMPUTER}}", WebUtility.HtmlEncode(computerName ?? ""))
-                .Replace("{{HOST}}", WebUtility.HtmlEncode(computerName ?? ""));
+            return GetTemplate();
         }
 
         private static string GetTemplate()

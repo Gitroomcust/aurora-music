@@ -15,17 +15,14 @@
                 <DropShadowEffect BlurRadius="20" ShadowDepth="5" Direction="270"
                                   Color="#7755D6" Opacity="0.30" />
             </Border.Effect>
-            <TextBlock x:Name="UserInitialText" Text="S" FontFamily="{StaticResource DisplayFont}"
-                       FontSize="26" FontWeight="SemiBold" Foreground="White"
+            <TextBlock x:Name="UserInitialText" Text="&#xE8D6;" FontFamily="{StaticResource IconFont}"
+                       FontSize="26" Foreground="White"
                        HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,2" />
         </Border>
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
-            <TextBlock x:Name="GreetingText" Text="Добрый вечер," Style="{StaticResource DisplayTextStyle}"
-                       FontSize="38" />
-            <TextBlock x:Name="UserNameText" Text="Sasha" Style="{StaticResource DisplayTextStyle}"
-                       FontSize="38" Margin="10,0,0,0" Foreground="{StaticResource TextAccentBrush}" />
-        </StackPanel>
+        <TextBlock x:Name="GreetingText" Text="Добро пожаловать" Style="{StaticResource DisplayTextStyle}"
+                   FontSize="38" HorizontalAlignment="Center" Margin="0,15,0,0" />
+        <TextBlock x:Name="UserNameText" Visibility="Collapsed" />
 
         <TextBlock x:Name="SubtitleText"
                    Text="Включите музыку с этого компьютера или транслируйте звук из любых приложений."

@@ -28,7 +28,19 @@ namespace Lumen.Net
         public string LanUrl { get; private set; }
         public string LocalUrl { get; private set; }
         public volatile bool IsLive;
-        public double LiveSeconds;
+        private long _liveMilliseconds;
+
+        public double LiveSeconds
+        {
+            get { return Interlocked.CompareExchange(ref _liveMilliseconds, 0, 0) / 1000.0; }
+            set
+            {
+                double seconds = value;
+                if (double.IsNaN(seconds) || seconds < 0) seconds = 0;
+                if (seconds > 31536000) seconds = 31536000;
+                Interlocked.Exchange(ref _liveMilliseconds, (long)(seconds * 1000.0));
+            }
+        }
 
         public LanServer(LiveAudioHub hub, string userName, string computerName)
         {
@@ -207,7 +219,7 @@ namespace Lumen.Net
 
                     if (path == "/" || path == "/index.html")
                     {
-                        string html = WebUi.Render(_userName, _computerName);
+                        string html = WebUi.Render();
                         WriteText(stream, 200, "OK", "text/html; charset=utf-8", html, head);
                     }
                     else if (path == "/api/state")
@@ -235,6 +247,15 @@ namespace Lumen.Net
                     else if (path == "/favicon.ico")
                     {
                         WriteText(stream, 204, "No Content", "image/x-icon", "", head);
+                    }
+                    else if (path == "/manifest.json")
+                    {
+                        WriteText(stream, 200, "OK", "application/manifest+json; charset=utf-8",
+                            BuildManifestJson(), head);
+                    }
+                    else if (path == "/icon.png")
+                    {
+                        ServeIcon(stream, head);
                     }
                     else
                     {
@@ -454,6 +475,43 @@ namespace Lumen.Net
             if (head) return;
             stream.Write(bytes, 0, bytes.Length);
             stream.Flush();
+        }
+
+        private static void WriteBytes(NetworkStream stream, int code, string status,
+            string contentType, byte[] bytes, bool head)
+        {
+            int length = bytes != null ? bytes.Length : 0;
+            WriteHeaders(stream, code, status, contentType, length, null, null, head);
+            if (head || length == 0) return;
+            stream.Write(bytes, 0, length);
+            stream.Flush();
+        }
+
+        private static string BuildManifestJson()
+        {
+            return "{\"name\":\"Aurora Music\",\"short_name\":\"Aurora\",\"description\":\"Музыкальный плеер для Android и Windows\",\"start_url\":\"/\",\"display\":\"standalone\",\"background_color\":\"#120e1a\",\"theme_color\":\"#120e1a\",\"orientation\":\"any\",\"icons\":[{\"src\":\"/icon.png\",\"sizes\":\"256x256\",\"type\":\"image/png\",\"purpose\":\"any maskable\"}]}";
+        }
+
+        private static void ServeIcon(NetworkStream stream, bool head)
+        {
+            try
+            {
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string iconPath = Path.Combine(baseDir, "assets", "lumen-256.png");
+                if (!File.Exists(iconPath))
+                {
+                    string parent = Directory.GetParent(baseDir) != null ? Directory.GetParent(baseDir).FullName : null;
+                    if (parent != null) iconPath = Path.Combine(parent, "assets", "lumen-256.png");
+                }
+                if (File.Exists(iconPath))
+                {
+                    byte[] data = File.ReadAllBytes(iconPath);
+                    WriteBytes(stream, 200, "OK", "image/png", data, head);
+                    return;
+                }
+            }
+            catch { }
+            WriteText(stream, 404, "Not Found", "text/plain", "Icon not found", head);
         }
 
         private static void WriteHeaders(NetworkStream stream, int code, string status,

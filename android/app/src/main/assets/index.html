@@ -1,0 +1,2339 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#120e1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json">
+<title>Aurora Music</title>
+<style>
+  :root {
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+    
+    --bg-base: #110d19;
+    --bg-card: rgba(26, 20, 37, 0.72);
+    --bg-card-hover: rgba(38, 29, 54, 0.82);
+    --surface-elevated: rgba(34, 26, 49, 0.88);
+    --border-card: rgba(255, 255, 255, 0.08);
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    
+    --ink: #f7f3ff;
+    --muted: #a79cb7;
+    --soft: #7a6f8b;
+    
+    --primary: #8a6cff;
+    --primary-gradient: linear-gradient(135deg, #7c5cff, #5a86ff);
+    --accent-gradient: linear-gradient(135deg, #ff7d6b, #ff5d9e);
+    --aurora-gradient: linear-gradient(135deg, #7c5cff 0%, #ff5d9e 50%, #ffb36b 100%);
+    --live-gradient: linear-gradient(135deg, #ff5376, #ff7b54);
+    
+    --shadow-sm: 0 4px 14px rgba(0,0,0,0.25);
+    --shadow-md: 0 10px 30px rgba(0,0,0,0.35);
+    --shadow-lg: 0 20px 50px rgba(0,0,0,0.48);
+    --shadow-glow: 0 0 35px rgba(124, 92, 255, 0.32);
+    
+    --radius-sm: 14px;
+    --radius-md: 20px;
+    --radius-lg: 28px;
+    --radius-xl: 34px;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    min-height: 100dvh;
+    background-color: var(--bg-base);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", Roboto, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* ============================================================
+     BACKGROUND VISUALIZER CANVAS (Full bleed)
+     ============================================================ */
+  #bgVisualizer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    z-index: 0;
+    pointer-events: none;
+    display: block;
+    opacity: 0.92;
+    transition: opacity 0.8s ease;
+  }
+
+  /* Ambient radial glows behind content */
+  .ambient-glow {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(124, 92, 255, 0.18), transparent 45%),
+      radial-gradient(circle at 85% 85%, rgba(255, 93, 158, 0.14), transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(90, 134, 255, 0.10), transparent 60%);
+  }
+
+  /* ============================================================
+     MAIN APP WRAPPER (Responsive scaling)
+     ============================================================ */
+  .app-container {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto;
+    padding-top: max(12px, var(--sat));
+    padding-bottom: calc(130px + var(--sab));
+    padding-left: max(14px, var(--sal));
+    padding-right: max(14px, var(--sar));
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Top Bar */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 4px 16px;
+    gap: 12px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: clamp(17px, 4.5vw, 20px);
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .brand-badge {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    background: var(--aurora-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 18px rgba(124, 92, 255, 0.4);
+    flex-shrink: 0;
+  }
+  .brand-badge svg { width: 18px; height: 18px; fill: #fff; }
+  
+  .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .status-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 11px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-card);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    backdrop-filter: blur(16px);
+  }
+  .pulse-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 8px #4ade80;
+  }
+  .pulse-dot.offline {
+    background: #94a3b8;
+    box-shadow: none;
+  }
+
+  .icon-btn-top {
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink);
+    cursor: pointer;
+    backdrop-filter: blur(14px);
+    transition: transform 0.15s, background 0.15s;
+  }
+  .icon-btn-top:active { transform: scale(0.92); }
+  .icon-btn-top svg { width: 17px; height: 17px; fill: currentColor; }
+
+  /* ============================================================
+     WELCOME / HERO SCREEN (Without username)
+     ============================================================ */
+  .hero-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+    padding: clamp(22px, 6vw, 32px);
+    background: linear-gradient(145deg, rgba(32, 23, 49, 0.88), rgba(20, 15, 30, 0.82));
+    border: 1px solid var(--border-card);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(28px);
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .hero-card::before {
+    content: "";
+    position: absolute;
+    width: 280px;
+    height: 280px;
+    top: -120px;
+    right: -80px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124, 92, 255, 0.25), transparent 70%);
+    pointer-events: none;
+  }
+  .hero-emblem {
+    width: clamp(62px, 16vw, 76px);
+    height: clamp(62px, 16vw, 76px);
+    border-radius: 50%;
+    background: var(--aurora-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    box-shadow: 0 10px 30px rgba(124, 92, 255, 0.45);
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+  }
+  .hero-emblem svg {
+    width: 32px;
+    height: 32px;
+    fill: #ffffff;
+  }
+  .hero-badge-tag {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.4px;
+    color: var(--primary);
+    background: rgba(138, 108, 255, 0.15);
+    padding: 4px 10px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .hero-title {
+    margin: 0;
+    font-size: clamp(23px, 6.5vw, 32px);
+    font-weight: 750;
+    letter-spacing: -0.6px;
+    line-height: 1.15;
+    background: linear-gradient(90deg, #ffffff 30%, #ffd1df 70%, #ffd0a0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-subtitle {
+    margin: 10px auto 0;
+    max-width: 440px;
+    font-size: clamp(12.5px, 3.6vw, 14.5px);
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  /* PC connection card (only shown by the bundled Android app) */
+  .connect-card {
+    width: 100%;
+    margin-top: 18px;
+    padding: 13px 14px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-card);
+    text-align: left;
+  }
+  .connect-card[hidden] { display: none; }
+  .connect-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 9px;
+    gap: 10px;
+  }
+  .connect-title {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--primary);
+  }
+  .connect-state {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--soft);
+  }
+  .connect-state.online { color: #5eead4; }
+  .connect-row { display: flex; gap: 8px; }
+  .connect-input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid var(--border-card);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 12.5px;
+    outline: none;
+  }
+  .connect-input:focus { border-color: var(--primary); }
+  .connect-input::placeholder { color: var(--soft); }
+  .connect-btn {
+    flex: none;
+    padding: 0 15px;
+    border: none;
+    border-radius: 12px;
+    background: var(--aurora-gradient);
+    color: #160f22;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .connect-btn:disabled { opacity: 0.55; }
+
+  /* Quick Actions Grid */
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    width: 100%;
+    margin-top: 20px;
+  }
+  .quick-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    padding: 14px 13px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .quick-card:active { transform: scale(0.97); }
+  .quick-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .quick-icon-box.purple { background: rgba(124, 92, 255, 0.22); color: #b6a2ff; }
+  .quick-icon-box.pink { background: rgba(255, 93, 158, 0.22); color: #ff8cb9; }
+  .quick-icon-box.green { background: rgba(46, 213, 115, 0.22); color: #5eead4; }
+  .quick-icon-box svg { width: 18px; height: 18px; fill: currentColor; }
+  .quick-title { font-size: 13.5px; font-weight: 700; color: #fff; margin: 0; }
+  .quick-desc { font-size: 11px; color: var(--muted); margin: 3px 0 0; }
+
+  /* ============================================================
+     SECTIONS & CARDS
+     ============================================================ */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 8px 4px 12px;
+  }
+  .section-title {
+    font-size: clamp(17px, 4.8vw, 21px);
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin: 0;
+  }
+  .pill-count {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--primary);
+    background: rgba(138, 108, 255, 0.16);
+    padding: 4px 9px;
+    border-radius: 12px;
+  }
+
+  /* Search Box */
+  .search-wrap {
+    position: relative;
+    margin-bottom: 12px;
+  }
+  .search-input {
+    width: 100%;
+    padding: 12px 14px 12px 42px;
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    color: var(--ink);
+    font-size: 13.5px;
+    outline: none;
+    backdrop-filter: blur(20px);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .search-input:focus {
+    border-color: var(--primary);
+    background: rgba(38, 29, 54, 0.9);
+  }
+  .search-input::placeholder { color: var(--soft); }
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    fill: var(--soft);
+    pointer-events: none;
+  }
+
+  /* Track List */
+  .track-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .track-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    cursor: pointer;
+    transition: background 0.18s, transform 0.12s;
+    backdrop-filter: blur(18px);
+    width: 100%;
+    text-align: left;
+  }
+  .track-item:active { transform: scale(0.985); }
+  .track-item.playing {
+    background: rgba(124, 92, 255, 0.24);
+    border-color: rgba(124, 92, 255, 0.45);
+  }
+  .track-cover {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    background: var(--primary-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  .track-cover svg { width: 20px; height: 20px; fill: #fff; }
+  .track-info {
+    min-width: 0;
+    flex: 1;
+  }
+  .track-title {
+    font-size: 14px;
+    font-weight: 650;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+  }
+  .track-artist {
+    font-size: 11.5px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+  }
+  .track-badge {
+    font-size: 9px;
+    font-weight: 750;
+    letter-spacing: 0.6px;
+    padding: 3px 6px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--soft);
+    flex-shrink: 0;
+  }
+  .track-item.playing .track-badge {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  /* Playing Equalizer Animation inside track row */
+  .eq-bars {
+    display: none;
+    align-items: flex-end;
+    gap: 2.5px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+  .track-item.playing .eq-bars { display: flex; }
+  .eq-bar {
+    width: 2.5px;
+    background: var(--primary);
+    border-radius: 2px;
+    animation: eqAnim 1.2s infinite ease-in-out;
+  }
+  .eq-bar:nth-child(1) { height: 6px; animation-delay: 0.1s; }
+  .eq-bar:nth-child(2) { height: 14px; animation-delay: 0.3s; }
+  .eq-bar:nth-child(3) { height: 9px; animation-delay: 0.2s; }
+  @keyframes eqAnim {
+    0%, 100% { transform: scaleY(0.4); }
+    50% { transform: scaleY(1); }
+  }
+
+  /* Empty state */
+  .empty-state {
+    padding: 40px 20px;
+    border-radius: var(--radius-lg);
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    text-align: center;
+    backdrop-filter: blur(20px);
+  }
+  .empty-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 20px;
+    background: rgba(138, 108, 255, 0.16);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    color: var(--primary);
+  }
+  .empty-icon svg { width: 28px; height: 28px; fill: currentColor; }
+  .empty-state h3 { margin: 0; font-size: 16px; font-weight: 700; }
+  .empty-state p { margin: 8px auto 0; max-width: 320px; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
+  /* Live Stream Card */
+  .live-card {
+    position: relative;
+    border-radius: var(--radius-xl);
+    padding: clamp(18px, 5vw, 24px);
+    background: linear-gradient(145deg, rgba(29, 21, 38, 0.9), rgba(18, 14, 25, 0.9));
+    border: 1px solid var(--border-card);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(28px);
+    overflow: hidden;
+  }
+  .live-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .live-status-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    padding: 5px 10px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--muted);
+  }
+  .live-status-pill.active {
+    background: rgba(255, 83, 118, 0.2);
+    color: #ff7d96;
+  }
+  .live-wave-box {
+    height: 140px;
+    margin: 10px 0 16px;
+    border-radius: var(--radius-md);
+    background: rgba(0, 0, 0, 0.28);
+    position: relative;
+    overflow: hidden;
+  }
+  #liveCanvas { width: 100%; height: 100%; display: block; }
+  
+  .btn-primary {
+    width: 100%;
+    padding: 15px;
+    border-radius: var(--radius-md);
+    border: 0;
+    background: var(--accent-gradient);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    box-shadow: 0 12px 28px -10px rgba(255, 93, 158, 0.6);
+    transition: transform 0.15s, opacity 0.2s;
+  }
+  .btn-primary:active { transform: scale(0.97); }
+  .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+  .btn-primary svg { width: 18px; height: 18px; fill: currentColor; }
+
+  /* ============================================================
+     DOCKED MINI-PLAYER (Floats above bottom nav)
+     ============================================================ */
+  .mini-player {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%) translateY(140px);
+    bottom: calc(66px + var(--sab));
+    width: min(640px, calc(100% - 20px));
+    height: 60px;
+    border-radius: var(--radius-md);
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-card);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(28px);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    padding: 0 12px 0 8px;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.38s cubic-bezier(0.2, 0.9, 0.2, 1), opacity 0.25s;
+    opacity: 0;
+    overflow: hidden;
+  }
+  .mini-player.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+  .mini-progress-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .mini-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--primary);
+    border-radius: 0 2px 2px 0;
+  }
+  .mini-cover {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--primary-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+  .mini-cover svg { width: 22px; height: 22px; fill: #fff; }
+  .mini-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .mini-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--ink);
+  }
+  .mini-artist {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 1px;
+  }
+  .mini-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .mini-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .mini-btn:active { transform: scale(0.9); }
+  .mini-btn.play-btn {
+    background: var(--primary-gradient);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(124, 92, 255, 0.5);
+  }
+  .mini-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+  /* ============================================================
+     FULLSCREEN MOBILE PLAYER SHEET (Swipe / Expand)
+     ============================================================ */
+  .full-player {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(14, 10, 21, 0.96);
+    backdrop-filter: blur(40px);
+    display: flex;
+    flex-direction: column;
+    padding: max(16px, var(--sat)) max(20px, var(--sal)) max(24px, var(--sab)) max(20px, var(--sar));
+    transform: translateY(105%);
+    transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.05);
+    overflow-y: auto;
+  }
+  .full-player.open {
+    transform: translateY(0);
+  }
+  .full-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 48px;
+  }
+  .full-close-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .full-close-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; }
+  .full-heading {
+    font-size: 11px;
+    font-weight: 750;
+    letter-spacing: 1.2px;
+    color: var(--soft);
+    text-transform: uppercase;
+  }
+  .full-art-wrap {
+    flex: 1;
+    min-height: 200px;
+    max-height: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 16px 0;
+  }
+  .full-art {
+    width: min(80vw, 320px);
+    height: min(80vw, 320px);
+    border-radius: var(--radius-xl);
+    background: var(--aurora-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-glow), 0 20px 50px rgba(0,0,0,0.6);
+    position: relative;
+    overflow: hidden;
+  }
+  .full-art svg { width: 80px; height: 80px; fill: #ffffff; }
+
+  .full-meta {
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .full-meta-text { min-width: 0; flex: 1; padding-right: 12px; }
+  .full-title {
+    font-size: clamp(19px, 5.5vw, 24px);
+    font-weight: 750;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .full-artist {
+    font-size: clamp(13px, 3.8vw, 15px);
+    color: var(--muted);
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .full-fav-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 0;
+    background: transparent;
+    color: var(--soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .full-fav-btn.active { color: #ff5d9e; }
+  .full-fav-btn svg { width: 22px; height: 22px; fill: currentColor; }
+
+  /* Scrub Range Slider */
+  .scrub-wrap {
+    margin-bottom: 20px;
+  }
+  .scrub-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 24px;
+    background: transparent;
+    cursor: pointer;
+    margin: 0;
+  }
+  .scrub-slider::-webkit-slider-runnable-track {
+    height: 5px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--primary) var(--p, 0%), rgba(255, 255, 255, 0.12) var(--p, 0%));
+  }
+  .scrub-slider::-moz-range-track {
+    height: 5px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .scrub-slider::-moz-range-progress {
+    height: 5px;
+    border-radius: 4px;
+    background: var(--primary);
+  }
+  .scrub-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    margin-top: -5.5px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    border: 3px solid var(--primary);
+  }
+  .scrub-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid var(--primary);
+  }
+  .time-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--soft);
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Full Player Media Controls */
+  .full-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 380px;
+    margin: 0 auto 20px;
+    width: 100%;
+  }
+  .ctrl-btn {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s, color 0.15s;
+  }
+  .ctrl-btn:active { transform: scale(0.9); }
+  .ctrl-btn.active { color: var(--primary); }
+  .ctrl-btn svg { width: 22px; height: 22px; fill: currentColor; }
+  .ctrl-btn.play-main {
+    width: 66px;
+    height: 66px;
+    background: var(--primary-gradient);
+    color: #fff;
+    box-shadow: 0 10px 28px rgba(124, 92, 255, 0.55);
+  }
+  .ctrl-btn.play-main svg { width: 28px; height: 28px; fill: currentColor; }
+
+  /* Volume Bar */
+  .volume-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 320px;
+    margin: 0 auto 10px;
+    width: 100%;
+    color: var(--soft);
+  }
+  .volume-row svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
+  .vol-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 20px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .vol-slider::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+  .vol-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    margin-top: -4px;
+    border-radius: 50%;
+    background: #fff;
+  }
+
+  /* Visualizer Selector Pill */
+  .vis-selector-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .vis-pill-btn {
+    padding: 6px 12px;
+    border-radius: 14px;
+    border: 1px solid var(--border-card);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .vis-pill-btn.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+
+  /* ============================================================
+     BOTTOM NAVIGATION BAR (Material 3 Mobile)
+     ============================================================ */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(62px + var(--sab));
+    padding-bottom: var(--sab);
+    background: rgba(18, 14, 25, 0.94);
+    border-top: 1px solid var(--border-card);
+    backdrop-filter: blur(28px);
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+  }
+  .nav-item {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border: 0;
+    background: transparent;
+    color: var(--soft);
+    cursor: pointer;
+    transition: color 0.18s;
+  }
+  .nav-item.active { color: var(--primary); }
+  .nav-icon {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .nav-icon svg { width: 20px; height: 20px; fill: currentColor; }
+  .nav-label { font-size: 10px; font-weight: 700; letter-spacing: 0.2px; }
+
+  /* Toast Notification */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(140px + var(--sab));
+    transform: translate(-50%, 20px);
+    z-index: 200;
+    background: rgba(28, 20, 39, 0.95);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.25s cubic-bezier(0.2, 0.9, 0.2, 1);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-card);
+    max-width: 90vw;
+    text-align: center;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  /* File input hidden */
+  #phoneFileInput { display: none; }
+</style>
+</head>
+<body>
+
+<!-- FULL-BLEED BACKGROUND VISUALIZER -->
+<canvas id="bgVisualizer"></canvas>
+<div class="ambient-glow"></div>
+
+<!-- APP WRAPPER -->
+<div class="app-container">
+
+  <!-- TOP HEADER -->
+  <header class="top-bar">
+    <div class="brand">
+      <div class="brand-badge">
+        <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+      </div>
+      <span>Aurora Music</span>
+    </div>
+    <div class="top-actions">
+      <div class="status-chip" id="connectionChip">
+        <div class="pulse-dot" id="connectionDot"></div>
+        <span id="connectionText">Wi-Fi</span>
+      </div>
+      <button class="icon-btn-top" id="visModeToggle" title="Стиль визуализатора">
+        <svg viewBox="0 0 24 24"><rect x="3" y="10" width="3" height="10" rx="1.5"/><rect x="8.5" y="4" width="3" height="16" rx="1.5"/><rect x="14" y="8" width="3" height="12" rx="1.5"/><rect x="19.5" y="12" width="3" height="8" rx="1.5"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== VIEW 1: HOME (WELCOME SCREEN) ==================== -->
+  <main id="viewHome">
+    <!-- HERO CARD (WITHOUT USERNAME) -->
+    <div class="hero-card">
+      <div class="hero-emblem">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 7.5 12 7.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5zm0-5.5c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1z"/></svg>
+      </div>
+      <span class="hero-badge-tag">Музыкальное пространство</span>
+      <h1 class="hero-title">Добро пожаловать</h1>
+      <p class="hero-subtitle">
+        Слушайте треки с компьютера, открывайте файлы с телефона или транслируйте звук в реальном времени.
+      </p>
+
+      <div class="connect-card" id="connectCard" hidden>
+        <div class="connect-head">
+          <span class="connect-title">Подключение к ПК</span>
+          <span class="connect-state" id="connectState">не подключено</span>
+        </div>
+        <div class="connect-row">
+          <input class="connect-input" id="serverInput" type="url" inputmode="url"
+                 autocomplete="off" spellcheck="false" placeholder="http://192.168.1.215:8737">
+          <button class="connect-btn" id="btnConnect" type="button">Подключить</button>
+        </div>
+      </div>
+
+      <div class="quick-grid">
+        <div class="quick-card" id="btnQuickLibrary">
+          <div class="quick-icon-box purple">
+            <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+          </div>
+          <div>
+            <div class="quick-title">Медиатека</div>
+            <div class="quick-desc" id="quickCountText">Коллекция с ПК</div>
+          </div>
+        </div>
+
+        <div class="quick-card" id="btnQuickPhone">
+          <div class="quick-icon-box green">
+            <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5" stroke="currentColor" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <div class="quick-title">С телефона</div>
+            <div class="quick-desc">Открыть свои файлы</div>
+          </div>
+        </div>
+
+        <div class="quick-card" id="btnQuickLive" style="grid-column: 1 / -1;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div class="quick-icon-box pink">
+              <svg viewBox="0 0 24 24"><path d="M4.93 4.93a10 10 0 0 0 0 14.14M7.76 7.76a6 6 0 0 0 0 8.48M12 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0M16.24 7.76a6 6 0 0 1 0 8.48M19.07 4.93a10 10 0 0 1 0 14.14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <div class="quick-title">Прямой эфир</div>
+              <div class="quick-desc" id="quickLiveStatus">Системный звук Windows</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================== VIEW 2: LIBRARY / PLAYLIST ==================== -->
+  <main id="viewLibrary" hidden>
+    <div class="section-header">
+      <h2 class="section-title">Плейлист</h2>
+      <span class="pill-count" id="libCount">0 треков</span>
+    </div>
+
+    <div class="search-wrap">
+      <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" fill="none" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="text" class="search-input" id="searchInput" placeholder="Поиск треков или артистов...">
+    </div>
+
+    <div class="track-list" id="trackList"></div>
+
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+      </div>
+      <h3>Здесь пока тихо</h3>
+      <p>Выберите папку с музыкой на ПК или нажмите «С телефона», чтобы открыть треки из памяти устройства.</p>
+    </div>
+  </main>
+
+  <!-- ==================== VIEW 3: LIVE STREAM ==================== -->
+  <main id="viewLive" hidden>
+    <div class="live-card">
+      <div class="live-card-top">
+        <span style="font-size:11px; font-weight:800; letter-spacing:1px; color:#c7b6df;">СИСТЕМНЫЙ ЗВУК</span>
+        <span class="live-status-pill" id="livePill">ОФЛАЙН</span>
+      </div>
+
+      <div class="live-wave-box">
+        <canvas id="liveCanvas"></canvas>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <h2 style="margin:0; font-size:20px; font-weight:700;" id="liveHeading">Эфир выключен</h2>
+        <p style="margin:6px 0 0; font-size:12.5px; color:var(--muted); line-height:1.5;" id="liveSub">
+          Запустите захват звука в Lumen на компьютере — и слушайте системное аудио на телефоне без проводов.
+        </p>
+      </div>
+
+      <button class="btn-primary" id="btnLiveAction" disabled>
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <span id="btnLiveActionText">Слушать эфир</span>
+      </button>
+    </div>
+  </main>
+
+</div>
+
+<!-- ============================================================
+     DOCKED MINI-PLAYER (Floats above bottom nav)
+     ============================================================ -->
+<div class="mini-player" id="miniPlayer">
+  <div class="mini-progress-bar">
+    <div class="mini-progress-fill" id="miniProgressFill"></div>
+  </div>
+  <div class="mini-cover" id="miniCover">
+    <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+  </div>
+  <div class="mini-info" id="miniInfoArea">
+    <div class="mini-title" id="miniTitle">Ничего не играет</div>
+    <div class="mini-artist" id="miniArtist">Выберите трек</div>
+  </div>
+  <div class="mini-controls">
+    <button class="mini-btn play-btn" id="miniPlayBtn" aria-label="Воспроизведение">
+      <svg id="miniPlayIcon" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72L9.5 4.28A1 1 0 0 0 8 5.14z"/></svg>
+    </button>
+    <button class="mini-btn" id="miniNextBtn" aria-label="Следующий">
+      <svg viewBox="0 0 24 24"><path d="M6 17.5a1 1 0 0 0 1.55.83l7.95-5.5v4.67a1 1 0 0 0 2 0v-11a1 1 0 0 0-2 0v4.67L7.55 5.67A1 1 0 0 0 6 6.5v11z"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================
+     FULLSCREEN MOBILE PLAYER SHEET (Expandable)
+     ============================================================ -->
+<div class="full-player" id="fullPlayer">
+  <div class="full-top">
+    <button class="full-close-btn" id="fullCloseBtn" aria-label="Закрыть">
+      <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="full-heading">Сейчас играет</div>
+    <button class="full-close-btn" id="fullVisBtn" title="Сменить визуализатор">
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="10" width="3" height="10" rx="1.5"/><rect x="8.5" y="4" width="3" height="16" rx="1.5"/><rect x="14" y="8" width="3" height="12" rx="1.5"/><rect x="19.5" y="12" width="3" height="8" rx="1.5"/></svg>
+    </button>
+  </div>
+
+  <div class="full-art-wrap">
+    <div class="full-art" id="fullArt">
+      <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+    </div>
+  </div>
+
+  <div class="full-meta">
+    <div class="full-meta-text">
+      <div class="full-title" id="fullTitle">Ничего не играет</div>
+      <div class="full-artist" id="fullArtist">Выберите аудиофайл</div>
+    </div>
+    <button class="full-fav-btn" id="fullFavBtn">
+      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    </button>
+  </div>
+
+  <!-- Scrub Slider -->
+  <div class="scrub-wrap">
+    <input type="range" class="scrub-slider" id="fullScrub" min="0" max="1000" value="0" step="1">
+    <div class="time-row">
+      <span id="fullTimeCur">0:00</span>
+      <span id="fullTimeDur">0:00</span>
+    </div>
+  </div>
+
+  <!-- Main Media Controls (Play, Pause, Skip, Shuffle, Repeat) -->
+  <div class="full-controls">
+    <button class="ctrl-btn" id="btnShuffle" title="Случайный порядок">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+    </button>
+    <button class="ctrl-btn" id="btnPrev" title="Предыдущий трек">
+      <svg viewBox="0 0 24 24"><path d="M18 6.5a1 1 0 0 0-1.55-.83L8.5 11.17v-4.67a1 1 0 0 0-2 0v11a1 1 0 0 0 2 0v-4.67l7.95 5.5A1 1 0 0 0 18 17.5v-11z"/></svg>
+    </button>
+    <button class="ctrl-btn play-main" id="btnPlayMain" title="Воспроизведение">
+      <svg id="fullPlayIcon" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72L9.5 4.28A1 1 0 0 0 8 5.14z"/></svg>
+    </button>
+    <button class="ctrl-btn" id="btnNext" title="Следующий трек">
+      <svg viewBox="0 0 24 24"><path d="M6 17.5a1 1 0 0 0 1.55.83l7.95-5.5v4.67a1 1 0 0 0 2 0v-11a1 1 0 0 0-2 0v4.67L7.55 5.67A1 1 0 0 0 6 6.5v11z"/></svg>
+    </button>
+    <button class="ctrl-btn" id="btnRepeat" title="Повтор">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+    </button>
+  </div>
+
+  <!-- Volume Control -->
+  <div class="volume-row">
+    <svg id="volIcon" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <input type="range" class="vol-slider" id="fullVol" min="0" max="1" step="0.01" value="0.8">
+  </div>
+
+  <div class="vis-selector-bar">
+    <button class="vis-pill-btn active" data-mode="aurora">Аврора</button>
+    <button class="vis-pill-btn" data-mode="bars">Эквалайзер</button>
+    <button class="vis-pill-btn" data-mode="nebula">Космос</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     BOTTOM NAVIGATION BAR (Material 3 Mobile)
+     ============================================================ -->
+<nav class="bottom-nav">
+  <button class="nav-item active" id="navHome">
+    <div class="nav-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </div>
+    <span class="nav-label">Главная</span>
+  </button>
+  <button class="nav-item" id="navLibrary">
+    <div class="nav-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+    </div>
+    <span class="nav-label">Музыка</span>
+  </button>
+  <button class="nav-item" id="navLive">
+    <div class="nav-icon">
+      <svg viewBox="0 0 24 24"><path d="M4.93 4.93a10 10 0 0 0 0 14.14M7.76 7.76a6 6 0 0 0 0 8.48M12 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0M16.24 7.76a6 6 0 0 1 0 8.48M19.07 4.93a10 10 0 0 1 0 14.14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+    <span class="nav-label">Эфир</span>
+  </button>
+  <button class="nav-item" id="navPhone">
+    <div class="nav-icon">
+      <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5" stroke="currentColor" stroke-linecap="round"/></svg>
+    </div>
+    <span class="nav-label">С телефона</span>
+  </button>
+</nav>
+
+<!-- Hidden Local Phone File Picker -->
+<input type="file" id="phoneFileInput" multiple accept="audio/*">
+
+<!-- Audio Elements -->
+<audio id="audio" preload="metadata"></audio>
+<audio id="liveAudio" preload="none"></audio>
+<div class="toast" id="toast"></div>
+
+<!-- ============================================================
+     JAVASCRIPT APPLICATION ENGINE
+     ============================================================ -->
+<script>
+(function(){
+  "use strict";
+
+  var $ = function(id){ return document.getElementById(id); };
+
+  // Palette pairs for track cards
+  var palettes = [
+    ["#7C5CFF", "#5A86FF"],
+    ["#FF7D6B", "#FF5D9E"],
+    ["#2FBF8F", "#4F8DFF"],
+    ["#B56BFF", "#FF7DAF"],
+    ["#FFB36B", "#FF6F87"],
+    ["#5B8CFF", "#8E7CFF"]
+  ];
+
+  var audio = $("audio");
+  var liveAudio = $("liveAudio");
+  var tracks = [];
+  var filteredTracks = [];
+  var current = -1;
+  var isPlaying = false;
+  var isLive = false;
+  var isSeeking = false;
+  var shuffleMode = false;
+  var repeatMode = 0; // 0: off, 1: all, 2: one
+  var visMode = localStorage.getItem("aurora.vismode") || "aurora";
+  var toastTimer = null;
+  var FAV_KEY = "aurora.favs";
+  var serverBase = "";
+  try { serverBase = (localStorage.getItem("aurora.base") || "").replace(/\/+$/, ""); } catch(e){}
+  var lastAndroidState = "";
+
+  // The bundled Android app is served from file:// and must talk to the PC
+  // server by absolute address. When the page is served by Lumen itself,
+  // serverBase stays empty and every URL remains relative.
+  function apiUrl(path){
+    return serverBase ? (serverBase + path) : path;
+  }
+
+  function isFileMode(){
+    return location.protocol === "file:";
+  }
+
+  function showToast(text){
+    var t = $("toast");
+    t.textContent = text;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2600);
+  }
+
+  function haptic(){
+    if (navigator.vibrate) {
+      try { navigator.vibrate(12); } catch(e){}
+    }
+  }
+
+  function fmt(seconds){
+    if (!isFinite(seconds) || seconds < 0) seconds = 0;
+    var s = Math.floor(seconds), m = Math.floor(s / 60), r = s % 60;
+    return m + ":" + (r < 10 ? "0" : "") + r;
+  }
+
+  function esc(val){ return String(val == null ? "" : val); }
+
+  // ============================================================
+  // FAVORITES (persisted in localStorage by "artist||title")
+  // ============================================================
+  function favKeyOf(track){
+    if (!track) return "";
+    return (track.artist || "") + "||" + (track.title || "");
+  }
+
+  function readFavs(){
+    try {
+      var raw = localStorage.getItem(FAV_KEY);
+      var list = raw ? JSON.parse(raw) : [];
+      return Object.prototype.toString.call(list) === "[object Array]" ? list : [];
+    } catch(e){
+      return [];
+    }
+  }
+
+  function writeFavs(list){
+    try { localStorage.setItem(FAV_KEY, JSON.stringify(list)); } catch(e){}
+  }
+
+  function syncFavButton(){
+    var track = (current >= 0 && current < tracks.length) ? tracks[current] : null;
+    var active = !!track && readFavs().indexOf(favKeyOf(track)) >= 0;
+    $("fullFavBtn").classList.toggle("active", active);
+    $("fullFavBtn").setAttribute("aria-pressed", active ? "true" : "false");
+  }
+
+  // ============================================================
+  // WEB AUDIO & BACKGROUND VISUALIZER
+  // ============================================================
+  var bgCanvas = $("bgVisualizer");
+  var bgCtx = bgCanvas.getContext("2d");
+  var liveCanvas = $("liveCanvas");
+  var liveCtx = liveCanvas.getContext("2d");
+
+  var audioCtx = null;
+  var analyser = null;
+  var sourceTrack = null;
+  var sourceLive = null;
+  var freqData = null;
+  var visualizerActive = false;
+
+  function initAudioContext(){
+    if (audioCtx) {
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      return;
+    }
+    try {
+      var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      audioCtx = new AudioContextClass();
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.82;
+      freqData = new Uint8Array(analyser.frequencyBinCount);
+
+      try {
+        sourceTrack = audioCtx.createMediaElementSource(audio);
+        sourceTrack.connect(analyser);
+      } catch(e){}
+
+      try {
+        sourceLive = audioCtx.createMediaElementSource(liveAudio);
+        sourceLive.connect(analyser);
+      } catch(e){}
+
+      analyser.connect(audioCtx.destination);
+    } catch(err){
+      console.warn("AudioContext init error:", err);
+    }
+  }
+
+  function resizeCanvases(){
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    var w = window.innerWidth, h = window.innerHeight;
+    bgCanvas.width = Math.floor(w * dpr);
+    bgCanvas.height = Math.floor(h * dpr);
+    bgCtx = bgCanvas.getContext("2d");
+    bgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    if (liveCanvas.clientWidth > 0){
+      var lw = liveCanvas.clientWidth, lh = liveCanvas.clientHeight;
+      liveCanvas.width = Math.floor(lw * dpr);
+      liveCanvas.height = Math.floor(lh * dpr);
+      liveCtx = liveCanvas.getContext("2d");
+      liveCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+  }
+  window.addEventListener("resize", resizeCanvases);
+
+  // Particles for nebula mode
+  var particles = [];
+  for (var pi = 0; pi < 45; pi++){
+    particles.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      radius: Math.random() * 2.8 + 1,
+      speedX: (Math.random() - 0.5) * 0.6,
+      speedY: (Math.random() - 0.5) * 0.6,
+      color: palettes[pi % palettes.length][0]
+    });
+  }
+
+  var phase = 0;
+  function renderBackground(){
+    requestAnimationFrame(renderBackground);
+    var w = window.innerWidth, h = window.innerHeight;
+    if (bgCanvas.width === 0) return;
+
+    bgCtx.clearRect(0, 0, w, h);
+
+    var playingNow = (!audio.paused && audio.currentTime > 0) || (isLive && !liveAudio.paused);
+    var intensity = playingNow ? 1.0 : 0.18;
+
+    var bass = 0.2, mid = 0.2, treble = 0.2;
+    if (analyser && playingNow){
+      try {
+        analyser.getByteFrequencyData(freqData);
+        var bSum = 0, mSum = 0, tSum = 0;
+        var len = freqData.length;
+        for (var i = 0; i < len; i++){
+          if (i < 8) bSum += freqData[i];
+          else if (i < 48) mSum += freqData[i];
+          else tSum += freqData[i];
+        }
+        bass = (bSum / 8) / 255;
+        mid = (mSum / 40) / 255;
+        treble = (tSum / (len - 48)) / 255;
+      } catch(e){}
+    } else if (playingNow) {
+      // Harmonic fallback simulation when playing
+      var t = Date.now() / 600;
+      bass = 0.35 + 0.25 * Math.sin(t * 1.8);
+      mid = 0.3 + 0.2 * Math.cos(t * 2.4);
+      treble = 0.25 + 0.15 * Math.sin(t * 3.2);
+    }
+
+    phase += 0.015 * (0.8 + bass * 1.6);
+
+    // MODE 1: AURORA WAVES
+    if (visMode === "aurora"){
+      var colors = [
+        ["rgba(124, 92, 255, ", 0.35 * intensity],
+        ["rgba(255, 93, 158, ", 0.30 * intensity],
+        ["rgba(90, 134, 255, ", 0.25 * intensity],
+        ["rgba(255, 179, 107, ", 0.20 * intensity]
+      ];
+
+      for (var l = 0; l < colors.length; l++){
+        var col = colors[l][0] + colors[l][1] + ")";
+        bgCtx.fillStyle = col;
+        bgCtx.beginPath();
+        bgCtx.moveTo(0, h);
+
+        var points = 12;
+        var step = w / (points - 1);
+        var baseY = h * (0.58 + l * 0.08) - (bass * 80 * (l === 0 ? 1.2 : 0.6));
+
+        for (var p = 0; p < points; p++){
+          var px = p * step;
+          var py = baseY + Math.sin(phase * (l + 1) * 0.7 + p * 0.55) * (45 + bass * 70);
+          if (p === 0) bgCtx.lineTo(px, py);
+          else {
+            var prevX = (p - 1) * step;
+            var prevY = baseY + Math.sin(phase * (l + 1) * 0.7 + (p - 1) * 0.55) * (45 + bass * 70);
+            var cx = (prevX + px) / 2;
+            var cy = (prevY + py) / 2;
+            bgCtx.quadraticCurveTo(prevX, prevY, cx, cy);
+          }
+        }
+        bgCtx.lineTo(w, h);
+        bgCtx.closePath();
+        bgCtx.fill();
+      }
+
+    // MODE 2: BARS (NEON EQUALIZER)
+    } else if (visMode === "bars"){
+      var barCount = 42;
+      var barWidth = w / barCount * 0.6;
+      var slotWidth = w / barCount;
+      var baseY = h * 0.88;
+
+      for (var b = 0; b < barCount; b++){
+        var val = 0.15;
+        if (analyser && playingNow && freqData){
+          var idx = Math.floor(b * freqData.length / barCount);
+          val = freqData[idx] / 255;
+        } else if (playingNow) {
+          val = 0.2 + 0.3 * Math.sin(phase * 2 + b * 0.4);
+        }
+        var barH = Math.max(6, val * h * 0.55 * intensity);
+        var bx = b * slotWidth + (slotWidth - barWidth) / 2;
+        var by = baseY - barH;
+
+        var grad = bgCtx.createLinearGradient(0, baseY, 0, by);
+        grad.addColorStop(0, "rgba(124, 92, 255, 0.15)");
+        grad.addColorStop(0.7, "rgba(255, 93, 158, " + (0.7 * intensity) + ")");
+        grad.addColorStop(1, "rgba(255, 179, 107, " + (0.9 * intensity) + ")");
+        bgCtx.fillStyle = grad;
+        bgCtx.beginPath();
+        if (bgCtx.roundRect) bgCtx.roundRect(bx, by, barWidth, barH, barWidth / 2);
+        else bgCtx.rect(bx, by, barWidth, barH);
+        bgCtx.fill();
+      }
+
+    // MODE 3: NEBULA (COSMIC PARTICLES)
+    } else {
+      var centerRadius = (70 + bass * 90) * intensity;
+      var radGrad = bgCtx.createRadialGradient(w/2, h/2, 10, w/2, h/2, centerRadius);
+      radGrad.addColorStop(0, "rgba(255, 93, 158, " + (0.35 * intensity) + ")");
+      radGrad.addColorStop(0.6, "rgba(124, 92, 255, " + (0.22 * intensity) + ")");
+      radGrad.addColorStop(1, "rgba(0,0,0,0)");
+      bgCtx.fillStyle = radGrad;
+      bgCtx.beginPath();
+      bgCtx.arc(w/2, h/2, centerRadius, 0, Math.PI * 2);
+      bgCtx.fill();
+
+      for (var pi = 0; pi < particles.length; pi++){
+        var pt = particles[pi];
+        pt.x += pt.speedX * (1 + bass * 3);
+        pt.y += pt.speedY * (1 + bass * 3);
+        if (pt.x < 0) pt.x = w;
+        if (pt.x > w) pt.x = 0;
+        if (pt.y < 0) pt.y = h;
+        if (pt.y > h) pt.y = 0;
+
+        bgCtx.fillStyle = pt.color;
+        bgCtx.beginPath();
+        bgCtx.arc(pt.x, pt.y, pt.radius * (1 + bass * 0.8), 0, Math.PI * 2);
+        bgCtx.fill();
+      }
+    }
+  }
+
+  // ============================================================
+  // LIVE BROADCAST VISUALIZER (Small card canvas)
+  // ============================================================
+  function renderLiveCard(){
+    requestAnimationFrame(renderLiveCard);
+    if (!liveCanvas || liveCanvas.offsetWidth === 0) return;
+    var lw = liveCanvas.clientWidth, lh = liveCanvas.clientHeight;
+    liveCtx.clearRect(0, 0, lw, lh);
+
+    var count = 38;
+    var slot = lw / count;
+    var bw = Math.max(2, slot * 0.45);
+    var mid = lh * 0.52;
+
+    for (var i = 0; i < count; i++){
+      var val = 0.04;
+      if (isLive && !liveAudio.paused && analyser && freqData){
+        var bin = Math.floor(i * freqData.length / count);
+        val = freqData[bin] / 255;
+      } else if (isLive && !liveAudio.paused) {
+        val = 0.15 + 0.25 * Math.sin(Date.now() / 400 + i * 0.5);
+      }
+      var bh = 4 + val * lh * 0.75;
+      var bx = i * slot + (slot - bw) / 2;
+      var by = mid - bh / 2;
+
+      var grad = liveCtx.createLinearGradient(0, lh, 0, 0);
+      grad.addColorStop(0, "#7c5cff");
+      grad.addColorStop(0.5, "#ff5d9e");
+      grad.addColorStop(1, "#ffb36b");
+      liveCtx.fillStyle = grad;
+      liveCtx.beginPath();
+      if (liveCtx.roundRect) liveCtx.roundRect(bx, by, bw, bh, bw / 2);
+      else liveCtx.rect(bx, by, bw, bh);
+      liveCtx.fill();
+    }
+  }
+
+  // ============================================================
+  // PLAYLIST RENDERING & PLAYBACK
+  // ============================================================
+  function renderPlaylist(){
+    var list = $("trackList");
+    var empty = $("emptyState");
+    list.innerHTML = "";
+
+    var displayList = filteredTracks;
+    $("libCount").textContent = tracks.length + " " + (tracks.length === 1 ? "трек" : (tracks.length < 5 ? "трека" : "треков"));
+    $("quickCountText").textContent = tracks.length ? (tracks.length + " треков") : "Коллекция с ПК";
+
+    if (!displayList.length){
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+
+    displayList.forEach(function(item){
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "track-item" + (item.originalIndex === current ? " playing" : "");
+      
+      var pair = palettes[item.originalIndex % palettes.length];
+
+      var cover = document.createElement("div");
+      cover.className = "track-cover";
+      cover.style.background = "linear-gradient(135deg, " + pair[0] + ", " + pair[1] + ")";
+      cover.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>';
+
+      var info = document.createElement("div");
+      info.className = "track-info";
+
+      var title = document.createElement("div");
+      title.className = "track-title";
+      title.textContent = esc(item.title);
+
+      var artist = document.createElement("div");
+      artist.className = "track-artist";
+      artist.textContent = esc(item.artist || "Неизвестный исполнитель");
+
+      info.appendChild(title);
+      info.appendChild(artist);
+
+      var eq = document.createElement("div");
+      eq.className = "eq-bars";
+      eq.innerHTML = '<div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>';
+
+      var badge = document.createElement("span");
+      badge.className = "track-badge";
+      badge.textContent = esc(item.ext || "AUDIO");
+
+      btn.appendChild(cover);
+      btn.appendChild(info);
+      btn.appendChild(eq);
+      btn.appendChild(badge);
+
+      btn.addEventListener("click", function(){
+        haptic();
+        playTrack(item.originalIndex);
+      });
+
+      list.appendChild(btn);
+    });
+  }
+
+  function updateActiveTrackUi(){
+    var items = document.querySelectorAll(".track-item");
+    items.forEach(function(it, idx){
+      var itemObj = filteredTracks[idx];
+      if (itemObj){
+        it.classList.toggle("playing", itemObj.originalIndex === current);
+      }
+    });
+
+    if (current >= 0 && current < tracks.length){
+      var t = tracks[current];
+      $("miniPlayer").classList.add("visible");
+      $("miniTitle").textContent = esc(t.title);
+      $("miniArtist").textContent = esc(t.artist || "Аудиофайл");
+      $("fullTitle").textContent = esc(t.title);
+      $("fullArtist").textContent = esc(t.artist || "Аудиофайл");
+
+      var pair = palettes[current % palettes.length];
+      var grad = "linear-gradient(135deg, " + pair[0] + ", " + pair[1] + ")";
+      $("miniCover").style.background = grad;
+      $("fullArt").style.background = grad;
+
+      // Web MediaSession metadata (desktop browsers; the APK uses the native
+      // PlaybackService session instead)
+      if ("mediaSession" in navigator && !window.AndroidMedia){
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: t.title,
+          artist: t.artist || "Aurora Music",
+          album: t.album || "Lumen Player",
+          artwork: [{ src: apiUrl("/icon.png"), sizes: "256x256", type: "image/png" }]
+        });
+      }
+    }
+
+    syncFavButton();
+    syncAndroidMedia();
+  }
+
+  function playTrack(index){
+    if (index < 0 || index >= tracks.length) return;
+    initAudioContext();
+
+    if (isLive && !liveAudio.paused){
+      liveAudio.pause();
+      isLive = false;
+      updateLiveUi();
+    }
+
+    if (index === current){
+      togglePlay();
+      return;
+    }
+
+    current = index;
+    var track = tracks[index];
+    // Server tracks keep their own index in /audio/N, which is not the same as
+    // the position in the combined (phone + server) playlist.
+    var serverIndex = (typeof track.serverIndex === "number") ? track.serverIndex : index;
+    audio.src = track.url || apiUrl("/audio/" + serverIndex);
+    audio.play().then(function(){
+      isPlaying = true;
+      syncPlayIcons();
+      updateActiveTrackUi();
+    }).catch(function(err){
+      showToast("Не удалось запустить трек.");
+    });
+  }
+
+  function togglePlay(){
+    initAudioContext();
+    if (current < 0 && tracks.length){
+      playTrack(0);
+      return;
+    }
+    if (!audio.src) return;
+    haptic();
+    if (audio.paused){
+      audio.play().catch(function(){});
+    } else {
+      audio.pause();
+    }
+  }
+
+  function nextTrack(){
+    haptic();
+    if (!tracks.length) return;
+    if (shuffleMode){
+      var rnd = Math.floor(Math.random() * tracks.length);
+      playTrack(rnd);
+    } else if (current + 1 < tracks.length){
+      playTrack(current + 1);
+    } else {
+      playTrack(0);
+    }
+  }
+
+  function prevTrack(){
+    haptic();
+    if (!tracks.length) return;
+    if (audio.currentTime > 3){
+      audio.currentTime = 0;
+      return;
+    }
+    if (current > 0){
+      playTrack(current - 1);
+    } else {
+      playTrack(tracks.length - 1);
+    }
+  }
+
+  function syncPlayIcons(){
+    var isPaused = audio.paused;
+    var playSvg = '<svg viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72L9.5 4.28A1 1 0 0 0 8 5.14z"/></svg>';
+    var pauseSvg = '<svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="2"/><rect x="14" y="5" width="4" height="14" rx="2"/></svg>';
+    
+    $("miniPlayBtn").innerHTML = isPaused ? playSvg : pauseSvg;
+    $("btnPlayMain").innerHTML = isPaused ? playSvg : pauseSvg;
+
+    if ("mediaSession" in navigator && !window.AndroidMedia){
+      navigator.mediaSession.playbackState = isPaused ? "paused" : "playing";
+    }
+
+    syncAndroidMedia();
+  }
+
+  // ============================================================
+  // ANDROID FOREGROUND PLAYBACK (JS <-> PlaybackService bridge)
+  // ============================================================
+  function currentMediaInfo(){
+    if (isLive && !liveAudio.paused){
+      return { title: "Прямой эфир", artist: "Lumen", playing: true };
+    }
+    if (current >= 0 && current < tracks.length){
+      var t = tracks[current];
+      return {
+        title: t.title || "Аудиофайл",
+        artist: t.artist || "Aurora Music",
+        playing: !audio.paused
+      };
+    }
+    return null;
+  }
+
+  function syncAndroidMedia(){
+    if (!window.AndroidMedia || !window.AndroidMedia.setNowPlaying) return;
+    var info = currentMediaInfo();
+    var signature = info
+      ? (info.title + "\n" + info.artist + "\n" + (info.playing ? "1" : "0"))
+      : "";
+    if (signature === lastAndroidState) return;
+    lastAndroidState = signature;
+    try {
+      if (info) window.AndroidMedia.setNowPlaying(info.title, info.artist, info.playing);
+      else window.AndroidMedia.setNowPlaying("", "", false);
+    } catch(e){}
+  }
+
+  // Called from PlaybackService (notification / lock screen / headset buttons).
+  window.auroraRemote = function(command){
+    if (command === "play"){
+      if (isLive) return;
+      if (audio.paused) togglePlay();
+    } else if (command === "pause"){
+      if (isLive){
+        liveAudio.pause();
+        isLive = false;
+        updateLiveUi();
+      } else if (!audio.paused){
+        audio.pause();
+      }
+    } else if (command === "next"){
+      nextTrack();
+    } else if (command === "prev"){
+      prevTrack();
+    }
+  };
+
+  function updateProgress(){
+    var dur = audio.duration;
+    if (isFinite(dur) && dur > 0){
+      if (!isSeeking){
+        var cur = audio.currentTime;
+        var p = (cur / dur) * 1000;
+        $("fullScrub").value = String(p);
+        $("fullScrub").style.setProperty("--p", (p / 10) + "%");
+        $("miniProgressFill").style.width = (p / 10) + "%";
+        $("fullTimeCur").textContent = fmt(cur);
+      }
+      $("fullTimeDur").textContent = fmt(dur);
+    }
+  }
+
+  audio.addEventListener("play", syncPlayIcons);
+  audio.addEventListener("pause", syncPlayIcons);
+  audio.addEventListener("timeupdate", updateProgress);
+  audio.addEventListener("loadedmetadata", updateProgress);
+  audio.addEventListener("ended", function(){
+    if (repeatMode === 2){
+      audio.currentTime = 0;
+      audio.play();
+      return;
+    }
+    if (repeatMode === 1 || shuffleMode){
+      nextTrack();
+      return;
+    }
+    if (current >= 0 && current + 1 < tracks.length){
+      playTrack(current + 1);
+      return;
+    }
+    // Repeat is off and the queue is finished: stay on the last track, rewound.
+    audio.currentTime = 0;
+    updateProgress();
+    syncPlayIcons();
+  });
+
+  // Web MediaSession action handlers. The APK delegates media buttons to the
+  // native PlaybackService, so these are only needed in a regular browser.
+  if ("mediaSession" in navigator && !window.AndroidMedia){
+    navigator.mediaSession.setActionHandler("play", function(){
+      if (audio.paused) togglePlay();
+    });
+    navigator.mediaSession.setActionHandler("pause", function(){
+      if (!audio.paused) togglePlay();
+    });
+    navigator.mediaSession.setActionHandler("previoustrack", prevTrack);
+    navigator.mediaSession.setActionHandler("nexttrack", nextTrack);
+    navigator.mediaSession.setActionHandler("seekto", function(details){
+      if (details.seekTime && isFinite(audio.duration)){
+        audio.currentTime = details.seekTime;
+      }
+    });
+  }
+
+  // Scrubbing
+  $("fullScrub").addEventListener("input", function(){
+    isSeeking = true;
+    var dur = audio.duration;
+    if (isFinite(dur) && dur > 0){
+      var cur = dur * Number(this.value) / 1000;
+      $("fullTimeCur").textContent = fmt(cur);
+      this.style.setProperty("--p", (Number(this.value) / 10) + "%");
+    }
+  });
+  $("fullScrub").addEventListener("change", function(){
+    var dur = audio.duration;
+    if (isFinite(dur) && dur > 0){
+      audio.currentTime = dur * Number(this.value) / 1000;
+    }
+    isSeeking = false;
+  });
+
+  // Volume
+  $("fullVol").addEventListener("input", function(){
+    var v = Number(this.value);
+    audio.volume = v;
+    liveAudio.volume = v;
+    localStorage.setItem("aurora.vol", String(v));
+  });
+  try {
+    var storedV = localStorage.getItem("aurora.vol");
+    if (storedV != null){
+      $("fullVol").value = storedV;
+      audio.volume = Number(storedV);
+      liveAudio.volume = Number(storedV);
+    }
+  } catch(e){}
+
+  // Shuffle & Repeat
+  $("btnShuffle").addEventListener("click", function(){
+    haptic();
+    shuffleMode = !shuffleMode;
+    this.classList.toggle("active", shuffleMode);
+    showToast(shuffleMode ? "Случайный порядок включен" : "Случайный порядок выключен");
+  });
+
+  $("btnRepeat").addEventListener("click", function(){
+    haptic();
+    repeatMode = (repeatMode + 1) % 3;
+    this.classList.toggle("active", repeatMode > 0);
+    if (repeatMode === 0) showToast("Повтор выключен");
+    else if (repeatMode === 1) showToast("Повторять все треки");
+    else showToast("Повторять текущий трек");
+  });
+
+  // Controls click binding
+  $("miniPlayBtn").addEventListener("click", function(e){ e.stopPropagation(); togglePlay(); });
+  $("miniNextBtn").addEventListener("click", function(e){ e.stopPropagation(); nextTrack(); });
+  $("btnPlayMain").addEventListener("click", togglePlay);
+  $("btnPrev").addEventListener("click", prevTrack);
+  $("btnNext").addEventListener("click", nextTrack);
+
+  // Favorites (heart in the fullscreen player)
+  $("fullFavBtn").addEventListener("click", function(){
+    haptic();
+    if (current < 0 || current >= tracks.length) return;
+    var key = favKeyOf(tracks[current]);
+    if (!key || key === "||") return;
+    var favs = readFavs();
+    var at = favs.indexOf(key);
+    if (at >= 0){
+      favs.splice(at, 1);
+      showToast("Удалено из избранного");
+    } else {
+      favs.push(key);
+      showToast("Добавлено в избранное");
+    }
+    writeFavs(favs);
+    syncFavButton();
+  });
+
+  // Full Player Open / Close
+  $("miniPlayer").addEventListener("click", function(){
+    haptic();
+    $("fullPlayer").classList.add("open");
+  });
+  $("fullCloseBtn").addEventListener("click", function(){
+    haptic();
+    $("fullPlayer").classList.remove("open");
+  });
+
+  // Visualizer Mode Cycling
+  var visModes = ["aurora", "bars", "nebula"];
+  function setVisMode(mode){
+    visMode = mode;
+    localStorage.setItem("aurora.vismode", mode);
+    document.querySelectorAll(".vis-pill-btn").forEach(function(btn){
+      btn.classList.toggle("active", btn.getAttribute("data-mode") === mode);
+    });
+  }
+  $("visModeToggle").addEventListener("click", function(){
+    haptic();
+    var nextIdx = (visModes.indexOf(visMode) + 1) % visModes.length;
+    setVisMode(visModes[nextIdx]);
+    showToast("Режим: " + (visMode === "aurora" ? "Аврора" : (visMode === "bars" ? "Эквалайзер" : "Космос")));
+  });
+  $("fullVisBtn").addEventListener("click", function(){
+    $("visModeToggle").click();
+  });
+  document.querySelectorAll(".vis-pill-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      haptic();
+      setVisMode(this.getAttribute("data-mode"));
+    });
+  });
+
+  // Cheap identity of the playlist: lets the 15s refresh skip a full re-render
+  // (which would otherwise reset the scroll position) when nothing changed.
+  function librarySignature(list){
+    var parts = [];
+    for (var i = 0; i < list.length; i++){
+      var t = list[i];
+      parts.push((t.url || ("srv:" + t.serverIndex)) + "|" + (t.title || "") + "|" + (t.artist || ""));
+    }
+    return parts.join("\n");
+  }
+
+  // Search filtering
+  function applyFilter(){
+    var q = $("searchInput").value.trim().toLowerCase();
+    if (!q){
+      filteredTracks = tracks.map(function(t, idx){ t.originalIndex = idx; return t; });
+    } else {
+      filteredTracks = [];
+      tracks.forEach(function(t, idx){
+        if ((t.title && t.title.toLowerCase().indexOf(q) >= 0) ||
+            (t.artist && t.artist.toLowerCase().indexOf(q) >= 0)){
+          t.originalIndex = idx;
+          filteredTracks.push(t);
+        }
+      });
+    }
+    renderPlaylist();
+  }
+
+  $("searchInput").addEventListener("input", applyFilter);
+
+  // ============================================================
+  // LOCAL PHONE FILE PICKER
+  // ============================================================
+  $("navPhone").addEventListener("click", function(){
+    haptic();
+    $("phoneFileInput").click();
+  });
+  $("btnQuickPhone").addEventListener("click", function(){
+    haptic();
+    $("phoneFileInput").click();
+  });
+
+  $("phoneFileInput").addEventListener("change", function(e){
+    var files = e.target.files;
+    if (!files || !files.length) return;
+    var newTracks = [];
+    for (var i = 0; i < files.length; i++){
+      var file = files[i];
+      var name = file.name.replace(/\.[^/.]+$/, "");
+      var ext = file.name.split('.').pop().toUpperCase();
+      var artist = "С телефона";
+      var title = name;
+      var dash = name.indexOf(" - ");
+      if (dash > 0){
+        artist = name.substring(0, dash).trim();
+        title = name.substring(dash + 3).trim();
+      }
+      newTracks.push({
+        title: title,
+        artist: artist,
+        ext: ext,
+        url: URL.createObjectURL(file)
+      });
+    }
+
+    tracks = newTracks.concat(tracks);
+    $("searchInput").value = "";
+    applyFilter();
+    switchView("library");
+    showToast("Добавлено " + newTracks.length + " треков с телефона");
+    playTrack(0);
+  });
+
+  // ============================================================
+  // LIVE BROADCAST ENGINE
+  // ============================================================
+  var liveState = { live: false, seconds: 0 };
+  function updateLiveUi(){
+    var on = !!liveState.live;
+    $("livePill").classList.toggle("active", on);
+    $("livePill").textContent = on ? "В ЭФИРЕ" : "ОФЛАЙН";
+    $("quickLiveStatus").textContent = on ? ("В эфире (" + fmt(liveState.seconds) + ")") : "Системный звук Windows";
+    $("liveHeading").textContent = on ? "Системный звук" : "Эфир выключен";
+    $("liveSub").textContent = on
+      ? "Прямая трансляция звука с компьютера без потерь качества. Время вещания: " + fmt(liveState.seconds)
+      : "Запустите захват звука в Lumen на компьютере — и слушайте системное аудио на телефоне без проводов.";
+
+    $("btnLiveAction").disabled = !on;
+    if (!on){
+      $("btnLiveActionText").textContent = "Слушать эфир";
+      if (isLive){ liveAudio.pause(); isLive = false; }
+    } else if (!isLive){
+      $("btnLiveActionText").textContent = "Слушать эфир";
+    } else {
+      $("btnLiveActionText").textContent = "Остановить эфир";
+    }
+
+    syncAndroidMedia();
+  }
+
+  $("btnLiveAction").addEventListener("click", function(){
+    haptic();
+    if (!liveState.live) return;
+    if (isLive){
+      liveAudio.pause();
+      isLive = false;
+      updateLiveUi();
+      return;
+    }
+
+    if (!audio.paused) audio.pause();
+    initAudioContext();
+    liveAudio.src = apiUrl("/live.wav?t=" + Date.now());
+    liveAudio.play().then(function(){
+      isLive = true;
+      updateLiveUi();
+      showToast("Подключено к прямому эфиру");
+    }).catch(function(){
+      isLive = false;
+      updateLiveUi();
+      showToast("Ошибка подключения к эфиру");
+    });
+  });
+
+  // ============================================================
+  // NAVIGATION (Bottom bar & Quick cards)
+  // ============================================================
+  function switchView(viewName){
+    haptic();
+    $("viewHome").hidden = viewName !== "home";
+    $("viewLibrary").hidden = viewName !== "library";
+    $("viewLive").hidden = viewName !== "live";
+
+    $("navHome").classList.toggle("active", viewName === "home");
+    $("navLibrary").classList.toggle("active", viewName === "library");
+    $("navLive").classList.toggle("active", viewName === "live");
+  }
+
+  $("navHome").addEventListener("click", function(){ switchView("home"); });
+  $("navLibrary").addEventListener("click", function(){ switchView("library"); });
+  $("navLive").addEventListener("click", function(){ switchView("live"); });
+
+  $("btnQuickLibrary").addEventListener("click", function(){ switchView("library"); });
+  $("btnQuickLive").addEventListener("click", function(){ switchView("live"); });
+
+  // ============================================================
+  // PC CONNECTION (bundled Android app)
+  // ============================================================
+  function setConnectState(text, online){
+    var state = $("connectState");
+    state.textContent = text;
+    state.classList.toggle("online", !!online);
+  }
+
+  async function testServer(base){
+    try {
+      var res = await fetch(base + "/health", { cache: "no-store" });
+      return res.ok;
+    } catch(e){
+      return false;
+    }
+  }
+
+  async function initConnectCard(){
+    if (!isFileMode()) return;
+    $("connectCard").hidden = false;
+    $("serverInput").value = serverBase;
+    if (serverBase){
+      var ok = await testServer(serverBase);
+      setConnectState(ok ? "подключено" : "нет связи", ok);
+    } else {
+      setConnectState("не подключено", false);
+    }
+  }
+
+  $("btnConnect").addEventListener("click", async function(){
+    var raw = $("serverInput").value.trim();
+    if (!raw) return;
+    if (!/^https?:\/\//i.test(raw)) raw = "http://" + raw;
+    raw = raw.replace(/\/+$/, "");
+    $("btnConnect").disabled = true;
+    setConnectState("проверка…", false);
+    var ok = await testServer(raw);
+    if (ok){
+      serverBase = raw;
+      try { localStorage.setItem("aurora.base", serverBase); } catch(e){}
+      $("serverInput").value = serverBase;
+      setConnectState("подключено", true);
+      showToast("ПК подключён");
+      loadLibrary();
+      pollState();
+    } else {
+      setConnectState("нет связи", false);
+      showToast("Не удалось подключиться");
+    }
+    $("btnConnect").disabled = false;
+  });
+
+  $("serverInput").addEventListener("keydown", function(e){
+    if (e.key === "Enter") $("btnConnect").click();
+  });
+
+  // ============================================================
+  // SERVER POLLING & DATA SYNC
+  // ============================================================
+  async function pollState(){
+    if (isFileMode() && !serverBase){
+      $("connectionDot").classList.add("offline");
+      $("connectionText").textContent = "Офлайн";
+      return;
+    }
+    try {
+      var res = await fetch(apiUrl("/api/state"), { cache: "no-store" });
+      if (!res.ok) throw new Error();
+      var data = await res.json();
+      liveState = data;
+      $("connectionDot").classList.remove("offline");
+      $("connectionText").textContent = "Wi-Fi OK";
+      updateLiveUi();
+    } catch(e){
+      $("connectionDot").classList.add("offline");
+      $("connectionText").textContent = "Офлайн";
+    }
+  }
+
+  async function loadLibrary(){
+    if (isFileMode() && !serverBase) return;
+    try {
+      var res = await fetch(apiUrl("/api/tracks"), { cache: "no-store" });
+      if (!res.ok) throw new Error();
+      var data = await res.json();
+
+      var previous = (current >= 0 && current < tracks.length) ? tracks[current] : null;
+      var previousKey = previous
+        ? (previous.url ? ("url:" + previous.url) : ("srv:" + previous.serverIndex))
+        : null;
+      var previousSignature = librarySignature(tracks);
+
+      // Keep phone-imported tracks and remember each server track's own index:
+      // /audio/N follows the server order, which differs from the combined
+      // (phone + server) playlist once phone files are added.
+      var phoneTracks = tracks.filter(function(t){ return !!t.url; });
+      var serverTracks = (data.tracks || []).map(function(t, idx){
+        t.serverIndex = idx;
+        return t;
+      });
+      tracks = phoneTracks.concat(serverTracks);
+
+      if (previousKey){
+        for (var i = 0; i < tracks.length; i++){
+          var key = tracks[i].url ? ("url:" + tracks[i].url) : ("srv:" + tracks[i].serverIndex);
+          if (key === previousKey){ current = i; break; }
+        }
+      }
+      if (current >= tracks.length) current = tracks.length - 1;
+
+      if (previousSignature !== librarySignature(tracks)){
+        applyFilter();
+      }
+      updateActiveTrackUi();
+    } catch(e){}
+  }
+
+  // Initialization
+  setVisMode(visMode);
+  syncFavButton();
+  resizeCanvases();
+  renderBackground();
+  renderLiveCard();
+  applyFilter();
+  initConnectCard();
+  loadLibrary();
+  pollState();
+
+  setInterval(pollState, 3000);
+  setInterval(loadLibrary, 15000);
+})();
+</script>
+</body>
+</html>

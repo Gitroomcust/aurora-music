@@ -110,6 +110,15 @@ if (Test-Path $docs) {
     Copy-Item -Force -Recurse $docs $docsDest
 }
 
+# The LAN server serves assets/lumen-256.png as /icon.png for the web player.
+if (Test-Path $assets) {
+    $assetsDest = Join-Path $dist 'assets'
+    if (Test-Path $assetsDest) {
+        Remove-Item $assetsDest -Recurse -Force
+    }
+    Copy-Item -Force -Recurse $assets $assetsDest
+}
+
 Remove-Item (Join-Path $dist 'Lumen.pdb') -Force -ErrorAction SilentlyContinue
 Remove-Item (Join-Path $dist 'lumen.log') -Force -ErrorAction SilentlyContinue
 Remove-Item (Join-Path $dist 'settings.ini') -Force -ErrorAction SilentlyContinue
@@ -122,7 +131,8 @@ $archiveItems = @(
     (Join-Path $dist 'Lumen.exe'),
     (Join-Path $dist 'README.md'),
     (Join-Path $dist 'LICENSE'),
-    (Join-Path $dist 'docs')
+    (Join-Path $dist 'docs'),
+    (Join-Path $dist 'assets')
 ) | Where-Object { Test-Path $_ }
 Compress-Archive -Path $archiveItems -DestinationPath $releaseZip -CompressionLevel Optimal
 
