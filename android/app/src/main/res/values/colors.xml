@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bg_dark">#120E1A</color>
-    <color name="primary_purple">#7C5CFF</color>
-    <color name="accent_pink">#FF5D9E</color>
+    <color name="bg_dark">#000000</color>
+    <color name="brand_green">#1ED760</color>
+    <color name="brand_green_dark">#0B6B34</color>
     <color name="white">#FFFFFF</color>
 </resources>

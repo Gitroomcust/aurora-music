@@ -3,1130 +3,1407 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#120e1a">
+<meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="/manifest.json">
 <title>Aurora Music</title>
 <style>
-  :root {
-    --sat: env(safe-area-inset-top, 0px);
-    --sab: env(safe-area-inset-bottom, 0px);
-    --sal: env(safe-area-inset-left, 0px);
-    --sar: env(safe-area-inset-right, 0px);
-    
-    --bg-base: #110d19;
-    --bg-card: rgba(26, 20, 37, 0.72);
-    --bg-card-hover: rgba(38, 29, 54, 0.82);
-    --surface-elevated: rgba(34, 26, 49, 0.88);
-    --border-card: rgba(255, 255, 255, 0.08);
-    --border-subtle: rgba(255, 255, 255, 0.05);
-    
-    --ink: #f7f3ff;
-    --muted: #a79cb7;
-    --soft: #7a6f8b;
-    
-    --primary: #8a6cff;
-    --primary-gradient: linear-gradient(135deg, #7c5cff, #5a86ff);
-    --accent-gradient: linear-gradient(135deg, #ff7d6b, #ff5d9e);
-    --aurora-gradient: linear-gradient(135deg, #7c5cff 0%, #ff5d9e 50%, #ffb36b 100%);
-    --live-gradient: linear-gradient(135deg, #ff5376, #ff7b54);
-    
-    --shadow-sm: 0 4px 14px rgba(0,0,0,0.25);
-    --shadow-md: 0 10px 30px rgba(0,0,0,0.35);
-    --shadow-lg: 0 20px 50px rgba(0,0,0,0.48);
-    --shadow-glow: 0 0 35px rgba(124, 92, 255, 0.32);
-    
-    --radius-sm: 14px;
-    --radius-md: 20px;
-    --radius-lg: 28px;
-    --radius-xl: 34px;
-  }
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
 
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  
-  html, body {
-    margin: 0;
-    padding: 0;
-    min-height: 100%;
-    min-height: 100dvh;
-    background-color: var(--bg-base);
-    color: var(--ink);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", Roboto, system-ui, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
-    user-select: none;
-    -webkit-user-select: none;
-  }
+  --bg: #000000;
+  --bg-elevated: #121212;
+  --surface: #181818;
+  --surface-2: #242424;
+  --surface-3: #2a2a2a;
 
-  /* ============================================================
-     BACKGROUND VISUALIZER CANVAS (Full bleed)
-     ============================================================ */
-  #bgVisualizer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    height: 100dvh;
-    z-index: 0;
-    pointer-events: none;
-    display: block;
-    opacity: 0.92;
-    transition: opacity 0.8s ease;
-  }
+  --ink: #ffffff;
+  --muted: #b3b3b3;
+  --soft: #7a7a7a;
 
-  /* Ambient radial glows behind content */
-  .ambient-glow {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 1;
-    background:
-      radial-gradient(circle at 15% 10%, rgba(124, 92, 255, 0.18), transparent 45%),
-      radial-gradient(circle at 85% 85%, rgba(255, 93, 158, 0.14), transparent 50%),
-      radial-gradient(circle at 50% 50%, rgba(90, 134, 255, 0.10), transparent 60%);
-  }
+  --green: #1ed760;
+  --green-strong: #1fdf64;
+  --green-dim: rgba(30, 215, 96, 0.12);
+  --red: #f15e6c;
 
-  /* ============================================================
-     MAIN APP WRAPPER (Responsive scaling)
-     ============================================================ */
-  .app-container {
-    position: relative;
-    z-index: 2;
-    width: 100%;
-    max-width: 680px;
-    margin: 0 auto;
-    padding-top: max(12px, var(--sat));
-    padding-bottom: calc(130px + var(--sab));
-    padding-left: max(14px, var(--sal));
-    padding-right: max(14px, var(--sar));
-    min-height: 100dvh;
-    display: flex;
-    flex-direction: column;
-  }
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
 
-  /* Top Bar */
-  .top-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 4px 16px;
-    gap: 12px;
-  }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: clamp(17px, 4.5vw, 20px);
-    font-weight: 700;
-    letter-spacing: -0.3px;
-  }
-  .brand-badge {
-    width: 34px;
-    height: 34px;
-    border-radius: 12px;
-    background: var(--aurora-gradient);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 6px 18px rgba(124, 92, 255, 0.4);
-    flex-shrink: 0;
-  }
-  .brand-badge svg { width: 18px; height: 18px; fill: #fff; }
-  
-  .top-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .status-chip {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 11px;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid var(--border-card);
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--muted);
-    backdrop-filter: blur(16px);
-  }
-  .pulse-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #4ade80;
-    box-shadow: 0 0 8px #4ade80;
-  }
-  .pulse-dot.offline {
-    background: #94a3b8;
-    box-shadow: none;
-  }
+  --radius: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --pill: 500px;
 
-  .icon-btn-top {
-    width: 36px;
-    height: 36px;
-    border-radius: 18px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid var(--border-card);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--ink);
-    cursor: pointer;
-    backdrop-filter: blur(14px);
-    transition: transform 0.15s, background 0.15s;
-  }
-  .icon-btn-top:active { transform: scale(0.92); }
-  .icon-btn-top svg { width: 17px; height: 17px; fill: currentColor; }
+  --nav-h: 64px;
+  --mini-h: 56px;
+  --app-max: 520px;
+}
 
-  /* ============================================================
-     WELCOME / HERO SCREEN (Without username)
-     ============================================================ */
-  .hero-card {
-    position: relative;
-    overflow: hidden;
-    border-radius: var(--radius-xl);
-    padding: clamp(22px, 6vw, 32px);
-    background: linear-gradient(145deg, rgba(32, 23, 49, 0.88), rgba(20, 15, 30, 0.82));
-    border: 1px solid var(--border-card);
-    box-shadow: var(--shadow-md);
-    backdrop-filter: blur(28px);
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-  .hero-card::before {
-    content: "";
-    position: absolute;
-    width: 280px;
-    height: 280px;
-    top: -120px;
-    right: -80px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(124, 92, 255, 0.25), transparent 70%);
-    pointer-events: none;
-  }
-  .hero-emblem {
-    width: clamp(62px, 16vw, 76px);
-    height: clamp(62px, 16vw, 76px);
-    border-radius: 50%;
-    background: var(--aurora-gradient);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 16px;
-    box-shadow: 0 10px 30px rgba(124, 92, 255, 0.45);
-    border: 3px solid rgba(255, 255, 255, 0.2);
-    position: relative;
-  }
-  .hero-emblem svg {
-    width: 32px;
-    height: 32px;
-    fill: #ffffff;
-  }
-  .hero-badge-tag {
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 1.4px;
-    color: var(--primary);
-    background: rgba(138, 108, 255, 0.15);
-    padding: 4px 10px;
-    border-radius: 12px;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-  }
-  .hero-title {
-    margin: 0;
-    font-size: clamp(23px, 6.5vw, 32px);
-    font-weight: 750;
-    letter-spacing: -0.6px;
-    line-height: 1.15;
-    background: linear-gradient(90deg, #ffffff 30%, #ffd1df 70%, #ffd0a0 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .hero-subtitle {
-    margin: 10px auto 0;
-    max-width: 440px;
-    font-size: clamp(12.5px, 3.6vw, 14.5px);
-    line-height: 1.5;
-    color: var(--muted);
-  }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-  /* PC connection card (only shown by the bundled Android app) */
-  .connect-card {
-    width: 100%;
-    margin-top: 18px;
-    padding: 13px 14px;
-    border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border-card);
-    text-align: left;
-  }
-  .connect-card[hidden] { display: none; }
-  .connect-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 9px;
-    gap: 10px;
-  }
-  .connect-title {
-    font-size: 10.5px;
-    font-weight: 800;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: var(--primary);
-  }
-  .connect-state {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--soft);
-  }
-  .connect-state.online { color: #5eead4; }
-  .connect-row { display: flex; gap: 8px; }
-  .connect-input {
-    flex: 1;
-    min-width: 0;
-    padding: 10px 12px;
-    border-radius: 12px;
-    background: rgba(0, 0, 0, 0.22);
-    border: 1px solid var(--border-card);
-    color: var(--ink);
-    font-family: inherit;
-    font-size: 12.5px;
-    outline: none;
-  }
-  .connect-input:focus { border-color: var(--primary); }
-  .connect-input::placeholder { color: var(--soft); }
-  .connect-btn {
-    flex: none;
-    padding: 0 15px;
-    border: none;
-    border-radius: 12px;
-    background: var(--aurora-gradient);
-    color: #160f22;
-    font-family: inherit;
-    font-size: 12.5px;
-    font-weight: 800;
-    cursor: pointer;
-  }
-  .connect-btn:disabled { opacity: 0.55; }
+html { color-scheme: dark; }
 
-  /* Quick Actions Grid */
-  .quick-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    width: 100%;
-    margin-top: 20px;
-  }
-  .quick-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border-card);
-    border-radius: var(--radius-md);
-    padding: 14px 13px;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 12px;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.15s;
-  }
-  .quick-card:active { transform: scale(0.97); }
-  .quick-icon-box {
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .quick-icon-box.purple { background: rgba(124, 92, 255, 0.22); color: #b6a2ff; }
-  .quick-icon-box.pink { background: rgba(255, 93, 158, 0.22); color: #ff8cb9; }
-  .quick-icon-box.green { background: rgba(46, 213, 115, 0.22); color: #5eead4; }
-  .quick-icon-box svg { width: 18px; height: 18px; fill: currentColor; }
-  .quick-title { font-size: 13.5px; font-weight: 700; color: #fff; margin: 0; }
-  .quick-desc { font-size: 11px; color: var(--muted); margin: 3px 0 0; }
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
 
-  /* ============================================================
-     SECTIONS & CARDS
-     ============================================================ */
-  .section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 8px 4px 12px;
-  }
-  .section-title {
-    font-size: clamp(17px, 4.8vw, 21px);
-    font-weight: 700;
-    letter-spacing: -0.3px;
-    margin: 0;
-  }
-  .pill-count {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--primary);
-    background: rgba(138, 108, 255, 0.16);
-    padding: 4px 9px;
-    border-radius: 12px;
-  }
+body.player-open { overflow: hidden; }
 
-  /* Search Box */
-  .search-wrap {
-    position: relative;
-    margin-bottom: 12px;
-  }
-  .search-input {
-    width: 100%;
-    padding: 12px 14px 12px 42px;
-    border-radius: var(--radius-md);
-    background: var(--bg-card);
-    border: 1px solid var(--border-card);
-    color: var(--ink);
-    font-size: 13.5px;
-    outline: none;
-    backdrop-filter: blur(20px);
-    transition: border-color 0.2s, background 0.2s;
-  }
-  .search-input:focus {
-    border-color: var(--primary);
-    background: rgba(38, 29, 54, 0.9);
-  }
-  .search-input::placeholder { color: var(--soft); }
-  .search-icon {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 18px;
-    height: 18px;
-    fill: var(--soft);
-    pointer-events: none;
-  }
+button, input { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
 
-  /* Track List */
-  .track-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-bottom: 16px;
-  }
-  .track-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    border-radius: var(--radius-md);
-    background: var(--bg-card);
-    border: 1px solid var(--border-card);
-    cursor: pointer;
-    transition: background 0.18s, transform 0.12s;
-    backdrop-filter: blur(18px);
-    width: 100%;
-    text-align: left;
-  }
-  .track-item:active { transform: scale(0.985); }
-  .track-item.playing {
-    background: rgba(124, 92, 255, 0.24);
-    border-color: rgba(124, 92, 255, 0.45);
-  }
-  .track-cover {
-    width: 44px;
-    height: 44px;
-    border-radius: 13px;
-    background: var(--primary-gradient);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    position: relative;
-    overflow: hidden;
-  }
-  .track-cover svg { width: 20px; height: 20px; fill: #fff; }
-  .track-info {
-    min-width: 0;
-    flex: 1;
-  }
-  .track-title {
-    font-size: 14px;
-    font-weight: 650;
-    color: var(--ink);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.3;
-  }
-  .track-artist {
-    font-size: 11.5px;
-    color: var(--muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-top: 2px;
-  }
-  .track-badge {
-    font-size: 9px;
-    font-weight: 750;
-    letter-spacing: 0.6px;
-    padding: 3px 6px;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--soft);
-    flex-shrink: 0;
-  }
-  .track-item.playing .track-badge {
-    background: var(--primary);
-    color: #fff;
-  }
+/* Ambient animated canvas: barely visible on pages, blurred behind the player */
+#bgVisualizer {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+body.player-open #bgVisualizer { opacity: 0.65; }
 
-  /* Playing Equalizer Animation inside track row */
-  .eq-bars {
-    display: none;
-    align-items: flex-end;
-    gap: 2.5px;
-    height: 14px;
-    flex-shrink: 0;
-  }
-  .track-item.playing .eq-bars { display: flex; }
-  .eq-bar {
-    width: 2.5px;
-    background: var(--primary);
-    border-radius: 2px;
-    animation: eqAnim 1.2s infinite ease-in-out;
-  }
-  .eq-bar:nth-child(1) { height: 6px; animation-delay: 0.1s; }
-  .eq-bar:nth-child(2) { height: 14px; animation-delay: 0.3s; }
-  .eq-bar:nth-child(3) { height: 9px; animation-delay: 0.2s; }
-  @keyframes eqAnim {
-    0%, 100% { transform: scaleY(0.4); }
-    50% { transform: scaleY(1); }
-  }
+.app-shell {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: var(--app-max);
+  margin: 0 auto;
+  min-height: 100dvh;
+  padding: max(10px, var(--sat)) max(16px, var(--sal)) calc(154px + var(--sab)) max(16px, var(--sar));
+}
 
-  /* Empty state */
-  .empty-state {
-    padding: 40px 20px;
-    border-radius: var(--radius-lg);
-    background: var(--bg-card);
-    border: 1px solid var(--border-card);
-    text-align: center;
-    backdrop-filter: blur(20px);
+@media (min-width: 560px) {
+  .app-shell {
+    border-left: 1px solid #141414;
+    border-right: 1px solid #141414;
   }
-  .empty-icon {
-    width: 58px;
-    height: 58px;
-    border-radius: 20px;
-    background: rgba(138, 108, 255, 0.16);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 14px;
-    color: var(--primary);
-  }
-  .empty-icon svg { width: 28px; height: 28px; fill: currentColor; }
-  .empty-state h3 { margin: 0; font-size: 16px; font-weight: 700; }
-  .empty-state p { margin: 8px auto 0; max-width: 320px; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+}
 
-  /* Live Stream Card */
-  .live-card {
-    position: relative;
-    border-radius: var(--radius-xl);
-    padding: clamp(18px, 5vw, 24px);
-    background: linear-gradient(145deg, rgba(29, 21, 38, 0.9), rgba(18, 14, 25, 0.9));
-    border: 1px solid var(--border-card);
-    box-shadow: var(--shadow-md);
-    backdrop-filter: blur(28px);
-    overflow: hidden;
-  }
-  .live-card-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-  }
-  .live-status-pill {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.8px;
-    padding: 5px 10px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--muted);
-  }
-  .live-status-pill.active {
-    background: rgba(255, 83, 118, 0.2);
-    color: #ff7d96;
-  }
-  .live-wave-box {
-    height: 140px;
-    margin: 10px 0 16px;
-    border-radius: var(--radius-md);
-    background: rgba(0, 0, 0, 0.28);
-    position: relative;
-    overflow: hidden;
-  }
-  #liveCanvas { width: 100%; height: 100%; display: block; }
-  
-  .btn-primary {
-    width: 100%;
-    padding: 15px;
-    border-radius: var(--radius-md);
-    border: 0;
-    background: var(--accent-gradient);
-    color: #fff;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-    box-shadow: 0 12px 28px -10px rgba(255, 93, 158, 0.6);
-    transition: transform 0.15s, opacity 0.2s;
-  }
-  .btn-primary:active { transform: scale(0.97); }
-  .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
-  .btn-primary svg { width: 18px; height: 18px; fill: currentColor; }
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0 16px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+}
+.brand-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.brand-mark svg { width: 17px; height: 17px; fill: currentColor; }
+.top-actions { display: flex; align-items: center; gap: 7px; }
+.status-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 104px;
+  padding: 6px 10px;
+  border-radius: var(--pill);
+  background: var(--surface);
+  border: 1px solid #242424;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.status-chip span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(30, 215, 96, 0.7);
+  flex-shrink: 0;
+}
+.pulse-dot.offline { background: #6b6b6b; box-shadow: none; }
+.icon-btn-top {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+.icon-btn-top:hover { background: var(--surface-2); }
+.icon-btn-top:active { transform: scale(0.92); }
+.icon-btn-top svg { width: 17px; height: 17px; fill: currentColor; }
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1ed760, #0a6b33);
+  color: #000;
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
 
-  /* ============================================================
-     DOCKED MINI-PLAYER (Floats above bottom nav)
-     ============================================================ */
-  .mini-player {
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%) translateY(140px);
-    bottom: calc(66px + var(--sab));
-    width: min(640px, calc(100% - 20px));
-    height: 60px;
-    border-radius: var(--radius-md);
-    background: var(--surface-elevated);
-    border: 1px solid var(--border-card);
-    box-shadow: var(--shadow-lg);
-    backdrop-filter: blur(28px);
-    z-index: 50;
-    display: flex;
-    align-items: center;
-    padding: 0 12px 0 8px;
-    gap: 10px;
-    cursor: pointer;
-    transition: transform 0.38s cubic-bezier(0.2, 0.9, 0.2, 1), opacity 0.25s;
-    opacity: 0;
-    overflow: hidden;
-  }
-  .mini-player.visible {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-  }
-  .mini-progress-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: rgba(255, 255, 255, 0.1);
-  }
-  .mini-progress-fill {
-    height: 100%;
-    width: 0%;
-    background: var(--primary);
-    border-radius: 0 2px 2px 0;
-  }
-  .mini-cover {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    background: var(--primary-gradient);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-  }
-  .mini-cover svg { width: 22px; height: 22px; fill: #fff; }
-  .mini-info {
-    flex: 1;
-    min-width: 0;
-  }
-  .mini-title {
-    font-size: 13.5px;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--ink);
-  }
-  .mini-artist {
-    font-size: 11px;
-    color: var(--muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-top: 1px;
-  }
-  .mini-controls {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-  }
-  .mini-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    border: 0;
-    background: transparent;
-    color: var(--ink);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: transform 0.15s;
-  }
-  .mini-btn:active { transform: scale(0.9); }
-  .mini-btn.play-btn {
-    background: var(--primary-gradient);
-    color: #fff;
-    box-shadow: 0 4px 14px rgba(124, 92, 255, 0.5);
-  }
-  .mini-btn svg { width: 18px; height: 18px; fill: currentColor; }
+/* ============================================================
+   HOME
+   ============================================================ */
+.view { animation: viewIn 0.24s ease both; }
+@keyframes viewIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
 
-  /* ============================================================
-     FULLSCREEN MOBILE PLAYER SHEET (Swipe / Expand)
-     ============================================================ */
-  .full-player {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    background: rgba(14, 10, 21, 0.96);
-    backdrop-filter: blur(40px);
-    display: flex;
-    flex-direction: column;
-    padding: max(16px, var(--sat)) max(20px, var(--sal)) max(24px, var(--sab)) max(20px, var(--sar));
-    transform: translateY(105%);
-    transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.05);
-    overflow-y: auto;
-  }
-  .full-player.open {
-    transform: translateY(0);
-  }
-  .full-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 48px;
-  }
-  .full-close-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 0;
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--ink);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-  }
-  .full-close-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; }
-  .full-heading {
-    font-size: 11px;
-    font-weight: 750;
-    letter-spacing: 1.2px;
-    color: var(--soft);
-    text-transform: uppercase;
-  }
-  .full-art-wrap {
-    flex: 1;
-    min-height: 200px;
-    max-height: 420px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 16px 0;
-  }
-  .full-art {
-    width: min(80vw, 320px);
-    height: min(80vw, 320px);
-    border-radius: var(--radius-xl);
-    background: var(--aurora-gradient);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: var(--shadow-glow), 0 20px 50px rgba(0,0,0,0.6);
-    position: relative;
-    overflow: hidden;
-  }
-  .full-art svg { width: 80px; height: 80px; fill: #ffffff; }
+.home-hero { padding: 4px 0 6px; }
+.home-kicker {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+.home-title {
+  margin: 6px 0 0;
+  font-size: clamp(28px, 8vw, 34px);
+  font-weight: 800;
+  letter-spacing: -1.3px;
+  line-height: 1.08;
+}
 
-  .full-meta {
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .full-meta-text { min-width: 0; flex: 1; padding-right: 12px; }
-  .full-title {
-    font-size: clamp(19px, 5.5vw, 24px);
-    font-weight: 750;
-    color: #fff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .full-artist {
-    font-size: clamp(13px, 3.8vw, 15px);
-    color: var(--muted);
-    margin-top: 3px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .full-fav-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: 0;
-    background: transparent;
-    color: var(--soft);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-  }
-  .full-fav-btn.active { color: #ff5d9e; }
-  .full-fav-btn svg { width: 22px; height: 22px; fill: currentColor; }
+.connect-card {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid #242424;
+}
+.connect-card[hidden] { display: none; }
+.connect-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.connect-title {
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+.connect-state { color: var(--soft); font-size: 10.5px; font-weight: 700; }
+.connect-state.online { color: var(--green); }
+.connect-row { display: flex; gap: 8px; }
+.connect-input {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  padding: 0 11px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 12px;
+  outline: none;
+}
+.connect-input:focus { border-color: var(--border-strong); }
+.connect-input::placeholder { color: var(--soft); }
+.connect-btn {
+  flex: none;
+  height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--green);
+  color: #000;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.connect-btn:disabled { opacity: 0.55; }
 
-  /* Scrub Range Slider */
-  .scrub-wrap {
-    margin-bottom: 20px;
-  }
-  .scrub-slider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 24px;
-    background: transparent;
-    cursor: pointer;
-    margin: 0;
-  }
-  .scrub-slider::-webkit-slider-runnable-track {
-    height: 5px;
-    border-radius: 4px;
-    background: linear-gradient(90deg, var(--primary) var(--p, 0%), rgba(255, 255, 255, 0.12) var(--p, 0%));
-  }
-  .scrub-slider::-moz-range-track {
-    height: 5px;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.12);
-  }
-  .scrub-slider::-moz-range-progress {
-    height: 5px;
-    border-radius: 4px;
-    background: var(--primary);
-  }
-  .scrub-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 16px;
-    height: 16px;
-    margin-top: -5.5px;
-    border-radius: 50%;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-    border: 3px solid var(--primary);
-  }
-  .scrub-slider::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #fff;
-    border: 3px solid var(--primary);
-  }
-  .time-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    color: var(--soft);
-    margin-top: 4px;
-    font-variant-numeric: tabular-nums;
-  }
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 18px;
+}
+.quick-tile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 60px;
+  padding: 0 10px 0 0;
+  border: 0;
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+  text-align: left;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.12s;
+}
+.quick-tile:hover { background: var(--surface-2); }
+.quick-tile:active { transform: scale(0.98); }
+.quick-art {
+  width: 60px;
+  height: 60px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.quick-art svg { width: 23px; height: 23px; fill: currentColor; }
+.quick-art.library { background: linear-gradient(135deg, #1ed760, #0b6b34); }
+.quick-art.phone { background: linear-gradient(135deg, #509bf5, #1c3f6e); }
+.quick-art.fav { background: linear-gradient(135deg, #8e66ff, #3d1e8f); }
+.quick-art.live { background: linear-gradient(135deg, #e8115b, #7a0b32); }
+.quick-copy { min-width: 0; }
+.quick-title {
+  font-size: 12.5px;
+  font-weight: 800;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.quick-desc {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  /* Full Player Media Controls */
-  .full-controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    max-width: 380px;
-    margin: 0 auto 20px;
-    width: 100%;
-  }
-  .ctrl-btn {
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    border: 0;
-    background: transparent;
-    color: var(--ink);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: transform 0.15s, color 0.15s;
-  }
-  .ctrl-btn:active { transform: scale(0.9); }
-  .ctrl-btn.active { color: var(--primary); }
-  .ctrl-btn svg { width: 22px; height: 22px; fill: currentColor; }
-  .ctrl-btn.play-main {
-    width: 66px;
-    height: 66px;
-    background: var(--primary-gradient);
-    color: #fff;
-    box-shadow: 0 10px 28px rgba(124, 92, 255, 0.55);
-  }
-  .ctrl-btn.play-main svg { width: 28px; height: 28px; fill: currentColor; }
+.section { margin-top: 28px; }
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.section-title {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.7px;
+}
+.section-link {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.section-link:hover { color: var(--ink); text-decoration: underline; }
 
-  /* Volume Bar */
-  .volume-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    max-width: 320px;
-    margin: 0 auto 10px;
-    width: 100%;
-    color: var(--soft);
-  }
-  .volume-row svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; }
-  .vol-slider {
-    flex: 1;
-    -webkit-appearance: none;
-    appearance: none;
-    height: 20px;
-    background: transparent;
-    cursor: pointer;
-  }
-  .vol-slider::-webkit-slider-runnable-track {
-    height: 4px;
-    border-radius: 3px;
-    background: rgba(255, 255, 255, 0.15);
-  }
-  .vol-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 12px;
-    height: 12px;
-    margin-top: -4px;
-    border-radius: 50%;
-    background: #fff;
-  }
+.card-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 0 0 6px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+.card-row::-webkit-scrollbar { display: none; }
+.media-card {
+  flex: 0 0 136px;
+  width: 136px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  scroll-snap-align: start;
+}
+.media-art {
+  position: relative;
+  width: 136px;
+  height: 136px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease;
+}
+.media-card:hover .media-art { transform: translateY(-3px); }
+.cover-letter {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: -2px;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+.media-art .cover-letter { font-size: 46px; }
+.media-art::after,
+.full-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 78% 18%, rgba(255, 255, 255, 0.28), transparent 38%),
+    linear-gradient(145deg, transparent 35%, rgba(0, 0, 0, 0.25));
+  pointer-events: none;
+}
+.card-play {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.2s, transform 0.2s;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+}
+.card-play svg { width: 17px; height: 17px; fill: currentColor; margin-left: 2px; }
+.media-card:hover .card-play { opacity: 1; transform: none; }
+@media (hover: none) {
+  .card-play { opacity: 1; transform: none; }
+}
+.media-title {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.media-sub {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  /* Visualizer Selector Pill */
-  .vis-selector-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 10px;
-  }
-  .vis-pill-btn {
-    padding: 6px 12px;
-    border-radius: 14px;
-    border: 1px solid var(--border-card);
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--muted);
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-  }
-  .vis-pill-btn.active {
-    background: var(--primary);
-    color: #fff;
-    border-color: var(--primary);
-  }
+.playlist-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.playlist-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 128px;
+  padding: 14px;
+  border: 0;
+  border-radius: var(--radius);
+  color: #fff;
+  text-align: left;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.16s;
+}
+.playlist-card:active { transform: scale(0.98); }
+.playlist-card.p-green { background: linear-gradient(145deg, #1ed760, #074d25); }
+.playlist-card.p-purple { background: linear-gradient(145deg, #8e66ff, #2d1466); }
+.playlist-cover {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: auto;
+}
+.playlist-cover svg { width: 19px; height: 19px; fill: currentColor; }
+.playlist-card b {
+  margin-top: 16px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+}
+.playlist-card span {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 10.5px;
+  font-weight: 600;
+}
 
-  /* ============================================================
-     BOTTOM NAVIGATION BAR (Material 3 Mobile)
-     ============================================================ */
-  .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: calc(62px + var(--sab));
-    padding-bottom: var(--sab);
-    background: rgba(18, 14, 25, 0.94);
-    border-top: 1px solid var(--border-card);
-    backdrop-filter: blur(28px);
-    z-index: 40;
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-  }
-  .nav-item {
-    flex: 1;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    border: 0;
-    background: transparent;
-    color: var(--soft);
-    cursor: pointer;
-    transition: color 0.18s;
-  }
-  .nav-item.active { color: var(--primary); }
-  .nav-icon {
-    width: 22px;
-    height: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-  }
-  .nav-icon svg { width: 20px; height: 20px; fill: currentColor; }
-  .nav-label { font-size: 10px; font-weight: 700; letter-spacing: 0.2px; }
+/* ============================================================
+   LIBRARY
+   ============================================================ */
+.library-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0 12px;
+}
+.library-title {
+  margin: 0;
+  font-size: clamp(24px, 7vw, 28px);
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+.add-btn {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+.add-btn:hover { background: #2f2f2f; }
+.add-btn:active { transform: scale(0.92); }
+.add-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; }
 
-  /* Toast Notification */
-  .toast {
-    position: fixed;
-    left: 50%;
-    bottom: calc(140px + var(--sab));
-    transform: translate(-50%, 20px);
-    z-index: 200;
-    background: rgba(28, 20, 39, 0.95);
-    color: #fff;
-    padding: 10px 18px;
-    border-radius: var(--radius-md);
-    font-size: 12px;
-    font-weight: 600;
-    opacity: 0;
-    pointer-events: none;
-    transition: 0.25s cubic-bezier(0.2, 0.9, 0.2, 1);
-    box-shadow: var(--shadow-lg);
-    border: 1px solid var(--border-card);
-    max-width: 90vw;
-    text-align: center;
-  }
-  .toast.show {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
+.chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 0 12px;
+  scrollbar-width: none;
+}
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  flex: none;
+  padding: 7px 14px;
+  border: 0;
+  border-radius: var(--pill);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.chip:hover { background: #303030; }
+.chip.active { background: var(--ink); color: #000; }
 
-  /* File input hidden */
-  #phoneFileInput { display: none; }
+.search-wrap { position: relative; margin: 2px 0 12px; }
+.search-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 42px 0 44px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 13.5px;
+  outline: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+.search-input:focus { background: #2a2a2a; border-color: var(--border-strong); }
+.search-input::placeholder { color: var(--muted); }
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+.search-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; }
+.search-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  width: 28px;
+  height: 28px;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.search-wrap.has-value .search-clear { display: flex; }
+.search-clear:hover { color: var(--ink); }
+.search-clear svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
+
+.list-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 2px 4px 6px;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.track-list { display: flex; flex-direction: column; }
+.track-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 7px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.14s;
+}
+.track-item:hover { background: var(--surface); }
+.track-item.playing { background: rgba(255, 255, 255, 0.04); }
+.track-cover {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.track-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.16), transparent 48%, rgba(0, 0, 0, 0.22));
+}
+.track-cover .cover-letter { font-size: 20px; letter-spacing: -0.5px; }
+.track-info { min-width: 0; flex: 1; }
+.track-title {
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.track-artist {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.track-item.playing .track-title { color: var(--green); }
+.track-badge {
+  flex: none;
+  padding: 2px 5px;
+  border: 1px solid #303030;
+  border-radius: 3px;
+  color: var(--soft);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+.track-fav {
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 50%;
+  color: var(--soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.track-fav:hover { color: var(--ink); background: rgba(255, 255, 255, 0.05); }
+.track-fav.active { color: var(--green); }
+.track-fav svg { width: 17px; height: 17px; fill: currentColor; }
+
+.eq-bars {
+  display: none;
+  align-items: flex-end;
+  gap: 2px;
+  height: 13px;
+  flex: none;
+}
+.track-item.playing .eq-bars { display: flex; }
+.track-item.playing .track-badge { display: none; }
+.eq-bar {
+  width: 2.5px;
+  border-radius: 2px;
+  background: var(--green);
+  animation: eqAnim 1.1s infinite ease-in-out;
+}
+.eq-bar:nth-child(1) { height: 6px; animation-delay: 0.1s; }
+.eq-bar:nth-child(2) { height: 13px; animation-delay: 0.28s; }
+.eq-bar:nth-child(3) { height: 9px; animation-delay: 0.18s; }
+@keyframes eqAnim {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+
+.empty-state {
+  margin-top: 10px;
+  padding: 44px 24px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  text-align: center;
+}
+.empty-icon {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: var(--green-dim);
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.empty-icon svg { width: 27px; height: 27px; fill: currentColor; }
+.empty-state h3 { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: -0.4px; }
+.empty-state p {
+  margin: 8px auto 0;
+  max-width: 300px;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+.empty-add {
+  margin-top: 18px;
+  height: 40px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: var(--pill);
+  background: var(--green);
+  color: #000;
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.empty-add:active { transform: scale(0.97); }
+
+/* ============================================================
+   LIVE
+   ============================================================ */
+.live-page { padding-top: 4px; }
+.live-kicker {
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+}
+.live-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 6px 0 16px;
+}
+.live-status-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  padding: 6px 10px;
+  border-radius: var(--pill);
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+}
+.live-status-pill.active { background: var(--green-dim); color: var(--green); }
+.live-hero {
+  padding: 18px;
+  border: 1px solid #242424;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, #18241b 0%, var(--bg-elevated) 62%);
+}
+.live-wave-box {
+  height: 170px;
+  margin-bottom: 20px;
+  border-radius: var(--radius);
+  background: #0b0b0b;
+  overflow: hidden;
+}
+#liveCanvas { width: 100%; height: 100%; display: block; }
+.live-heading {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  line-height: 1.12;
+}
+.live-sub {
+  margin: 8px 0 20px;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+.btn-primary {
+  width: 100%;
+  height: 48px;
+  border: 0;
+  border-radius: var(--pill);
+  background: var(--green);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s;
+}
+.btn-primary:hover { background: var(--green-strong); }
+.btn-primary:active { transform: scale(0.97); }
+.btn-primary:disabled { background: var(--surface-2); color: var(--soft); cursor: not-allowed; }
+.btn-primary svg { width: 17px; height: 17px; fill: currentColor; }
+
+/* ============================================================
+   MINI PLAYER
+   ============================================================ */
+.mini-player {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--nav-h) + var(--sab));
+  z-index: 60;
+  width: 100%;
+  max-width: var(--app-max);
+  height: var(--mini-h);
+  padding: 0 10px 0 8px;
+  background: #181818;
+  border-top: 1px solid #282828;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transform: translate(-50%, 130%);
+  transition: transform 0.32s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+.mini-player.visible { transform: translate(-50%, 0); }
+.mini-progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #2a2a2a;
+}
+.mini-progress-fill { width: 0; height: 100%; background: var(--green); }
+.mini-cover {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.mini-cover .cover-letter { font-size: 18px; letter-spacing: -0.5px; }
+.mini-info { min-width: 0; flex: 1; }
+.mini-title {
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mini-artist {
+  margin-top: 1px;
+  color: var(--muted);
+  font-size: 10.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mini-controls { display: flex; align-items: center; gap: 2px; flex: none; }
+.mini-btn {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.mini-btn:hover { color: var(--green); }
+.mini-btn:active { transform: scale(0.9); }
+.mini-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+/* ============================================================
+   FULLSCREEN PLAYER
+   ============================================================ */
+.full-player {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: 100;
+  width: 100%;
+  max-width: var(--app-max);
+  padding: max(12px, var(--sat)) max(20px, var(--sal)) max(20px, var(--sab)) max(20px, var(--sar));
+  background-color: #000;
+  background-image: linear-gradient(180deg, #202020 0%, #121212 56%, #000 100%);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  transform: translate(-50%, 105%);
+  transition: transform 0.38s cubic-bezier(0.18, 0.89, 0.32, 1.03);
+}
+.full-player.open { transform: translate(-50%, 0); }
+.full-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  height: 46px;
+  flex: none;
+}
+.full-close-btn {
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.full-close-btn:hover { background: rgba(0, 0, 0, 0.4); }
+.full-close-btn svg { width: 21px; height: 21px; stroke: currentColor; fill: none; }
+.full-context {
+  min-width: 0;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+}
+.full-context b {
+  display: block;
+  margin-top: 3px;
+  color: var(--ink);
+  font-size: 10px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.full-art-wrap {
+  flex: 1;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 0;
+}
+.full-art {
+  position: relative;
+  width: min(76vw, 340px);
+  height: min(76vw, 340px);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+}
+.full-art .cover-letter { font-size: min(21vw, 98px); letter-spacing: -4px; }
+.full-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 6px;
+}
+.full-meta-text { min-width: 0; flex: 1; }
+.full-title {
+  color: var(--ink);
+  font-size: clamp(20px, 6vw, 25px);
+  font-weight: 800;
+  letter-spacing: -0.7px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.full-artist {
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.full-fav-btn {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.full-fav-btn:hover { color: var(--ink); }
+.full-fav-btn.active { color: var(--green); }
+.full-fav-btn svg { width: 24px; height: 24px; fill: currentColor; }
+
+.scrub-wrap { margin: 10px 0 6px; }
+.scrub-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 22px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.scrub-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--green) var(--p, 0%), rgba(255, 255, 255, 0.2) var(--p, 0%));
+}
+.scrub-slider::-moz-range-track { height: 4px; border-radius: 4px; background: rgba(255, 255, 255, 0.2); }
+.scrub-slider::-moz-range-progress { height: 4px; border-radius: 4px; background: var(--green); }
+.scrub-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -4px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.scrub-slider:hover::-webkit-slider-thumb,
+.scrub-slider:active::-webkit-slider-thumb { opacity: 1; }
+.scrub-slider::-moz-range-thumb { width: 12px; height: 12px; border: 0; border-radius: 50%; background: #fff; }
+.time-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.full-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 360px;
+  margin: 10px auto 14px;
+}
+.ctrl-btn {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s, color 0.15s;
+}
+.ctrl-btn:active { transform: scale(0.9); }
+.ctrl-btn active { color: var(--green); }
+.ctrl-btn.active { color: var(--green); }
+.ctrl-btn.active::after {
+  content: "";
+  position: absolute;
+  bottom: 1px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: var(--green);
+}
+.ctrl-btn svg { width: 21px; height: 21px; fill: currentColor; }
+.ctrl-btn.play-main {
+  width: 64px;
+  height: 64px;
+  background: #fff;
+  color: #000;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4);
+}
+.ctrl-btn.play-main:hover { transform: scale(1.04); }
+.ctrl-btn.play-main svg { width: 26px; height: 26px; }
+
+.volume-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto 12px;
+  color: rgba(255, 255, 255, 0.55);
+}
+.volume-row svg { width: 17px; height: 17px; flex: none; fill: currentColor; }
+.vol-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 18px;
+  background: transparent;
+  cursor: pointer;
+}
+.vol-slider::-webkit-slider-runnable-track { height: 4px; border-radius: 3px; background: rgba(255, 255, 255, 0.2); }
+.vol-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: #fff;
+}
+.vol-slider::-moz-range-track { height: 4px; border-radius: 3px; background: rgba(255, 255, 255, 0.2); }
+.vol-slider::-moz-range-thumb { width: 12px; height: 12px; border: 0; border-radius: 50%; background: #fff; }
+
+.vis-selector-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 8px;
+}
+.vis-pill-btn {
+  padding: 6px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--pill);
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--ink);
+  font-size: 10.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.vis-pill-btn.active { background: #fff; color: #000; border-color: #fff; }
+
+/* ============================================================
+   BOTTOM NAV
+   ============================================================ */
+.bottom-nav {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 50;
+  width: 100%;
+  max-width: var(--app-max);
+  height: calc(var(--nav-h) + var(--sab));
+  padding-bottom: var(--sab);
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.94);
+  border-top: 1px solid #1c1c1c;
+  backdrop-filter: blur(24px);
+  display: flex;
+  align-items: stretch;
+}
+.nav-item {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--soft);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: color 0.16s;
+}
+.nav-item:hover { color: var(--muted); }
+.nav-item.active { color: var(--ink); }
+.nav-icon {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nav-icon svg { width: 22px; height: 22px; fill: currentColor; }
+.nav-item.active .nav-icon::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: var(--green);
+}
+.nav-label { font-size: 9.5px; font-weight: 700; letter-spacing: 0.1px; }
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--nav-h) + var(--mini-h) + 18px + var(--sab));
+  z-index: 200;
+  max-width: 88vw;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: #fff;
+  color: #000;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 14px);
+  transition: opacity 0.22s, transform 0.22s;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+#phoneFileInput { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
 </style>
 </head>
 <body>
-
-<!-- FULL-BLEED BACKGROUND VISUALIZER -->
 <canvas id="bgVisualizer"></canvas>
-<div class="ambient-glow"></div>
 
-<!-- APP WRAPPER -->
-<div class="app-container">
-
-  <!-- TOP HEADER -->
-  <header class="top-bar">
+<div class="app-shell">
+  <header class="topbar">
     <div class="brand">
-      <div class="brand-badge">
+      <div class="brand-mark">
         <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
       </div>
-      <span>Aurora Music</span>
+      <span>Aurora</span>
     </div>
     <div class="top-actions">
       <div class="status-chip" id="connectionChip">
-        <div class="pulse-dot" id="connectionDot"></div>
+        <span class="pulse-dot" id="connectionDot"></span>
         <span id="connectionText">Wi-Fi</span>
       </div>
-      <button class="icon-btn-top" id="visModeToggle" title="Стиль визуализатора">
+      <button class="icon-btn-top" id="visModeToggle" title="Стиль визуализатора" aria-label="Стиль визуализатора">
         <svg viewBox="0 0 24 24"><rect x="3" y="10" width="3" height="10" rx="1.5"/><rect x="8.5" y="4" width="3" height="16" rx="1.5"/><rect x="14" y="8" width="3" height="12" rx="1.5"/><rect x="19.5" y="12" width="3" height="8" rx="1.5"/></svg>
       </button>
+      <div class="avatar" aria-hidden="true">A</div>
     </div>
   </header>
 
-  <!-- ==================== VIEW 1: HOME (WELCOME SCREEN) ==================== -->
-  <main id="viewHome">
-    <!-- HERO CARD (WITHOUT USERNAME) -->
-    <div class="hero-card">
-      <div class="hero-emblem">
-        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 7.5 12 7.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5zm0-5.5c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1z"/></svg>
-      </div>
-      <span class="hero-badge-tag">Музыкальное пространство</span>
-      <h1 class="hero-title">Добро пожаловать</h1>
-      <p class="hero-subtitle">
-        Слушайте треки с компьютера, открывайте файлы с телефона или транслируйте звук в реальном времени.
-      </p>
+  <!-- HOME -->
+  <main id="viewHome" class="view">
+    <div class="home-hero">
+      <div class="home-kicker" id="homeGreeting">Добрый вечер</div>
+      <h1 class="home-title">Что послушаем?</h1>
+    </div>
 
-      <div class="connect-card" id="connectCard" hidden>
-        <div class="connect-head">
-          <span class="connect-title">Подключение к ПК</span>
-          <span class="connect-state" id="connectState">не подключено</span>
-        </div>
-        <div class="connect-row">
-          <input class="connect-input" id="serverInput" type="url" inputmode="url"
-                 autocomplete="off" spellcheck="false" placeholder="http://192.168.1.215:8737">
-          <button class="connect-btn" id="btnConnect" type="button">Подключить</button>
-        </div>
+    <div class="connect-card" id="connectCard" hidden>
+      <div class="connect-head">
+        <span class="connect-title">Подключение к ПК</span>
+        <span class="connect-state" id="connectState">не подключено</span>
       </div>
+      <div class="connect-row">
+        <input class="connect-input" id="serverInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="192.168.1.215:8737">
+        <button class="connect-btn" id="btnConnect" type="button">Подключить</button>
+      </div>
+    </div>
 
-      <div class="quick-grid">
-        <div class="quick-card" id="btnQuickLibrary">
-          <div class="quick-icon-box purple">
+    <div class="quick-grid">
+      <button class="quick-tile" id="btnQuickLibrary" type="button">
+        <div class="quick-art library">
+          <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+        </div>
+        <div class="quick-copy">
+          <div class="quick-title">Медиатека</div>
+          <div class="quick-desc" id="quickCountText">Коллекция с ПК</div>
+        </div>
+      </button>
+
+      <button class="quick-tile" id="btnQuickPhone" type="button">
+        <div class="quick-art phone">
+          <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5" stroke="currentColor" stroke-linecap="round"/></svg>
+        </div>
+        <div class="quick-copy">
+          <div class="quick-title">С телефона</div>
+          <div class="quick-desc">Файлы</div>
+        </div>
+      </button>
+
+      <button class="quick-tile" id="btnQuickFav" type="button">
+        <div class="quick-art fav">
+          <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </div>
+        <div class="quick-copy">
+          <div class="quick-title">Избранное</div>
+          <div class="quick-desc" id="quickFavText">Ваши треки</div>
+        </div>
+      </button>
+
+      <button class="quick-tile" id="btnQuickLive" type="button">
+        <div class="quick-art live">
+          <svg viewBox="0 0 24 24"><path d="M4.93 4.93a10 10 0 0 0 0 14.14M7.76 7.76a6 6 0 0 0 0 8.48M12 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0M16.24 7.76a6 6 0 0 1 0 8.48M19.07 4.93a10 10 0 0 1 0 14.14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div class="quick-copy">
+          <div class="quick-title">Эфир</div>
+          <div class="quick-desc" id="quickLiveStatus">Звук с ПК</div>
+        </div>
+      </button>
+    </div>
+
+    <section class="section" id="homeRecentSection">
+      <div class="section-head">
+        <h2 class="section-title">Недавно добавленные</h2>
+        <button class="section-link" id="homeSeeAll" type="button">Все</button>
+      </div>
+      <div class="card-row" id="homeRecent"></div>
+    </section>
+
+    <section class="section" id="homeFavsSection">
+      <div class="section-head">
+        <h2 class="section-title">Ваше избранное</h2>
+        <button class="section-link" id="homeSeeFavs" type="button">Все</button>
+      </div>
+      <div class="card-row" id="homeFavs"></div>
+    </section>
+
+    <section class="section" id="homePlaylistsSection">
+      <div class="section-head">
+        <h2 class="section-title">Ваши плейлисты</h2>
+      </div>
+      <div class="playlist-grid">
+        <button class="playlist-card p-green" id="homeAllPlaylist" type="button">
+          <div class="playlist-cover">
             <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
           </div>
-          <div>
-            <div class="quick-title">Медиатека</div>
-            <div class="quick-desc" id="quickCountText">Коллекция с ПК</div>
+          <b>Все треки</b>
+          <span id="homeAllCount">0 треков</span>
+        </button>
+        <button class="playlist-card p-purple" id="homeFavPlaylist" type="button">
+          <div class="playlist-cover">
+            <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
           </div>
-        </div>
-
-        <div class="quick-card" id="btnQuickPhone">
-          <div class="quick-icon-box green">
-            <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5" stroke="currentColor" stroke-linecap="round"/></svg>
-          </div>
-          <div>
-            <div class="quick-title">С телефона</div>
-            <div class="quick-desc">Открыть свои файлы</div>
-          </div>
-        </div>
-
-        <div class="quick-card" id="btnQuickLive" style="grid-column: 1 / -1;">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div class="quick-icon-box pink">
-              <svg viewBox="0 0 24 24"><path d="M4.93 4.93a10 10 0 0 0 0 14.14M7.76 7.76a6 6 0 0 0 0 8.48M12 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0M16.24 7.76a6 6 0 0 1 0 8.48M19.07 4.93a10 10 0 0 1 0 14.14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            </div>
-            <div>
-              <div class="quick-title">Прямой эфир</div>
-              <div class="quick-desc" id="quickLiveStatus">Системный звук Windows</div>
-            </div>
-          </div>
-        </div>
+          <b>Избранное</b>
+          <span id="homeFavCount">0 треков</span>
+        </button>
       </div>
-    </div>
+    </section>
   </main>
 
-  <!-- ==================== VIEW 2: LIBRARY / PLAYLIST ==================== -->
-  <main id="viewLibrary" hidden>
-    <div class="section-header">
-      <h2 class="section-title">Плейлист</h2>
-      <span class="pill-count" id="libCount">0 треков</span>
+  <!-- LIBRARY / SEARCH -->
+  <main id="viewLibrary" class="view" hidden>
+    <div class="library-head">
+      <h1 class="library-title" id="libraryTitle">Ваша медиатека</h1>
+      <button class="add-btn" id="navPhone" aria-label="Добавить музыку с телефона" title="Добавить с телефона">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
     </div>
 
-    <div class="search-wrap">
-      <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" fill="none" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      <input type="text" class="search-input" id="searchInput" placeholder="Поиск треков или артистов...">
+    <div class="chips" id="libraryChips">
+      <button class="chip active" type="button" data-filter="all">Все</button>
+      <button class="chip" type="button" data-filter="favs">Избранное</button>
+      <button class="chip" type="button" data-filter="phone">С телефона</button>
+    </div>
+
+    <div class="search-wrap" id="searchWrap">
+      <span class="search-icon">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </span>
+      <input class="search-input" id="searchInput" type="text" autocomplete="off" placeholder="Треки, исполнители...">
+      <button class="search-clear" id="searchClear" type="button" aria-label="Очистить поиск">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="list-meta">
+      <span id="libCount">0 треков</span>
+      <span>Недавно добавленные</span>
     </div>
 
     <div class="track-list" id="trackList"></div>
@@ -1135,94 +1412,77 @@
       <div class="empty-icon">
         <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
       </div>
-      <h3>Здесь пока тихо</h3>
-      <p>Выберите папку с музыкой на ПК или нажмите «С телефона», чтобы открыть треки из памяти устройства.</p>
+      <h3>Пока пусто</h3>
+      <p>Подключите компьютер в разделе «Главная» или добавьте музыку из памяти телефона.</p>
+      <button class="empty-add" id="emptyAddBtn" type="button">Выбрать файлы</button>
     </div>
   </main>
 
-  <!-- ==================== VIEW 3: LIVE STREAM ==================== -->
-  <main id="viewLive" hidden>
-    <div class="live-card">
-      <div class="live-card-top">
-        <span style="font-size:11px; font-weight:800; letter-spacing:1px; color:#c7b6df;">СИСТЕМНЫЙ ЗВУК</span>
+  <!-- LIVE -->
+  <main id="viewLive" class="view" hidden>
+    <div class="live-page">
+      <div class="live-kicker">LUMEN LIVE</div>
+      <div class="live-head-row">
+        <h1 class="library-title">Прямой эфир</h1>
         <span class="live-status-pill" id="livePill">ОФЛАЙН</span>
       </div>
-
-      <div class="live-wave-box">
-        <canvas id="liveCanvas"></canvas>
+      <div class="live-hero">
+        <div class="live-wave-box"><canvas id="liveCanvas"></canvas></div>
+        <h2 class="live-heading" id="liveHeading">Эфир выключен</h2>
+        <p class="live-sub" id="liveSub">Запустите захват звука в Lumen на компьютере — и слушайте системное аудио на телефоне без проводов.</p>
+        <button class="btn-primary" id="btnLiveAction" type="button" disabled>
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <span id="btnLiveActionText">Слушать эфир</span>
+        </button>
       </div>
-
-      <div style="margin-bottom:16px;">
-        <h2 style="margin:0; font-size:20px; font-weight:700;" id="liveHeading">Эфир выключен</h2>
-        <p style="margin:6px 0 0; font-size:12.5px; color:var(--muted); line-height:1.5;" id="liveSub">
-          Запустите захват звука в Lumen на компьютере — и слушайте системное аудио на телефоне без проводов.
-        </p>
-      </div>
-
-      <button class="btn-primary" id="btnLiveAction" disabled>
-        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        <span id="btnLiveActionText">Слушать эфир</span>
-      </button>
     </div>
   </main>
-
 </div>
 
-<!-- ============================================================
-     DOCKED MINI-PLAYER (Floats above bottom nav)
-     ============================================================ -->
+<!-- MINI PLAYER -->
 <div class="mini-player" id="miniPlayer">
-  <div class="mini-progress-bar">
-    <div class="mini-progress-fill" id="miniProgressFill"></div>
-  </div>
-  <div class="mini-cover" id="miniCover">
-    <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
-  </div>
+  <div class="mini-progress-bar"><div class="mini-progress-fill" id="miniProgressFill"></div></div>
+  <div class="mini-cover" id="miniCover"><span class="cover-letter">A</span></div>
   <div class="mini-info" id="miniInfoArea">
     <div class="mini-title" id="miniTitle">Ничего не играет</div>
     <div class="mini-artist" id="miniArtist">Выберите трек</div>
   </div>
   <div class="mini-controls">
-    <button class="mini-btn play-btn" id="miniPlayBtn" aria-label="Воспроизведение">
-      <svg id="miniPlayIcon" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72L9.5 4.28A1 1 0 0 0 8 5.14z"/></svg>
+    <button class="mini-btn" id="miniPlayBtn" type="button" aria-label="Воспроизведение">
+      <svg viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72L9.5 4.28A1 1 0 0 0 8 5.14z"/></svg>
     </button>
-    <button class="mini-btn" id="miniNextBtn" aria-label="Следующий">
+    <button class="mini-btn" id="miniNextBtn" type="button" aria-label="Следующий трек">
       <svg viewBox="0 0 24 24"><path d="M6 17.5a1 1 0 0 0 1.55.83l7.95-5.5v4.67a1 1 0 0 0 2 0v-11a1 1 0 0 0-2 0v4.67L7.55 5.67A1 1 0 0 0 6 6.5v11z"/></svg>
     </button>
   </div>
 </div>
 
-<!-- ============================================================
-     FULLSCREEN MOBILE PLAYER SHEET (Expandable)
-     ============================================================ -->
+<!-- FULL PLAYER -->
 <div class="full-player" id="fullPlayer">
   <div class="full-top">
-    <button class="full-close-btn" id="fullCloseBtn" aria-label="Закрыть">
-      <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    <button class="full-close-btn" id="fullCloseBtn" type="button" aria-label="Свернуть плеер">
+      <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
-    <div class="full-heading">Сейчас играет</div>
-    <button class="full-close-btn" id="fullVisBtn" title="Сменить визуализатор">
-      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="10" width="3" height="10" rx="1.5"/><rect x="8.5" y="4" width="3" height="16" rx="1.5"/><rect x="14" y="8" width="3" height="12" rx="1.5"/><rect x="19.5" y="12" width="3" height="8" rx="1.5"/></svg>
+    <div class="full-context">Играет из<b>Ваша медиатека</b></div>
+    <button class="full-close-btn" id="fullVisBtn" type="button" title="Сменить визуализатор" aria-label="Сменить визуализатор">
+      <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="3" y="10" width="3" height="10" rx="1.5"/><rect x="8.5" y="4" width="3" height="16" rx="1.5"/><rect x="14" y="8" width="3" height="12" rx="1.5"/><rect x="19.5" y="12" width="3" height="8" rx="1.5"/></svg>
     </button>
   </div>
 
   <div class="full-art-wrap">
-    <div class="full-art" id="fullArt">
-      <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
-    </div>
+    <div class="full-art" id="fullArt"><span class="cover-letter">A</span></div>
   </div>
 
   <div class="full-meta">
     <div class="full-meta-text">
       <div class="full-title" id="fullTitle">Ничего не играет</div>
-      <div class="full-artist" id="fullArtist">Выберите аудиофайл</div>
+      <div class="full-artist" id="fullArtist">Выберите трек</div>
     </div>
-    <button class="full-fav-btn" id="fullFavBtn">
-      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+    <button class="full-fav-btn" id="fullFavBtn" type="button" aria-label="В избранное" aria-pressed="false">
+      <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
     </button>
   </div>
 
-  <!-- Scrub Slider -->
   <div class="scrub-wrap">
     <input type="range" class="scrub-slider" id="fullScrub" min="0" max="1000" value="0" step="1">
     <div class="time-row">
@@ -1231,79 +1491,70 @@
     </div>
   </div>
 
-  <!-- Main Media Controls (Play, Pause, Skip, Shuffle, Repeat) -->
   <div class="full-controls">
-    <button class="ctrl-btn" id="btnShuffle" title="Случайный порядок">
+    <button class="ctrl-btn" id="btnShuffle" type="button" title="Случайный порядок" aria-label="Случайный порядок">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
     </button>
-    <button class="ctrl-btn" id="btnPrev" title="Предыдущий трек">
+    <button class="ctrl-btn" id="btnPrev" type="button" title="Предыдущий трек" aria-label="Предыдущий трек">
       <svg viewBox="0 0 24 24"><path d="M18 6.5a1 1 0 0 0-1.55-.83L8.5 11.17v-4.67a1 1 0 0 0-2 0v11a1 1 0 0 0 2 0v-4.67l7.95 5.5A1 1 0 0 0 18 17.5v-11z"/></svg>
     </button>
-    <button class="ctrl-btn play-main" id="btnPlayMain" title="Воспроизведение">
+    <button class="ctrl-btn play-main" id="btnPlayMain" type="button" title="Воспроизведение" aria-label="Воспроизведение">
       <svg id="fullPlayIcon" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72L9.5 4.28A1 1 0 0 0 8 5.14z"/></svg>
     </button>
-    <button class="ctrl-btn" id="btnNext" title="Следующий трек">
+    <button class="ctrl-btn" id="btnNext" type="button" title="Следующий трек" aria-label="Следующий трек">
       <svg viewBox="0 0 24 24"><path d="M6 17.5a1 1 0 0 0 1.55.83l7.95-5.5v4.67a1 1 0 0 0 2 0v-11a1 1 0 0 0-2 0v4.67L7.55 5.67A1 1 0 0 0 6 6.5v11z"/></svg>
     </button>
-    <button class="ctrl-btn" id="btnRepeat" title="Повтор">
+    <button class="ctrl-btn" id="btnRepeat" type="button" title="Повтор" aria-label="Повтор">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
     </button>
   </div>
 
-  <!-- Volume Control -->
   <div class="volume-row">
     <svg id="volIcon" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     <input type="range" class="vol-slider" id="fullVol" min="0" max="1" step="0.01" value="0.8">
   </div>
 
   <div class="vis-selector-bar">
-    <button class="vis-pill-btn active" data-mode="aurora">Аврора</button>
-    <button class="vis-pill-btn" data-mode="bars">Эквалайзер</button>
-    <button class="vis-pill-btn" data-mode="nebula">Космос</button>
+    <button class="vis-pill-btn active" type="button" data-mode="aurora">Аврора</button>
+    <button class="vis-pill-btn" type="button" data-mode="bars">Эквалайзер</button>
+    <button class="vis-pill-btn" type="button" data-mode="nebula">Космос</button>
   </div>
 </div>
 
-<!-- ============================================================
-     BOTTOM NAVIGATION BAR (Material 3 Mobile)
-     ============================================================ -->
+<!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <button class="nav-item active" id="navHome">
-    <div class="nav-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    </div>
+  <button class="nav-item active" id="navHome" type="button">
+    <span class="nav-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 3.1L2.8 10.9a1 1 0 0 0-.3.74V21a1 1 0 0 0 1 1h6.2v-6.4h4.6V22H20.5a1 1 0 0 0 1-1v-9.36a1 1 0 0 0-.35-.76L12 3.1z"/></svg>
+    </span>
     <span class="nav-label">Главная</span>
   </button>
-  <button class="nav-item" id="navLibrary">
-    <div class="nav-icon">
-      <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
-    </div>
-    <span class="nav-label">Музыка</span>
+  <button class="nav-item" id="navSearch" type="button">
+    <span class="nav-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="7"/><line x1="21" y1="21" x2="16" y2="16"/></svg>
+    </span>
+    <span class="nav-label">Поиск</span>
   </button>
-  <button class="nav-item" id="navLive">
-    <div class="nav-icon">
-      <svg viewBox="0 0 24 24"><path d="M4.93 4.93a10 10 0 0 0 0 14.14M7.76 7.76a6 6 0 0 0 0 8.48M12 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0M16.24 7.76a6 6 0 0 1 0 8.48M19.07 4.93a10 10 0 0 1 0 14.14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    </div>
+  <button class="nav-item" id="navLibrary" type="button">
+    <span class="nav-icon">
+      <svg viewBox="0 0 24 24"><path d="M4 3h3v18H4zM9 3h3v18H9zM14.4 4.1l2.8-.8 4.4 16.2-2.8.8z"/></svg>
+    </span>
+    <span class="nav-label">Медиатека</span>
+  </button>
+  <button class="nav-item" id="navLive" type="button">
+    <span class="nav-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.9 4.9a10 10 0 0 0 0 14.2M7.8 7.8a6 6 0 0 0 0 8.4M16.2 7.8a6 6 0 0 1 0 8.4M19.1 4.9a10 10 0 0 1 0 14.2"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/></svg>
+    </span>
     <span class="nav-label">Эфир</span>
-  </button>
-  <button class="nav-item" id="navPhone">
-    <div class="nav-icon">
-      <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5" stroke="currentColor" stroke-linecap="round"/></svg>
-    </div>
-    <span class="nav-label">С телефона</span>
   </button>
 </nav>
 
-<!-- Hidden Local Phone File Picker -->
 <input type="file" id="phoneFileInput" multiple accept="audio/*">
-
-<!-- Audio Elements -->
 <audio id="audio" preload="metadata"></audio>
 <audio id="liveAudio" preload="none"></audio>
 <div class="toast" id="toast"></div>
 
-<!-- ============================================================
-     JAVASCRIPT APPLICATION ENGINE
-     ============================================================ -->
+
 <script>
 (function(){
   "use strict";
@@ -1312,12 +1563,14 @@
 
   // Palette pairs for track cards
   var palettes = [
-    ["#7C5CFF", "#5A86FF"],
-    ["#FF7D6B", "#FF5D9E"],
-    ["#2FBF8F", "#4F8DFF"],
-    ["#B56BFF", "#FF7DAF"],
-    ["#FFB36B", "#FF6F87"],
-    ["#5B8CFF", "#8E7CFF"]
+    ["#1ED760", "#0B6B34"],
+    ["#8E66FF", "#3D1E8F"],
+    ["#E8115B", "#7A0B32"],
+    ["#F59B23", "#A34F00"],
+    ["#27856A", "#0B3D2E"],
+    ["#509BF5", "#1C3F6E"],
+    ["#E13300", "#6B1800"],
+    ["#7358FF", "#2E1F80"]
   ];
 
   var audio = $("audio");
@@ -1330,6 +1583,7 @@
   var isSeeking = false;
   var shuffleMode = false;
   var repeatMode = 0; // 0: off, 1: all, 2: one
+  var libraryFilter = "all";
   var visMode = localStorage.getItem("aurora.vismode") || "aurora";
   var toastTimer = null;
   var FAV_KEY = "aurora.favs";
@@ -1370,6 +1624,40 @@
 
   function esc(val){ return String(val == null ? "" : val); }
 
+  function escHtml(val){
+    return String(val == null ? "" : val)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function trackLetter(track){
+    var s = track && track.title ? String(track.title).trim() : "";
+    return s ? s.charAt(0).toUpperCase() : "♪";
+  }
+
+  function grad(pair){
+    return "linear-gradient(135deg, " + pair[0] + ", " + pair[1] + ")";
+  }
+
+  function hexA(hex, alpha){
+    var h = String(hex || "#000000").replace("#", "");
+    if (h.length === 3) h = h.charAt(0) + h.charAt(0) + h.charAt(1) + h.charAt(1) + h.charAt(2) + h.charAt(2);
+    var n = parseInt(h, 16);
+    if (!isFinite(n)) return "rgba(0,0,0," + alpha + ")";
+    return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + alpha + ")";
+  }
+
+  function pluralTracks(n){
+    var a = Math.abs(n) % 100, b = a % 10;
+    if (a > 10 && a < 20) return "треков";
+    if (b === 1) return "трек";
+    if (b >= 2 && b <= 4) return "трека";
+    return "треков";
+  }
+
   // ============================================================
   // FAVORITES (persisted in localStorage by "artist||title")
   // ============================================================
@@ -1392,9 +1680,32 @@
     try { localStorage.setItem(FAV_KEY, JSON.stringify(list)); } catch(e){}
   }
 
+  function isFav(track){
+    return !!track && readFavs().indexOf(favKeyOf(track)) >= 0;
+  }
+
+  function toggleFavorite(track){
+    var key = favKeyOf(track);
+    if (!key || key === "||") return false;
+    var favs = readFavs();
+    var at = favs.indexOf(key);
+    var added = false;
+    if (at >= 0){
+      favs.splice(at, 1);
+    } else {
+      favs.push(key);
+      added = true;
+    }
+    writeFavs(favs);
+    syncFavButton();
+    applyFilter();
+    renderHome();
+    return added;
+  }
+
   function syncFavButton(){
     var track = (current >= 0 && current < tracks.length) ? tracks[current] : null;
-    var active = !!track && readFavs().indexOf(favKeyOf(track)) >= 0;
+    var active = isFav(track);
     $("fullFavBtn").classList.toggle("active", active);
     $("fullFavBtn").setAttribute("aria-pressed", active ? "true" : "false");
   }
@@ -1514,8 +1825,8 @@
     // MODE 1: AURORA WAVES
     if (visMode === "aurora"){
       var colors = [
-        ["rgba(124, 92, 255, ", 0.35 * intensity],
-        ["rgba(255, 93, 158, ", 0.30 * intensity],
+        ["rgba(30, 215, 96, ", 0.35 * intensity],
+        ["rgba(80, 155, 245, ", 0.30 * intensity],
         ["rgba(90, 134, 255, ", 0.25 * intensity],
         ["rgba(255, 179, 107, ", 0.20 * intensity]
       ];
@@ -1567,8 +1878,8 @@
         var by = baseY - barH;
 
         var grad = bgCtx.createLinearGradient(0, baseY, 0, by);
-        grad.addColorStop(0, "rgba(124, 92, 255, 0.15)");
-        grad.addColorStop(0.7, "rgba(255, 93, 158, " + (0.7 * intensity) + ")");
+        grad.addColorStop(0, "rgba(30, 215, 96, 0.15)");
+        grad.addColorStop(0.7, "rgba(39, 133, 106, " + (0.7 * intensity) + ")");
         grad.addColorStop(1, "rgba(255, 179, 107, " + (0.9 * intensity) + ")");
         bgCtx.fillStyle = grad;
         bgCtx.beginPath();
@@ -1581,8 +1892,8 @@
     } else {
       var centerRadius = (70 + bass * 90) * intensity;
       var radGrad = bgCtx.createRadialGradient(w/2, h/2, 10, w/2, h/2, centerRadius);
-      radGrad.addColorStop(0, "rgba(255, 93, 158, " + (0.35 * intensity) + ")");
-      radGrad.addColorStop(0.6, "rgba(124, 92, 255, " + (0.22 * intensity) + ")");
+      radGrad.addColorStop(0, "rgba(30, 215, 96, " + (0.35 * intensity) + ")");
+      radGrad.addColorStop(0.6, "rgba(80, 155, 245, " + (0.22 * intensity) + ")");
       radGrad.addColorStop(1, "rgba(0,0,0,0)");
       bgCtx.fillStyle = radGrad;
       bgCtx.beginPath();
@@ -1633,9 +1944,9 @@
       var by = mid - bh / 2;
 
       var grad = liveCtx.createLinearGradient(0, lh, 0, 0);
-      grad.addColorStop(0, "#7c5cff");
-      grad.addColorStop(0.5, "#ff5d9e");
-      grad.addColorStop(1, "#ffb36b");
+      grad.addColorStop(0, "#1ed760");
+      grad.addColorStop(0.5, "#56d9a3");
+      grad.addColorStop(1, "#509bf5");
       liveCtx.fillStyle = grad;
       liveCtx.beginPath();
       if (liveCtx.roundRect) liveCtx.roundRect(bx, by, bw, bh, bw / 2);
@@ -1653,8 +1964,8 @@
     list.innerHTML = "";
 
     var displayList = filteredTracks;
-    $("libCount").textContent = tracks.length + " " + (tracks.length === 1 ? "трек" : (tracks.length < 5 ? "трека" : "треков"));
-    $("quickCountText").textContent = tracks.length ? (tracks.length + " треков") : "Коллекция с ПК";
+    $("libCount").textContent = displayList.length + " " + pluralTracks(displayList.length);
+    $("quickCountText").textContent = tracks.length ? (tracks.length + " " + pluralTracks(tracks.length)) : "Коллекция с ПК";
 
     if (!displayList.length){
       empty.style.display = "block";
@@ -1666,13 +1977,13 @@
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "track-item" + (item.originalIndex === current ? " playing" : "");
-      
+
       var pair = palettes[item.originalIndex % palettes.length];
 
       var cover = document.createElement("div");
       cover.className = "track-cover";
-      cover.style.background = "linear-gradient(135deg, " + pair[0] + ", " + pair[1] + ")";
-      cover.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>';
+      cover.style.background = grad(pair);
+      cover.innerHTML = '<span class="cover-letter">' + escHtml(trackLetter(item)) + '</span>';
 
       var info = document.createElement("div");
       info.className = "track-info";
@@ -1696,10 +2007,24 @@
       badge.className = "track-badge";
       badge.textContent = esc(item.ext || "AUDIO");
 
+      var fav = document.createElement("span");
+      fav.className = "track-fav" + (isFav(item) ? " active" : "");
+      fav.setAttribute("role", "button");
+      fav.setAttribute("tabindex", "0");
+      fav.setAttribute("aria-label", "В избранное");
+      fav.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+      fav.addEventListener("click", function(e){
+        e.stopPropagation();
+        haptic();
+        var added = toggleFavorite(item);
+        showToast(added ? "Добавлено в избранное" : "Удалено из избранного");
+      });
+
       btn.appendChild(cover);
       btn.appendChild(info);
       btn.appendChild(eq);
       btn.appendChild(badge);
+      btn.appendChild(fav);
 
       btn.addEventListener("click", function(){
         haptic();
@@ -1728,9 +2053,13 @@
       $("fullArtist").textContent = esc(t.artist || "Аудиофайл");
 
       var pair = palettes[current % palettes.length];
-      var grad = "linear-gradient(135deg, " + pair[0] + ", " + pair[1] + ")";
-      $("miniCover").style.background = grad;
-      $("fullArt").style.background = grad;
+      var coverGrad = grad(pair);
+      var letter = escHtml(trackLetter(t));
+      $("miniCover").style.background = coverGrad;
+      $("miniCover").innerHTML = '<span class="cover-letter">' + letter + '</span>';
+      $("fullArt").style.background = coverGrad;
+      $("fullArt").innerHTML = '<span class="cover-letter">' + letter + '</span>';
+      $("fullPlayer").style.backgroundImage = "linear-gradient(180deg, " + hexA(pair[0], 0.30) + " 0%, " + hexA(pair[1], 0.10) + " 44%, rgba(0,0,0,0.97) 100%)";
 
       // Web MediaSession metadata (desktop browsers; the APK uses the native
       // PlaybackService session instead)
@@ -2006,29 +2335,25 @@
   $("fullFavBtn").addEventListener("click", function(){
     haptic();
     if (current < 0 || current >= tracks.length) return;
-    var key = favKeyOf(tracks[current]);
-    if (!key || key === "||") return;
-    var favs = readFavs();
-    var at = favs.indexOf(key);
-    if (at >= 0){
-      favs.splice(at, 1);
-      showToast("Удалено из избранного");
-    } else {
-      favs.push(key);
-      showToast("Добавлено в избранное");
-    }
-    writeFavs(favs);
-    syncFavButton();
+    var added = toggleFavorite(tracks[current]);
+    showToast(added ? "Добавлено в избранное" : "Удалено из избранного");
   });
 
   // Full Player Open / Close
   $("miniPlayer").addEventListener("click", function(){
     haptic();
     $("fullPlayer").classList.add("open");
+    document.body.classList.add("player-open");
   });
   $("fullCloseBtn").addEventListener("click", function(){
     haptic();
     $("fullPlayer").classList.remove("open");
+    document.body.classList.remove("player-open");
+  });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && $("fullPlayer").classList.contains("open")){
+      $("fullCloseBtn").click();
+    }
   });
 
   // Visualizer Mode Cycling
@@ -2067,25 +2392,129 @@
     return parts.join("\n");
   }
 
-  // Search filtering
+  // ============================================================
+  // HOME SHELVES
+  // ============================================================
+  function setGreeting(){
+    var h = new Date().getHours();
+    var greeting = h < 5 ? "Доброй ночи" : (h < 12 ? "Доброе утро" : (h < 18 ? "Добрый день" : "Добрый вечер"));
+    var el = $("homeGreeting");
+    if (el) el.textContent = greeting;
+  }
+
+  function mediaCard(item, index){
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "media-card";
+
+    var pair = palettes[index % palettes.length];
+    var art = document.createElement("div");
+    art.className = "media-art";
+    art.style.background = grad(pair);
+    art.innerHTML = '<span class="cover-letter">' + escHtml(trackLetter(item)) + '</span>' +
+      '<span class="card-play"><svg viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72L9.5 4.28A1 1 0 0 0 8 5.14z"/></svg></span>';
+
+    var title = document.createElement("div");
+    title.className = "media-title";
+    title.textContent = esc(item.title || "Без названия");
+
+    var sub = document.createElement("div");
+    sub.className = "media-sub";
+    sub.textContent = esc(item.artist || "Неизвестный исполнитель");
+
+    btn.appendChild(art);
+    btn.appendChild(title);
+    btn.appendChild(sub);
+    btn.addEventListener("click", function(){
+      haptic();
+      playTrack(index);
+    });
+    return btn;
+  }
+
+  function renderHome(){
+    setGreeting();
+
+    var recent = tracks.slice(0, 8);
+    var recentRow = $("homeRecent");
+    recentRow.innerHTML = "";
+    recent.forEach(function(t, idx){ recentRow.appendChild(mediaCard(t, idx)); });
+    $("homeRecentSection").hidden = !recent.length;
+
+    var favs = [];
+    tracks.forEach(function(t, idx){ if (isFav(t)) favs.push({ track: t, index: idx }); });
+
+    var favRow = $("homeFavs");
+    favRow.innerHTML = "";
+    favs.slice(0, 8).forEach(function(x){ favRow.appendChild(mediaCard(x.track, x.index)); });
+    $("homeFavsSection").hidden = !favs.length;
+
+    $("homeAllCount").textContent = tracks.length + " " + pluralTracks(tracks.length);
+    $("homeFavCount").textContent = favs.length + " " + pluralTracks(favs.length);
+    $("quickFavText").textContent = favs.length ? (favs.length + " " + pluralTracks(favs.length)) : "Ваши треки";
+    $("quickCountText").textContent = tracks.length ? (tracks.length + " " + pluralTracks(tracks.length)) : "Коллекция с ПК";
+  }
+
+  function setLibraryFilter(filter){
+    libraryFilter = filter;
+    document.querySelectorAll("#libraryChips .chip").forEach(function(chip){
+      chip.classList.toggle("active", chip.getAttribute("data-filter") === filter);
+    });
+    applyFilter();
+  }
+
+  function openFavorites(){
+    setLibraryFilter("favs");
+    switchView("library");
+  }
+
+  // ============================================================
+  // SEARCH FILTERING
+  // ============================================================
   function applyFilter(){
     var q = $("searchInput").value.trim().toLowerCase();
-    if (!q){
-      filteredTracks = tracks.map(function(t, idx){ t.originalIndex = idx; return t; });
-    } else {
-      filteredTracks = [];
-      tracks.forEach(function(t, idx){
-        if ((t.title && t.title.toLowerCase().indexOf(q) >= 0) ||
-            (t.artist && t.artist.toLowerCase().indexOf(q) >= 0)){
-          t.originalIndex = idx;
-          filteredTracks.push(t);
-        }
-      });
-    }
+    $("searchWrap").classList.toggle("has-value", !!q);
+    filteredTracks = [];
+    tracks.forEach(function(t, idx){
+      if (libraryFilter === "favs" && !isFav(t)) return;
+      if (libraryFilter === "phone" && !t.url) return;
+      if (q && (t.title || "").toLowerCase().indexOf(q) < 0 &&
+               (t.artist || "").toLowerCase().indexOf(q) < 0) return;
+      t.originalIndex = idx;
+      filteredTracks.push(t);
+    });
     renderPlaylist();
   }
 
   $("searchInput").addEventListener("input", applyFilter);
+  $("searchClear").addEventListener("click", function(){
+    $("searchInput").value = "";
+    applyFilter();
+    $("searchInput").focus();
+  });
+
+  document.querySelectorAll("#libraryChips .chip").forEach(function(chip){
+    chip.addEventListener("click", function(){
+      haptic();
+      setLibraryFilter(this.getAttribute("data-filter"));
+    });
+  });
+
+  $("homeSeeAll").addEventListener("click", function(){
+    setLibraryFilter("all");
+    switchView("library");
+  });
+  $("homeSeeFavs").addEventListener("click", openFavorites);
+  $("homeAllPlaylist").addEventListener("click", function(){
+    setLibraryFilter("all");
+    switchView("library");
+  });
+  $("homeFavPlaylist").addEventListener("click", openFavorites);
+  $("btnQuickFav").addEventListener("click", openFavorites);
+  $("emptyAddBtn").addEventListener("click", function(){
+    haptic();
+    $("phoneFileInput").click();
+  });
 
   // ============================================================
   // LOCAL PHONE FILE PICKER
@@ -2124,9 +2553,10 @@
 
     tracks = newTracks.concat(tracks);
     $("searchInput").value = "";
-    applyFilter();
+    setLibraryFilter("all");
+    renderHome();
     switchView("library");
-    showToast("Добавлено " + newTracks.length + " треков с телефона");
+    showToast("Добавлено " + newTracks.length + " " + pluralTracks(newTracks.length) + " с телефона");
     playTrack(0);
   });
 
@@ -2138,7 +2568,7 @@
     var on = !!liveState.live;
     $("livePill").classList.toggle("active", on);
     $("livePill").textContent = on ? "В ЭФИРЕ" : "ОФЛАЙН";
-    $("quickLiveStatus").textContent = on ? ("В эфире (" + fmt(liveState.seconds) + ")") : "Системный звук Windows";
+    $("quickLiveStatus").textContent = on ? ("В эфире (" + fmt(liveState.seconds) + ")") : "Звук с ПК";
     $("liveHeading").textContent = on ? "Системный звук" : "Эфир выключен";
     $("liveSub").textContent = on
       ? "Прямая трансляция звука с компьютера без потерь качества. Время вещания: " + fmt(liveState.seconds)
@@ -2186,20 +2616,37 @@
   // ============================================================
   function switchView(viewName){
     haptic();
+    var showLibrary = viewName === "library" || viewName === "search";
     $("viewHome").hidden = viewName !== "home";
-    $("viewLibrary").hidden = viewName !== "library";
+    $("viewLibrary").hidden = !showLibrary;
     $("viewLive").hidden = viewName !== "live";
 
     $("navHome").classList.toggle("active", viewName === "home");
+    $("navSearch").classList.toggle("active", viewName === "search");
     $("navLibrary").classList.toggle("active", viewName === "library");
     $("navLive").classList.toggle("active", viewName === "live");
+
+    if (showLibrary){
+      $("libraryTitle").textContent = viewName === "search" ? "Поиск" : "Ваша медиатека";
+    }
+    if (viewName === "search"){
+      setTimeout(function(){ $("searchInput").focus(); }, 80);
+    }
+    if (viewName === "home"){
+      renderHome();
+    }
+    window.scrollTo(0, 0);
   }
 
   $("navHome").addEventListener("click", function(){ switchView("home"); });
+  $("navSearch").addEventListener("click", function(){ switchView("search"); });
   $("navLibrary").addEventListener("click", function(){ switchView("library"); });
   $("navLive").addEventListener("click", function(){ switchView("live"); });
 
-  $("btnQuickLibrary").addEventListener("click", function(){ switchView("library"); });
+  $("btnQuickLibrary").addEventListener("click", function(){
+    setLibraryFilter("all");
+    switchView("library");
+  });
   $("btnQuickLive").addEventListener("click", function(){ switchView("live"); });
 
   // ============================================================
@@ -2315,6 +2762,7 @@
 
       if (previousSignature !== librarySignature(tracks)){
         applyFilter();
+        renderHome();
       }
       updateActiveTrackUi();
     } catch(e){}
@@ -2327,6 +2775,7 @@
   renderBackground();
   renderLiveCard();
   applyFilter();
+  renderHome();
   initConnectCard();
   loadLibrary();
   pollState();

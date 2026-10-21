@@ -489,7 +489,7 @@ namespace Lumen.Net
 
         private static string BuildManifestJson()
         {
-            return "{\"name\":\"Aurora Music\",\"short_name\":\"Aurora\",\"description\":\"Музыкальный плеер для Android и Windows\",\"start_url\":\"/\",\"display\":\"standalone\",\"background_color\":\"#120e1a\",\"theme_color\":\"#120e1a\",\"orientation\":\"any\",\"icons\":[{\"src\":\"/icon.png\",\"sizes\":\"256x256\",\"type\":\"image/png\",\"purpose\":\"any maskable\"}]}";
+            return "{\"name\":\"Aurora Music\",\"short_name\":\"Aurora\",\"description\":\"Музыкальный плеер для Android и Windows\",\"start_url\":\"/\",\"display\":\"standalone\",\"background_color\":\"#000000\",\"theme_color\":\"#000000\",\"orientation\":\"any\",\"icons\":[{\"src\":\"/icon.png\",\"sizes\":\"256x256\",\"type\":\"image/png\",\"purpose\":\"any maskable\"}]}";
         }
 
         private static void ServeIcon(NetworkStream stream, bool head)
