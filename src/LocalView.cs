@@ -525,7 +525,7 @@ namespace Lumen
             _nowArtist.Text = track.Artist;
             SetCover(null);
             _nowPlayingBadge.Text = "ЗАГРУЗКА…";
-            _nowPlayingDot.Fill = new SolidColorBrush(Color.FromRgb(223, 255, 255));
+            _nowPlayingDot.Fill = new SolidColorBrush(Color.FromRgb(34, 211, 238));
             UpdateTransportEnabled(true);
 
             try
@@ -595,7 +595,7 @@ namespace Lumen
                 _duration.Text = FormatTime(total);
             }
             _nowPlayingBadge.Text = "СЕЙЧАС ИГРАЕТ";
-            _nowPlayingDot.Fill = new SolidColorBrush(Color.FromRgb(128, 255, 197));
+            _nowPlayingDot.Fill = new SolidColorBrush(Color.FromRgb(192, 132, 252));
         }
 
         private void OnMediaEnded(object sender, EventArgs e)
@@ -679,7 +679,7 @@ namespace Lumen
             _nowPlayingBadge.Text = badge;
             if (badge == "ПАУЗА" || badge == "ОШИБКА" || badge == "ОШИБКА ФОРМАТА")
             {
-                _nowPlayingDot.Fill = new SolidColorBrush(Color.FromRgb(255, 203, 150));
+                _nowPlayingDot.Fill = new SolidColorBrush(Color.FromRgb(251, 191, 36));
             }
         }
 

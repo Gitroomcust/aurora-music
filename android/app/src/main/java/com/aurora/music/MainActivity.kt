@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         window.navigationBarColor = android.graphics.Color.TRANSPARENT
 
         webView = WebView(this).apply {
-            setBackgroundColor(0xFF000000.toInt())
+            setBackgroundColor(0xFF050509.toInt())
             overScrollMode = View.OVER_SCROLL_NEVER
         }
         setContentView(webView)

@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bg_dark">#000000</color>
-    <color name="brand_green">#1ED760</color>
-    <color name="brand_green_dark">#0B6B34</color>
+    <color name="bg_dark">#050509</color>
+    <color name="surface">#100E1C</color>
+    <color name="brand_aurora">#8B5CF6</color>
+    <color name="brand_aurora_dark">#6D28D9</color>
+    <color name="brand_cyan">#22D3EE</color>
+    <color name="brand_pink">#F472B6</color>
+    <color name="brand_amber">#FBBF24</color>
     <color name="white">#FFFFFF</color>
+    <color name="ink_dim">#C7C7D6</color>
+    <color name="muted">#8E8EA0</color>
 </resources>

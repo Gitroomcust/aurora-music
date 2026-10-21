@@ -146,7 +146,7 @@ class PlaybackService : Service() {
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_music)
-            .setColor(0xFF1ED760.toInt())
+            .setColor(0xFF8B5CF6.toInt())
             .setContentTitle(title.ifEmpty { "Aurora Music" })
             .setContentText(artist)
             .setContentIntent(openIntent)

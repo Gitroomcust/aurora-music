@@ -32,7 +32,7 @@
         <Button x:Name="ChooseFolderButton" Grid.Column="2" Style="{StaticResource PillButtonStyle}">
             <StackPanel Orientation="Horizontal">
                 <Viewbox Width="15" Height="15" VerticalAlignment="Center" Margin="0,0,8,0">
-                    <Path Fill="White"
+                    <Path Fill="#000000"
                           Data="M2.5,7 L2.5,5.5 C2.5,4.4 3.4,3.5 4.5,3.5 L8.5,3.5 C8.9,3.5 9.3,3.7 9.6,4 L11.2,6 L19.5,6 C20.6,6 21.5,6.9 21.5,8 L21.5,18 C21.5,19.1 20.6,20 19.5,20 L4.5,20 C3.4,20 2.5,19.1 2.5,18 Z" />
                 </Viewbox>
                 <TextBlock x:Name="ChooseFolderButtonText" Text="Выбрать папку"
@@ -51,146 +51,146 @@
         </Grid.ColumnDefinitions>
 
         <!-- ==================== NOW PLAYING ==================== -->
-        <Border x:Name="NowPlayingCard" Style="{StaticResource CardStyle}" Padding="16">
+        <Border x:Name="NowPlayingCard" Style="{StaticResource CardStyle}" Padding="18">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="246" />
+                    <RowDefinition Height="250" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <Border CornerRadius="24" ClipToBounds="True">
+                <Border CornerRadius="22" ClipToBounds="True">
                     <Grid>
-                        <Border CornerRadius="24">
+                        <Border CornerRadius="22">
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                    <GradientStop Color="#27203B" Offset="0" />
-                                    <GradientStop Color="#4B3B8C" Offset="0.55" />
-                                    <GradientStop Color="#E4718B" Offset="1" />
+                                    <GradientStop Color="#1A102A" Offset="0" />
+                                    <GradientStop Color="#2E1B4E" Offset="0.55" />
+                                    <GradientStop Color="#4A1A3C" Offset="1" />
                                 </LinearGradientBrush>
                             </Border.Background>
                         </Border>
 
                         <Grid x:Name="ArtDecor">
                             <Canvas IsHitTestVisible="False">
-                                <Ellipse Width="262" Height="262" Canvas.Left="55" Canvas.Top="34"
+                                <Ellipse Width="270" Height="270" Canvas.Left="55" Canvas.Top="30"
                                          Stroke="#22FFFFFF" StrokeThickness="1" />
-                                <Ellipse Width="194" Height="194" Canvas.Left="89" Canvas.Top="68"
+                                <Ellipse Width="200" Height="200" Canvas.Left="90" Canvas.Top="64"
                                          Stroke="#18FFFFFF" StrokeThickness="1" />
-                                <Ellipse Width="128" Height="128" Canvas.Left="122" Canvas.Top="101"
+                                <Ellipse Width="132" Height="132" Canvas.Left="124" Canvas.Top="98"
                                          Fill="#15FFFFFF" />
                             </Canvas>
                             <TextBlock Text="&#xE8D6;" FontFamily="{StaticResource IconFont}"
-                                       FontSize="57" Foreground="#EFFFFFFF"
+                                       FontSize="59" Foreground="#EFFFFFFF"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"
                                        Margin="0,-8,0,0" />
-                            <TextBlock Text="LUMEN SESSION" FontFamily="{StaticResource TextFont}"
+                            <TextBlock Text="AURORA SESSION" FontFamily="{StaticResource TextFont}"
                                        FontSize="9" FontWeight="SemiBold" Foreground="#80FFFFFF"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       Margin="0,113,0,0" />
+                                       Margin="0,115,0,0" />
                         </Grid>
 
-                        <Border x:Name="CoverLayer" CornerRadius="24" Opacity="0"
+                        <Border x:Name="CoverLayer" CornerRadius="22" Opacity="0"
                                 Background="Transparent" />
 
-                        <Border CornerRadius="24" IsHitTestVisible="False">
+                        <Border CornerRadius="22" IsHitTestVisible="False">
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0,0.45" EndPoint="0,1">
                                     <GradientStop Color="#00000000" Offset="0" />
-                                    <GradientStop Color="#660B0714" Offset="1" />
+                                    <GradientStop Color="#7A0B0B14" Offset="1" />
                                 </LinearGradientBrush>
                             </Border.Background>
                         </Border>
 
-                        <Border Background="#40FFFFFF" CornerRadius="11" Padding="9,5"
+                        <Border Background="#40FFFFFF" CornerRadius="12" Padding="10,5"
                                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="14,14,0,0">
                             <StackPanel Orientation="Horizontal">
-                                <Ellipse x:Name="NowPlayingDot" Width="5" Height="5"
-                                         Fill="#DFFFFFFF" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                <Ellipse x:Name="NowPlayingDot" Width="6" Height="6"
+                                         Fill="#DFFFFFFF" VerticalAlignment="Center" Margin="0,0,7,0" />
                                 <TextBlock x:Name="NowPlayingBadgeText" Text="ГОТОВО К ЗАПУСКУ"
-                                           FontFamily="{StaticResource TextFont}" FontSize="9"
-                                           FontWeight="SemiBold" Foreground="White" />
+                                           FontFamily="{StaticResource TextFont}" FontSize="9.5"
+                                           FontWeight="SemiBold" Foreground="#FFFFFF" />
                             </StackPanel>
                         </Border>
 
                         <TextBlock Text="LOCAL FILE" FontFamily="{StaticResource TextFont}"
                                    FontSize="9" FontWeight="SemiBold" Foreground="#A6FFFFFF"
                                    HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                                   Margin="0,0,15,13" />
+                                   Margin="0,0,15,14" />
                     </Grid>
                 </Border>
 
-                <StackPanel Grid.Row="1" Margin="3,14,3,0">
+                <StackPanel Grid.Row="1" Margin="3,16,3,0">
                     <TextBlock x:Name="NowTitleText" Text="Ничего не играет"
-                               Style="{StaticResource H2TextStyle}" FontSize="21"
+                               Style="{StaticResource H2TextStyle}" FontSize="22"
                                TextTrimming="CharacterEllipsis" />
                     <TextBlock x:Name="NowArtistText" Text="Выберите папку и запустите трек"
-                               Style="{StaticResource CaptionTextStyle}" FontSize="12.5"
+                               Style="{StaticResource CaptionTextStyle}" FontSize="13"
                                TextTrimming="CharacterEllipsis" Margin="0,1,0,0" />
 
                     <Slider x:Name="SeekSlider" Style="{StaticResource SeekSliderStyle}"
-                            Minimum="0" Maximum="100" Value="0" Margin="0,9,0,0"
+                            Minimum="0" Maximum="100" Value="0" Margin="0,10,0,0"
                             IsEnabled="False" />
                     <Grid Margin="1,-1,1,0">
                         <TextBlock x:Name="CurrentTimeText" Text="0:00"
-                                   Style="{StaticResource CaptionTextStyle}" FontSize="10.5" />
+                                   Style="{StaticResource CaptionTextStyle}" FontSize="11" />
                         <TextBlock x:Name="DurationText" Text="0:00"
-                                   Style="{StaticResource CaptionTextStyle}" FontSize="10.5"
+                                   Style="{StaticResource CaptionTextStyle}" FontSize="11"
                                    HorizontalAlignment="Right" />
                     </Grid>
 
                     <StackPanel x:Name="TransportPanel" Orientation="Horizontal"
-                                HorizontalAlignment="Center" Margin="0,8,0,0"
+                                HorizontalAlignment="Center" Margin="0,10,0,0"
                                 IsEnabled="False">
                         <Button x:Name="PreviousButton" Style="{StaticResource IconButtonStyle}"
-                                Width="40" Height="40" Margin="0,8,10,0"
-                                Background="#F7F2FE" ToolTip="Предыдущий трек">
-                            <TextBlock Text="&#xE892;" FontFamily="{StaticResource IconFont}" FontSize="14" />
+                                Width="44" Height="44" Margin="0,10,12,0"
+                                Background="{StaticResource SurfaceContainerBrush}" ToolTip="Предыдущий трек">
+                            <TextBlock Text="&#xE892;" FontFamily="{StaticResource IconFont}" FontSize="15" />
                         </Button>
 
                         <Button x:Name="PlayButton" Style="{StaticResource BareButtonStyle}"
-                                Width="56" Height="56" ToolTip="Воспроизвести">
-                            <Grid Width="56" Height="56" RenderTransformOrigin="0.5,0.5">
+                                Width="60" Height="60" ToolTip="Воспроизвести">
+                            <Grid Width="60" Height="60" RenderTransformOrigin="0.5,0.5">
                                 <Grid.RenderTransform>
                                     <ScaleTransform x:Name="PlayButtonScale" />
                                 </Grid.RenderTransform>
-                                <Border CornerRadius="28" Background="{StaticResource PrimaryGradientBrush}">
+                                <Border CornerRadius="30" Background="{StaticResource PrimaryGradientBrush}">
                                     <Border.Effect>
-                                        <DropShadowEffect BlurRadius="18" ShadowDepth="5" Direction="270"
-                                                          Color="#6850E8" Opacity="0.38" />
+                                        <DropShadowEffect BlurRadius="20" ShadowDepth="6" Direction="270"
+                                                          Color="#8B5CF6" Opacity="0.45" />
                                     </Border.Effect>
                                     <TextBlock x:Name="PlayGlyph" Text="&#xE768;"
-                                               FontFamily="{StaticResource IconFont}" FontSize="18"
-                                               Foreground="White" HorizontalAlignment="Center"
+                                               FontFamily="{StaticResource IconFont}" FontSize="20"
+                                               Foreground="#FFFFFF" HorizontalAlignment="Center"
                                                VerticalAlignment="Center" Margin="1,0,0,0" />
                                 </Border>
                             </Grid>
                         </Button>
 
                         <Button x:Name="NextButton" Style="{StaticResource IconButtonStyle}"
-                                Width="40" Height="40" Margin="10,8,0,0"
-                                Background="#F7F2FE" ToolTip="Следующий трек">
-                            <TextBlock Text="&#xE893;" FontFamily="{StaticResource IconFont}" FontSize="14" />
+                                Width="44" Height="44" Margin="12,10,0,0"
+                                Background="{StaticResource SurfaceContainerBrush}" ToolTip="Следующий трек">
+                            <TextBlock Text="&#xE893;" FontFamily="{StaticResource IconFont}" FontSize="15" />
                         </Button>
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
-                                Margin="0,7,0,0">
+                                Margin="0,9,0,0">
                         <TextBlock Text="&#xE767;" FontFamily="{StaticResource IconFont}"
-                                   FontSize="12" Foreground="{StaticResource OnSurfaceMutedBrush}"
+                                   FontSize="13" Foreground="{StaticResource OnSurfaceMutedBrush}"
                                    VerticalAlignment="Center" />
                         <Slider x:Name="VolumeSlider" Style="{StaticResource VolumeSliderStyle}"
-                                Width="110" Minimum="0" Maximum="1" Value="0.7"
-                                Margin="7,0,7,0" VerticalAlignment="Center" />
+                                Width="120" Minimum="0" Maximum="1" Value="0.7"
+                                Margin="8,0,8,0" VerticalAlignment="Center" />
                         <TextBlock x:Name="VolumeText" Text="70" FontFamily="{StaticResource TextFont}"
-                                   FontSize="10" Foreground="{StaticResource OnSurfaceMutedBrush}"
-                                   VerticalAlignment="Center" Width="20" />
+                                   FontSize="11" Foreground="{StaticResource OnSurfaceMutedBrush}"
+                                   VerticalAlignment="Center" Width="22" />
                     </StackPanel>
                 </StackPanel>
             </Grid>
         </Border>
 
         <!-- ==================== QUEUE ==================== -->
-        <Border Grid.Column="2" Style="{StaticResource CardStyle}" Padding="18,16,18,15">
+        <Border Grid.Column="2" Style="{StaticResource CardStyle}" Padding="20,18,20,17">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -200,20 +200,20 @@
 
                 <Grid>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="Очередь" Style="{StaticResource H2TextStyle}" FontSize="20" />
-                        <Border Style="{StaticResource ChipStyle}" Margin="9,1,0,0"
-                                VerticalAlignment="Center" Background="#0F6850E8" Padding="9,3">
+                        <TextBlock Text="Очередь" Style="{StaticResource H2TextStyle}" FontSize="21" />
+                        <Border Style="{StaticResource ChipStyle}" Margin="10,1,0,0"
+                                VerticalAlignment="Center" Background="#0F8B5CF6" Padding="10,4">
                             <TextBlock x:Name="TrackCountText" Text="0"
-                                       FontFamily="{StaticResource TextFont}" FontSize="10"
+                                       FontFamily="{StaticResource TextFont}" FontSize="10.5"
                                        FontWeight="SemiBold" Foreground="{StaticResource PrimaryBrush}" />
                         </Border>
                     </StackPanel>
                     <TextBlock Text="Нажмите на трек, чтобы включить"
-                               Style="{StaticResource CaptionTextStyle}" FontSize="10.5"
+                               Style="{StaticResource CaptionTextStyle}" FontSize="11"
                                HorizontalAlignment="Right" VerticalAlignment="Center" />
                 </Grid>
 
-                <Grid Grid.Row="1" Margin="0,7,0,0">
+                <Grid Grid.Row="1" Margin="0,9,0,0">
                     <ListBox x:Name="PlaylistBox" Style="{StaticResource TrackListStyle}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -223,66 +223,67 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <Border Width="34" Height="34" CornerRadius="11"
-                                            Background="#F1EBFA" VerticalAlignment="Center">
+                                    <Border Width="36" Height="36" CornerRadius="10"
+                                            Background="{StaticResource SurfaceContainerBrush}" VerticalAlignment="Center">
                                         <TextBlock Text="&#xE8D6;" FontFamily="{StaticResource IconFont}"
-                                                   FontSize="13" Foreground="{StaticResource PrimaryBrush}"
+                                                   FontSize="14" Foreground="{StaticResource PrimaryBrush}"
                                                    HorizontalAlignment="Center" VerticalAlignment="Center" />
                                     </Border>
-                                    <StackPanel Grid.Column="1" Margin="10,0,10,0"
+                                    <StackPanel Grid.Column="1" Margin="11,0,11,0"
                                                 VerticalAlignment="Center">
                                         <TextBlock Text="{Binding Title}"
                                                    FontFamily="{StaticResource TextFont}"
-                                                   FontSize="13" FontWeight="SemiBold"
+                                                   FontSize="13.5" FontWeight="SemiBold"
                                                    Foreground="{StaticResource OnSurfaceBrush}"
                                                    TextTrimming="CharacterEllipsis" />
                                         <TextBlock Text="{Binding Artist}"
                                                    FontFamily="{StaticResource TextFont}"
-                                                   FontSize="10.5"
+                                                   FontSize="11"
                                                    Foreground="{StaticResource OnSurfaceMutedBrush}"
                                                    TextTrimming="CharacterEllipsis" Margin="0,1,0,0" />
                                     </StackPanel>
-                                    <Border Grid.Column="2" Background="#0F6850E8" CornerRadius="7"
-                                            Padding="6,3" VerticalAlignment="Center">
+                                    <Border Grid.Column="2" Background="#0F8B5CF6" CornerRadius="8"
+                                            Padding="7,3" VerticalAlignment="Center">
                                         <TextBlock Text="{Binding Badge}"
                                                    FontFamily="{StaticResource TextFont}"
-                                                   FontSize="8.5" FontWeight="SemiBold"
+                                                   FontSize="9" FontWeight="SemiBold"
                                                    Foreground="{StaticResource PrimaryBrush}" />
                                     </Border>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <Border x:Name="EmptyState" Background="#FAF7FF" CornerRadius="20"
-                            Visibility="Collapsed">
+                    <Border x:Name="EmptyState" Background="#14121E" CornerRadius="20"
+                            Visibility="Collapsed"
+                            BorderBrush="#2A2240" BorderThickness="1">
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
-                                    MaxWidth="310" Margin="18">
-                            <Border Width="66" Height="66" CornerRadius="24"
+                                    MaxWidth="320" Margin="20">
+                            <Border Width="68" Height="68" CornerRadius="24"
                                     Background="{StaticResource PrimaryContainerBrush}"
                                     HorizontalAlignment="Center">
                                 <TextBlock x:Name="EmptyIcon" Text="&#xE8B7;"
-                                           FontFamily="{StaticResource IconFont}" FontSize="27"
+                                           FontFamily="{StaticResource IconFont}" FontSize="28"
                                            Foreground="{StaticResource PrimaryBrush}"
                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                             <TextBlock x:Name="EmptyTitleText" Text="Здесь появится музыка"
-                                       Style="{StaticResource H2TextStyle}" FontSize="18"
-                                       HorizontalAlignment="Center" Margin="0,13,0,0" />
+                                       Style="{StaticResource H2TextStyle}" FontSize="19"
+                                       HorizontalAlignment="Center" Margin="0,14,0,0" />
                             <TextBlock x:Name="EmptyHintText"
-                                       Text="Выберите папку — Lumen найдёт MP3, WAV, FLAC и другие треки."
-                                       Style="{StaticResource CaptionTextStyle}" FontSize="11.5"
+                                       Text="Выберите папку — Aurora найдёт MP3, WAV, FLAC и другие треки."
+                                       Style="{StaticResource CaptionTextStyle}" FontSize="12"
                                        TextAlignment="Center" TextWrapping="Wrap"
-                                       HorizontalAlignment="Center" Margin="0,4,0,0" LineHeight="17" />
+                                       HorizontalAlignment="Center" Margin="0,5,0,0" LineHeight="18" />
                             <Button x:Name="EmptyChooseButton" Style="{StaticResource TonalButtonStyle}"
-                                    Content="Выбрать папку" Height="38" Padding="18,0"
-                                    HorizontalAlignment="Center" Margin="0,14,0,0" />
+                                    Content="Выбрать папку" Height="40" Padding="20,0"
+                                    HorizontalAlignment="Center" Margin="0,16,0,0" />
                         </StackPanel>
                     </Border>
                 </Grid>
 
-                <Border Grid.Row="2" Height="60" CornerRadius="19" Background="#F8F3FF"
-                        BorderBrush="#0F6850E8" BorderThickness="1" Margin="0,10,0,0"
-                        Padding="12,0">
+                <Border Grid.Row="2" Height="62" CornerRadius="20" Background="#14121E"
+                        BorderBrush="#0F8B5CF6" BorderThickness="1" Margin="0,12,0,0"
+                        Padding="14,0">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -291,33 +292,33 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <Border Width="34" Height="34" CornerRadius="12"
+                        <Border Width="36" Height="36" CornerRadius="12"
                                 Background="{StaticResource PrimaryContainerBrush}"
                                 VerticalAlignment="Center">
                             <TextBlock Text="&#xE701;" FontFamily="{StaticResource IconFont}"
-                                       FontSize="14" Foreground="{StaticResource PrimaryBrush}"
+                                       FontSize="15" Foreground="{StaticResource PrimaryBrush}"
                                        HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
 
-                        <StackPanel Grid.Column="1" Margin="10,0,8,0" VerticalAlignment="Center">
+                        <StackPanel Grid.Column="1" Margin="11,0,10,0" VerticalAlignment="Center">
                             <TextBlock Text="Слушать на других устройствах"
-                                       FontFamily="{StaticResource TextFont}" FontSize="11.5"
+                                       FontFamily="{StaticResource TextFont}" FontSize="12"
                                        FontWeight="SemiBold" Foreground="{StaticResource OnSurfaceBrush}" />
                             <TextBlock x:Name="StreamUrlText" Text="http://localhost:8737"
-                                       FontFamily="{StaticResource TextFont}" FontSize="10.5"
+                                       FontFamily="{StaticResource TextFont}" FontSize="11"
                                        Foreground="{StaticResource PrimaryBrush}"
                                        TextTrimming="CharacterEllipsis" />
                         </StackPanel>
 
                         <Button x:Name="CopyStreamButton" Grid.Column="2"
-                                Style="{StaticResource IconButtonStyle}" Width="32" Height="32"
+                                Style="{StaticResource IconButtonStyle}" Width="34" Height="34"
                                 Background="Transparent" ToolTip="Скопировать ссылку">
-                            <TextBlock Text="&#xE8C8;" FontFamily="{StaticResource IconFont}" FontSize="12" />
+                            <TextBlock Text="&#xE8C8;" FontFamily="{StaticResource IconFont}" FontSize="13" />
                         </Button>
                         <Button x:Name="OpenStreamButton" Grid.Column="3"
-                                Style="{StaticResource IconButtonStyle}" Width="32" Height="32"
+                                Style="{StaticResource IconButtonStyle}" Width="34" Height="34"
                                 Background="Transparent" ToolTip="Открыть веб-плеер">
-                            <TextBlock Text="&#xE8A7;" FontFamily="{StaticResource IconFont}" FontSize="12" />
+                            <TextBlock Text="&#xE8A7;" FontFamily="{StaticResource IconFont}" FontSize="13" />
                         </Button>
                     </Grid>
                 </Border>

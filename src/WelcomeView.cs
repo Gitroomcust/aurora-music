@@ -61,7 +61,7 @@ namespace Lumen
             {
                 _streamStatus.Text = "Стриминг недоступен";
                 _streamUrl.Text = "";
-                _networkDot.Fill = new SolidColorBrush(Color.FromRgb(150, 143, 160));
+                _networkDot.Fill = new SolidColorBrush(Color.FromRgb(142, 142, 160));
                 _openWebButton.IsEnabled = false;
             }
             else

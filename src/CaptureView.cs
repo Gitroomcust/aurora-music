@@ -165,7 +165,7 @@ namespace Lumen
             _starting = true;
             _captureStatus.Text = "Подключение…";
             _captureHint.Text = "Открываем системный микшер";
-            _captureStatusDot.Fill = new SolidColorBrush(Color.FromRgb(255, 179, 107));
+            _captureStatusDot.Fill = new SolidColorBrush(Color.FromRgb(251, 191, 36));
 
             WasapiLoopbackCapture capture = new WasapiLoopbackCapture();
             capture.DataAvailable += OnCaptureData;
@@ -273,7 +273,7 @@ namespace Lumen
             _elapsed.Text = "00:00";
             _peak.Text = "— дБ";
             _levelBar.Width = 0;
-            _captureStatusDot.Fill = new SolidColorBrush(Color.FromRgb(138, 129, 151));
+            _captureStatusDot.Fill = new SolidColorBrush(Color.FromRgb(142, 142, 160));
             _captureStatus.Text = "Пауза";
             _captureHint.Text = "Запустите захват, чтобы начать эфир";
             _captureGlyph.Text = "\uE768";
@@ -319,45 +319,45 @@ namespace Lumen
 
             if (live)
             {
-                _headerChip.Background = new SolidColorBrush(Color.FromArgb(22, 255, 111, 135));
-                _headerChipDot.Fill = new SolidColorBrush(Color.FromRgb(255, 111, 135));
+                _headerChip.Background = new SolidColorBrush(Color.FromArgb(26, 244, 114, 182));
+                _headerChipDot.Fill = new SolidColorBrush(Color.FromRgb(244, 114, 182));
                 _headerChipText.Text = "В ЭФИРЕ";
-                _headerChipText.Foreground = new SolidColorBrush(Color.FromRgb(197, 38, 73));
+                _headerChipText.Foreground = new SolidColorBrush(Color.FromRgb(244, 114, 182));
 
-                _liveBadge.Background = new SolidColorBrush(Color.FromArgb(30, 255, 111, 135));
-                _liveBadgeDot.Fill = new SolidColorBrush(Color.FromRgb(255, 143, 162));
+                _liveBadge.Background = new SolidColorBrush(Color.FromArgb(30, 244, 114, 182));
+                _liveBadgeDot.Fill = new SolidColorBrush(Color.FromRgb(255, 175, 212));
                 _liveBadgeText.Text = "LIVE";
-                _liveBadgeText.Foreground = new SolidColorBrush(Color.FromRgb(255, 195, 207));
+                _liveBadgeText.Foreground = new SolidColorBrush(Color.FromRgb(255, 214, 232));
 
-                _streamStateChip.Background = new SolidColorBrush(Color.FromArgb(22, 47, 191, 143));
+                _streamStateChip.Background = new SolidColorBrush(Color.FromArgb(22, 34, 211, 238));
                 _streamStateText.Text = "LIVE";
-                _streamStateText.Foreground = new SolidColorBrush(Color.FromRgb(23, 123, 93));
+                _streamStateText.Foreground = new SolidColorBrush(Color.FromRgb(34, 211, 238));
 
-                _captureStatusDot.Fill = new SolidColorBrush(Color.FromRgb(47, 191, 143));
+                _captureStatusDot.Fill = new SolidColorBrush(Color.FromRgb(34, 211, 238));
                 _captureStatus.Text = "Идёт захват";
                 _captureHint.Text = "Нажмите, чтобы остановить эфир";
             }
             else
             {
                 bool isError = error;
-                Color chipColor = isError ? Color.FromRgb(229, 72, 77) : Color.FromRgb(138, 129, 151);
+                Color chipColor = isError ? Color.FromRgb(229, 72, 77) : Color.FromRgb(142, 142, 160);
                 _headerChip.Background = new SolidColorBrush(isError
                     ? Color.FromArgb(22, 229, 72, 77)
-                    : Color.FromArgb(18, 138, 129, 151));
+                    : Color.FromArgb(18, 142, 142, 160));
                 _headerChipDot.Fill = new SolidColorBrush(chipColor);
                 _headerChipText.Text = !string.IsNullOrEmpty(headerText) ? headerText : "ПАУЗА";
                 _headerChipText.Foreground = new SolidColorBrush(isError
-                    ? Color.FromRgb(179, 38, 45)
-                    : Color.FromRgb(99, 91, 112));
+                    ? Color.FromRgb(248, 113, 113)
+                    : Color.FromRgb(199, 199, 214));
 
                 _liveBadge.Background = new SolidColorBrush(Color.FromArgb(20, 255, 255, 255));
-                _liveBadgeDot.Fill = new SolidColorBrush(Color.FromRgb(142, 130, 166));
+                _liveBadgeDot.Fill = new SolidColorBrush(Color.FromRgb(142, 142, 160));
                 _liveBadgeText.Text = isError ? "ERROR" : "PAUSE";
-                _liveBadgeText.Foreground = new SolidColorBrush(Color.FromRgb(185, 174, 204));
+                _liveBadgeText.Foreground = new SolidColorBrush(Color.FromRgb(199, 199, 214));
 
-                _streamStateChip.Background = new SolidColorBrush(Color.FromArgb(18, 138, 129, 151));
+                _streamStateChip.Background = new SolidColorBrush(Color.FromArgb(18, 142, 142, 160));
                 _streamStateText.Text = "OFF";
-                _streamStateText.Foreground = new SolidColorBrush(Color.FromRgb(120, 111, 136));
+                _streamStateText.Foreground = new SolidColorBrush(Color.FromRgb(142, 142, 160));
 
                 if (isError)
                 {
@@ -366,7 +366,7 @@ namespace Lumen
                 }
                 else
                 {
-                    _captureStatusDot.Fill = new SolidColorBrush(Color.FromRgb(138, 129, 151));
+                    _captureStatusDot.Fill = new SolidColorBrush(Color.FromRgb(142, 142, 160));
                     _captureStatus.Text = "Пауза";
                     _captureHint.Text = "Запустите захват, чтобы начать эфир";
                 }

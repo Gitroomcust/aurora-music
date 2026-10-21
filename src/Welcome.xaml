@@ -5,18 +5,18 @@
     <StackPanel x:Name="Hero" VerticalAlignment="Center" HorizontalAlignment="Center"
                 Margin="0,2,0,8">
 
-        <TextBlock Text="ВАШЕ МУЗЫКАЛЬНОЕ ПРОСТРАНСТВО" Style="{StaticResource LabelTextStyle}"
+        <TextBlock Text="АУРОРА" Style="{StaticResource LabelTextStyle}"
                    HorizontalAlignment="Center" FontSize="10" Opacity="0.85" />
 
-        <Border Width="66" Height="66" CornerRadius="33" Margin="0,15,0,0"
+        <Border Width="68" Height="68" CornerRadius="17" Margin="0,15,0,0"
                 HorizontalAlignment="Center" BorderBrush="#33FFFFFF" BorderThickness="2"
                 Background="{StaticResource BrandGradientBrush}">
             <Border.Effect>
-                <DropShadowEffect BlurRadius="20" ShadowDepth="5" Direction="270"
-                                  Color="#7755D6" Opacity="0.30" />
+                <DropShadowEffect BlurRadius="22" ShadowDepth="6" Direction="270"
+                                  Color="#8B5CF6" Opacity="0.40" />
             </Border.Effect>
             <TextBlock x:Name="UserInitialText" Text="&#xE8D6;" FontFamily="{StaticResource IconFont}"
-                       FontSize="26" Foreground="White"
+                       FontSize="26" Foreground="#000000"
                        HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,2" />
         </Border>
 
@@ -25,66 +25,66 @@
         <TextBlock x:Name="UserNameText" Visibility="Collapsed" />
 
         <TextBlock x:Name="SubtitleText"
-                   Text="Включите музыку с этого компьютера или транслируйте звук из любых приложений."
+                   Text="Ваше личное музыкальное пространство. Локальная музыка и трансляция звука из любых приложений."
                    Style="{StaticResource BodyTextStyle}" FontSize="15.5" TextAlignment="Center"
-                   HorizontalAlignment="Center" MaxWidth="610" TextWrapping="Wrap"
-                   Margin="0,7,0,0" />
+                   HorizontalAlignment="Center" MaxWidth="620" TextWrapping="Wrap"
+                   Margin="0,8,0,0" />
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,28,0,0">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,30,0,0">
             <!-- ==================== LOCAL MUSIC ==================== -->
             <Button x:Name="LocalCardButton" Style="{StaticResource BareButtonStyle}"
-                    Width="320" Height="198" Margin="8,0" ToolTip="Открыть музыку из папки на компьютере">
-                <Grid Width="320" Height="198" RenderTransformOrigin="0.5,0.5">
+                    Width="320" Height="200" Margin="10,0" ToolTip="Открыть музыку из папки на компьютере">
+                <Grid Width="320" Height="200" RenderTransformOrigin="0.5,0.5">
                     <Grid.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform x:Name="LocalScale" />
                             <TranslateTransform x:Name="LocalTranslate" />
                         </TransformGroup>
                     </Grid.RenderTransform>
-                    <Border CornerRadius="30">
+                    <Border CornerRadius="26">
                         <Border.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                <GradientStop Color="#7C5CFF" Offset="0" />
-                                <GradientStop Color="#5A86FF" Offset="1" />
+                                <GradientStop Color="#8B5CF6" Offset="0" />
+                                <GradientStop Color="#6D28D9" Offset="1" />
                             </LinearGradientBrush>
                         </Border.Background>
                         <Border.Effect>
-                            <DropShadowEffect BlurRadius="30" ShadowDepth="10" Direction="270"
-                                              Color="#6A55E0" Opacity="0.26" />
+                            <DropShadowEffect BlurRadius="32" ShadowDepth="12" Direction="270"
+                                              Color="#6D28D9" Opacity="0.35" />
                         </Border.Effect>
                         <Grid ClipToBounds="True">
                             <Canvas IsHitTestVisible="False">
-                                <Ellipse Width="230" Height="230" Canvas.Left="190" Canvas.Top="-96"
+                                <Ellipse Width="240" Height="240" Canvas.Left="190" Canvas.Top="-100"
                                          Stroke="#2BFFFFFF" StrokeThickness="1" />
-                                <Ellipse Width="150" Height="150" Canvas.Left="228" Canvas.Top="-55"
+                                <Ellipse Width="160" Height="160" Canvas.Left="230" Canvas.Top="-60"
                                          Stroke="#22FFFFFF" StrokeThickness="1" />
-                                <Ellipse Width="110" Height="110" Canvas.Left="-52" Canvas.Top="148"
+                                <Ellipse Width="120" Height="120" Canvas.Left="-50" Canvas.Top="150"
                                          Stroke="#1EFFFFFF" StrokeThickness="1" />
                             </Canvas>
 
-                            <StackPanel Margin="25,22,25,20">
-                                <Border Width="48" Height="48" CornerRadius="17" Background="#2EFFFFFF"
+                            <StackPanel Margin="26,24,26,22">
+                                <Border Width="50" Height="50" CornerRadius="16" Background="#2EFFFFFF"
                                         HorizontalAlignment="Left">
-                                    <Viewbox Width="22" Height="22" HorizontalAlignment="Center"
+                                    <Viewbox Width="24" Height="24" HorizontalAlignment="Center"
                                              VerticalAlignment="Center">
-                                        <Path Fill="White"
+                                        <Path Fill="#000000"
                                               Data="M2.5,7 L2.5,5.5 C2.5,4.4 3.4,3.5 4.5,3.5 L8.5,3.5 C8.9,3.5 9.3,3.7 9.6,4 L11.2,6 L19.5,6 C20.6,6 21.5,6.9 21.5,8 L21.5,18 C21.5,19.1 20.6,20 19.5,20 L4.5,20 C3.4,20 2.5,19.1 2.5,18 Z" />
                                     </Viewbox>
                                 </Border>
                                 <TextBlock Text="Локальная музыка" FontFamily="{StaticResource DisplayFont}"
-                                           FontSize="23" FontWeight="SemiBold" Foreground="White"
+                                           FontSize="23" FontWeight="SemiBold" Foreground="#000000"
                                            Margin="0,17,0,0" />
                                 <TextBlock Text="Папка, плейлист и ваши любимые треки"
                                            FontFamily="{StaticResource TextFont}" FontSize="13"
-                                           Foreground="#DFFFFFFF" TextWrapping="Wrap"
-                                           Width="236" Margin="0,4,0,0" LineHeight="18" />
+                                           Foreground="#3A3A4A" TextWrapping="Wrap"
+                                           Width="240" Margin="0,4,0,0" LineHeight="18" />
                             </StackPanel>
 
-                            <Border Width="38" Height="38" CornerRadius="19" Background="#2BFFFFFF"
+                            <Border Width="40" Height="40" CornerRadius="20" Background="#2BFFFFFF"
                                     HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                                    Margin="0,0,21,20">
+                                    Margin="0,0,22,22">
                                 <TextBlock Text="&#xE72A;" FontFamily="{StaticResource IconFont}"
-                                           FontSize="14" Foreground="White"
+                                           FontSize="15" Foreground="#000000"
                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                         </Grid>
@@ -94,64 +94,64 @@
 
             <!-- ==================== SYSTEM AUDIO ==================== -->
             <Button x:Name="CaptureCardButton" Style="{StaticResource BareButtonStyle}"
-                    Width="320" Height="198" Margin="8,0" ToolTip="Захватить системный звук с любых приложений">
-                <Grid Width="320" Height="198" RenderTransformOrigin="0.5,0.5">
+                    Width="320" Height="200" Margin="10,0" ToolTip="Захватить системный звук с любых приложений">
+                <Grid Width="320" Height="200" RenderTransformOrigin="0.5,0.5">
                     <Grid.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform x:Name="CaptureScale" />
                             <TranslateTransform x:Name="CaptureTranslate" />
                         </TransformGroup>
                     </Grid.RenderTransform>
-                    <Border CornerRadius="30">
+                    <Border CornerRadius="26">
                         <Border.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                <GradientStop Color="#FF7D6B" Offset="0" />
-                                <GradientStop Color="#FF5D9E" Offset="1" />
+                                <GradientStop Color="#F472B6" Offset="0" />
+                                <GradientStop Color="#BE185D" Offset="1" />
                             </LinearGradientBrush>
                         </Border.Background>
                         <Border.Effect>
-                            <DropShadowEffect BlurRadius="30" ShadowDepth="10" Direction="270"
-                                              Color="#E45B7D" Opacity="0.24" />
+                            <DropShadowEffect BlurRadius="32" ShadowDepth="12" Direction="270"
+                                              Color="#BE185D" Opacity="0.32" />
                         </Border.Effect>
                         <Grid ClipToBounds="True">
                             <Canvas IsHitTestVisible="False">
-                                <Ellipse Width="230" Height="230" Canvas.Left="190" Canvas.Top="-96"
+                                <Ellipse Width="240" Height="240" Canvas.Left="190" Canvas.Top="-100"
                                          Stroke="#2BFFFFFF" StrokeThickness="1" />
-                                <Ellipse Width="150" Height="150" Canvas.Left="228" Canvas.Top="-55"
+                                <Ellipse Width="160" Height="160" Canvas.Left="230" Canvas.Top="-60"
                                          Stroke="#22FFFFFF" StrokeThickness="1" />
-                                <Ellipse Width="110" Height="110" Canvas.Left="-52" Canvas.Top="148"
+                                <Ellipse Width="120" Height="120" Canvas.Left="-50" Canvas.Top="150"
                                          Stroke="#1EFFFFFF" StrokeThickness="1" />
                             </Canvas>
 
-                            <StackPanel Margin="25,22,25,20">
-                                <Border Width="48" Height="48" CornerRadius="17" Background="#2EFFFFFF"
+                            <StackPanel Margin="26,24,26,22">
+                                <Border Width="50" Height="50" CornerRadius="16" Background="#2EFFFFFF"
                                         HorizontalAlignment="Left">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
                                                 HorizontalAlignment="Center">
-                                        <Border Width="3" Height="12" CornerRadius="2" Background="White"
+                                        <Border Width="3" Height="14" CornerRadius="2" Background="#000000"
                                                 Margin="1.5,0" />
-                                        <Border Width="3" Height="23" CornerRadius="2" Background="White"
+                                        <Border Width="3" Height="24" CornerRadius="2" Background="#000000"
                                                 Margin="1.5,0" />
-                                        <Border Width="3" Height="17" CornerRadius="2" Background="White"
+                                        <Border Width="3" Height="18" CornerRadius="2" Background="#000000"
                                                 Margin="1.5,0" />
-                                        <Border Width="3" Height="8" CornerRadius="2" Background="#DFFFFFFF"
+                                        <Border Width="3" Height="10" CornerRadius="2" Background="#3A3A4A"
                                                 Margin="1.5,0" />
                                     </StackPanel>
                                 </Border>
                                 <TextBlock Text="Захват звука" FontFamily="{StaticResource DisplayFont}"
-                                           FontSize="23" FontWeight="SemiBold" Foreground="White"
+                                           FontSize="23" FontWeight="SemiBold" Foreground="#000000"
                                            Margin="0,17,0,0" />
                                 <TextBlock Text="Системный звук из плеера, браузера или игры"
                                            FontFamily="{StaticResource TextFont}" FontSize="13"
-                                           Foreground="#DFFFFFFF" TextWrapping="Wrap"
-                                           Width="236" Margin="0,4,0,0" LineHeight="18" />
+                                           Foreground="#3A3A4A" TextWrapping="Wrap"
+                                           Width="240" Margin="0,4,0,0" LineHeight="18" />
                             </StackPanel>
 
-                            <Border Width="38" Height="38" CornerRadius="19" Background="#2BFFFFFF"
+                            <Border Width="40" Height="40" CornerRadius="20" Background="#2BFFFFFF"
                                     HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                                    Margin="0,0,21,20">
+                                    Margin="0,0,22,22">
                                 <TextBlock Text="&#xE72A;" FontFamily="{StaticResource IconFont}"
-                                           FontSize="14" Foreground="White"
+                                           FontSize="15" Foreground="#000000"
                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                         </Grid>
@@ -160,11 +160,11 @@
             </Button>
         </StackPanel>
 
-        <Border HorizontalAlignment="Center" Margin="0,22,0,0" Background="#86FFFFFF"
-                BorderBrush="#141D1B20" BorderThickness="1" CornerRadius="18" Padding="13,7">
+        <Border HorizontalAlignment="Center" Margin="0,24,0,0" Background="#14121E"
+                BorderBrush="#2A2240" BorderThickness="1" CornerRadius="20" Padding="14,8">
             <StackPanel Orientation="Horizontal">
-                <Ellipse x:Name="NetworkDot" Width="7" Height="7" Fill="{StaticResource SuccessBrush}"
-                         VerticalAlignment="Center" Margin="0,0,8,0" />
+                <Ellipse x:Name="NetworkDot" Width="8" Height="8" Fill="{StaticResource SuccessBrush}"
+                         VerticalAlignment="Center" Margin="0,0,9,0" />
                 <TextBlock x:Name="StreamStatusText" Text="Стриминг по Wi-Fi"
                            Style="{StaticResource CaptionTextStyle}" FontSize="12"
                            Foreground="{StaticResource OnSurfaceVariantBrush}" VerticalAlignment="Center" />
@@ -172,10 +172,10 @@
                            Style="{StaticResource CaptionTextStyle}" FontSize="12"
                            Foreground="{StaticResource PrimaryBrush}" VerticalAlignment="Center"
                            Margin="8,0,0,0" />
-                <Border Width="1" Height="13" Background="{StaticResource OutlineBrush}"
+                <Border Width="1" Height="14" Background="{StaticResource OutlineBrush}"
                         Margin="10,0" VerticalAlignment="Center" />
                 <Button x:Name="OpenWebButton" Content="Открыть веб-плеер"
-                        Style="{StaticResource TextButtonStyle}" FontSize="12" Padding="7,3" />
+                        Style="{StaticResource TextButtonStyle}" FontSize="12" Padding="8,3" />
             </StackPanel>
         </Border>
     </StackPanel>

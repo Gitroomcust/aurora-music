@@ -27,14 +27,15 @@
                        Style="{StaticResource CaptionTextStyle}" FontSize="11.5" Margin="0,1,0,0" />
         </StackPanel>
 
-        <Border x:Name="HeaderChip" Grid.Column="2" Background="#0F2FBF8F" CornerRadius="14"
-                Padding="11,6" VerticalAlignment="Center">
+        <Border x:Name="HeaderChip" Grid.Column="2" Background="#14121E" CornerRadius="14"
+                Padding="12,6" VerticalAlignment="Center"
+                BorderBrush="#2A2240" BorderThickness="1">
             <StackPanel Orientation="Horizontal">
-                <Ellipse x:Name="HeaderChipDot" Width="7" Height="7" Fill="{StaticResource SuccessBrush}"
-                         VerticalAlignment="Center" Margin="0,0,7,0" />
+                <Ellipse x:Name="HeaderChipDot" Width="8" Height="8" Fill="{StaticResource SuccessBrush}"
+                         VerticalAlignment="Center" Margin="0,0,8,0" />
                 <TextBlock x:Name="HeaderChipText" Text="ПАУЗА"
                            FontFamily="{StaticResource TextFont}" FontSize="10" FontWeight="Bold"
-                           Foreground="#177B5D" VerticalAlignment="Center" />
+                           Foreground="#22D3EE" VerticalAlignment="Center" />
             </StackPanel>
         </Border>
     </Grid>
@@ -44,37 +45,37 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="16" />
-            <ColumnDefinition Width="342" />
+            <ColumnDefinition Width="350" />
         </Grid.ColumnDefinitions>
 
         <!-- ==================== LIVE VISUAL ==================== -->
-        <Border x:Name="VisualCard" CornerRadius="30" Padding="24,20,24,20" ClipToBounds="True">
+        <Border x:Name="VisualCard" CornerRadius="32" Padding="26,22,26,22" ClipToBounds="True">
             <Border.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#17131F" Offset="0" />
-                    <GradientStop Color="#211832" Offset="0.55" />
-                    <GradientStop Color="#34203E" Offset="1" />
+                    <GradientStop Color="#0A0812" Offset="0" />
+                    <GradientStop Color="#161026" Offset="0.55" />
+                    <GradientStop Color="#0C0A18" Offset="1" />
                 </LinearGradientBrush>
             </Border.Background>
             <Border.Effect>
-                <DropShadowEffect BlurRadius="30" ShadowDepth="10" Direction="270"
-                                  Color="#25123B" Opacity="0.24" />
+                <DropShadowEffect BlurRadius="34" ShadowDepth="12" Direction="270"
+                                  Color="#000000" Opacity="0.5" />
             </Border.Effect>
             <Grid>
-                <Canvas IsHitTestVisible="False" Opacity="0.9">
-                    <Ellipse Canvas.Left="440" Canvas.Top="-30" Width="310" Height="310">
+                <Canvas IsHitTestVisible="False" Opacity="0.6">
+                    <Ellipse Canvas.Left="420" Canvas.Top="-40" Width="360" Height="360">
                         <Ellipse.Fill>
                             <RadialGradientBrush>
-                                <GradientStop Color="#3DFF6F87" Offset="0" />
-                                <GradientStop Color="#00FF6F87" Offset="1" />
+                                <GradientStop Color="#2AF472B6" Offset="0" />
+                                <GradientStop Color="#00F472B6" Offset="1" />
                             </RadialGradientBrush>
                         </Ellipse.Fill>
                     </Ellipse>
-                    <Ellipse Canvas.Left="-60" Canvas.Top="260" Width="350" Height="350">
+                    <Ellipse Canvas.Left="-80" Canvas.Top="280" Width="420" Height="420">
                         <Ellipse.Fill>
                             <RadialGradientBrush>
-                                <GradientStop Color="#337C5CFF" Offset="0" />
-                                <GradientStop Color="#007C5CFF" Offset="1" />
+                                <GradientStop Color="#1A8B5CF6" Offset="0" />
+                                <GradientStop Color="#008B5CF6" Offset="1" />
                             </RadialGradientBrush>
                         </Ellipse.Fill>
                     </Ellipse>
@@ -89,30 +90,32 @@
 
                     <Grid>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Border Background="#18FFFFFF" CornerRadius="11" Padding="9,4">
+                            <Border Background="#14121E" CornerRadius="12" Padding="10,4"
+                                    BorderBrush="#2A2240" BorderThickness="1">
                                 <TextBlock Text="СИСТЕМНЫЙ ЗВУК" FontFamily="{StaticResource TextFont}"
                                            FontSize="9" FontWeight="Bold" Foreground="#D9CCEE" />
                             </Border>
                             <TextBlock Text="Поток с этого компьютера"
-                                       FontFamily="{StaticResource TextFont}" FontSize="11.5"
-                                       Foreground="#8E82A6" VerticalAlignment="Center" Margin="10,0,0,0" />
+                                       FontFamily="{StaticResource TextFont}" FontSize="12"
+                                       Foreground="#8E8EA0" VerticalAlignment="Center" Margin="11,0,0,0" />
                         </StackPanel>
 
-                        <Border x:Name="LiveBadge" Background="#22FF6F87" CornerRadius="11"
-                                Padding="9,4" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Border x:Name="LiveBadge" Background="#1AF472B6" CornerRadius="12"
+                                Padding="10,4" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                BorderBrush="#66F472B6" BorderThickness="1">
                             <StackPanel Orientation="Horizontal">
-                                <Ellipse x:Name="LiveBadgeDot" Width="6" Height="6" Fill="#FF8FA2"
-                                         VerticalAlignment="Center" Margin="0,0,6,0" />
+                                <Ellipse x:Name="LiveBadgeDot" Width="7" Height="7" Fill="#FF8FA2"
+                                         VerticalAlignment="Center" Margin="0,0,7,0" />
                                 <TextBlock x:Name="LiveBadgeText" Text="LIVE"
-                                           FontFamily="{StaticResource TextFont}" FontSize="9"
+                                           FontFamily="{StaticResource TextFont}" FontSize="10"
                                            FontWeight="Bold" Foreground="#FFC3CF" />
                             </StackPanel>
                         </Border>
                     </Grid>
 
-                    <Grid x:Name="WaveformHost" Grid.Row="1" Margin="-8,8,-8,0" MinHeight="190" />
+                    <Grid x:Name="WaveformHost" Grid.Row="1" Margin="-10,10,-10,0" MinHeight="200" />
 
-                    <Grid Grid.Row="2" Margin="0,2,0,0">
+                    <Grid Grid.Row="2" Margin="0,4,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
@@ -123,20 +126,20 @@
                             <TextBlock Text="ДЛИТЕЛЬНОСТЬ" FontFamily="{StaticResource TextFont}"
                                        FontSize="9" FontWeight="SemiBold" Foreground="#7E718F" />
                             <TextBlock x:Name="ElapsedText" Text="00:00"
-                                       FontFamily="{StaticResource DisplayFont}" FontSize="45"
+                                       FontFamily="{StaticResource DisplayFont}" FontSize="48"
                                        FontWeight="SemiBold" Foreground="{StaticResource OnDarkBrush}"
                                        Margin="0,-2,0,0" />
                         </StackPanel>
 
-                        <StackPanel Grid.Column="1" Margin="22,0,22,5" VerticalAlignment="Bottom">
+                        <StackPanel Grid.Column="1" Margin="24,0,24,6" VerticalAlignment="Bottom">
                             <Grid>
                                 <TextBlock Text="ПИК" FontFamily="{StaticResource TextFont}" FontSize="9"
                                            FontWeight="SemiBold" Foreground="#7E718F" />
                                 <TextBlock x:Name="PeakText" Text="— дБ" FontFamily="{StaticResource TextFont}"
-                                           FontSize="10" FontWeight="SemiBold" Foreground="#D9CCEE"
+                                           FontSize="11" FontWeight="SemiBold" Foreground="#D9CCEE"
                                            HorizontalAlignment="Right" />
                             </Grid>
-                            <Border Height="6" CornerRadius="3" Background="#20FFFFFF" Margin="0,7,0,0">
+                            <Border Height="7" CornerRadius="3" Background="#20FFFFFF" Margin="0,8,0,0">
                                 <Border x:Name="LevelBar" Width="0" HorizontalAlignment="Left"
                                         CornerRadius="3" Background="{StaticResource WarmGradientBrush}" />
                             </Border>
@@ -147,8 +150,8 @@
                                        FontSize="9" FontWeight="SemiBold" Foreground="#7E718F"
                                        HorizontalAlignment="Right" />
                             <TextBlock x:Name="FormatText" Text="48 000 Гц · стерео · 16 бит"
-                                       FontFamily="{StaticResource TextFont}" FontSize="10.5"
-                                       Foreground="#B9AECC" Margin="0,3,0,0" />
+                                       FontFamily="{StaticResource TextFont}" FontSize="11"
+                                       Foreground="#B9B9C8" Margin="0,4,0,0" />
                         </StackPanel>
                     </Grid>
                 </Grid>
@@ -158,12 +161,12 @@
         <!-- ==================== RIGHT COLUMN ==================== -->
         <Grid Grid.Column="2">
             <Grid.RowDefinitions>
-                <RowDefinition Height="292" />
+                <RowDefinition Height="300" />
                 <RowDefinition Height="16" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Border Style="{StaticResource CardStyle}" Padding="20,18,20,14">
+            <Border Style="{StaticResource CardStyle}" Padding="22,20,22,16">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -175,31 +178,31 @@
                         <TextBlock Text="ЗАХВАТ" Style="{StaticResource LabelTextStyle}"
                                    Foreground="{StaticResource SecondaryBrush}" />
                         <TextBlock Text="Системный звук" Style="{StaticResource H2TextStyle}"
-                                   FontSize="21" Margin="0,3,0,0" />
+                                   FontSize="22" Margin="0,4,0,0" />
                         <TextBlock Text="Всё, что сейчас играет на компьютере"
-                                   Style="{StaticResource CaptionTextStyle}" FontSize="11"
-                                   Margin="0,2,0,0" />
+                                   Style="{StaticResource CaptionTextStyle}" FontSize="11.5"
+                                   Margin="0,3,0,0" />
                     </StackPanel>
 
                     <Button x:Name="CaptureToggleButton" Grid.Row="1"
-                            Style="{StaticResource BareButtonStyle}" Width="82" Height="82"
+                            Style="{StaticResource BareButtonStyle}" Width="86" Height="86"
                             HorizontalAlignment="Center" VerticalAlignment="Center"
                             ToolTip="Остановить захват">
-                        <Grid Width="82" Height="82" RenderTransformOrigin="0.5,0.5">
+                        <Grid Width="86" Height="86" RenderTransformOrigin="0.5,0.5">
                             <Grid.RenderTransform>
                                 <ScaleTransform x:Name="CaptureButtonScale" />
                             </Grid.RenderTransform>
-                            <Ellipse Width="82" Height="82" Fill="#12FF6F87" />
-                            <Ellipse Width="70" Height="70" Stroke="#1FFF6F87" StrokeThickness="1" />
-                            <Border Width="58" Height="58" CornerRadius="29"
+                            <Ellipse Width="86" Height="86" Fill="#14F472B6" />
+                            <Ellipse Width="74" Height="74" Stroke="#1FFF72B6" StrokeThickness="1" />
+                            <Border Width="62" Height="62" CornerRadius="31"
                                     Background="{StaticResource WarmGradientBrush}">
                                 <Border.Effect>
-                                    <DropShadowEffect BlurRadius="18" ShadowDepth="5" Direction="270"
-                                                      Color="#FF5D8A" Opacity="0.36" />
+                                    <DropShadowEffect BlurRadius="20" ShadowDepth="6" Direction="270"
+                                                      Color="#F472B6" Opacity="0.4" />
                                 </Border.Effect>
                                 <TextBlock x:Name="CaptureGlyph" Text="&#xE71A;"
-                                           FontFamily="{StaticResource IconFont}" FontSize="18"
-                                           Foreground="White" HorizontalAlignment="Center"
+                                           FontFamily="{StaticResource IconFont}" FontSize="20"
+                                           Foreground="#FFFFFF" HorizontalAlignment="Center"
                                            VerticalAlignment="Center" />
                             </Border>
                         </Grid>
@@ -207,21 +210,21 @@
 
                     <StackPanel Grid.Row="2" HorizontalAlignment="Center">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Ellipse x:Name="CaptureStatusDot" Width="7" Height="7"
+                            <Ellipse x:Name="CaptureStatusDot" Width="8" Height="8"
                                      Fill="{StaticResource SuccessBrush}" VerticalAlignment="Center"
-                                     Margin="0,0,7,0" />
+                                     Margin="0,0,8,0" />
                             <TextBlock x:Name="CaptureStatusText" Text="Подключение…"
-                                       FontFamily="{StaticResource TextFont}" FontSize="12"
+                                       FontFamily="{StaticResource TextFont}" FontSize="12.5"
                                        FontWeight="SemiBold" Foreground="{StaticResource OnSurfaceBrush}" />
                         </StackPanel>
                         <TextBlock x:Name="CaptureHintText" Text="Запустите захват, чтобы начать эфир"
-                                   Style="{StaticResource CaptionTextStyle}" FontSize="9.5"
-                                   HorizontalAlignment="Center" Margin="0,3,0,0" />
+                                   Style="{StaticResource CaptionTextStyle}" FontSize="10"
+                                   HorizontalAlignment="Center" Margin="0,4,0,0" />
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="18,15,18,14">
+            <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="20,16,20,15">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -232,51 +235,53 @@
 
                     <Grid>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Border Width="30" Height="30" CornerRadius="10"
+                            <Border Width="32" Height="32" CornerRadius="11"
                                     Background="{StaticResource PrimaryContainerBrush}">
                                 <TextBlock Text="&#xE701;" FontFamily="{StaticResource IconFont}"
-                                           FontSize="13" Foreground="{StaticResource PrimaryBrush}"
+                                           FontSize="14" Foreground="{StaticResource PrimaryBrush}"
                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                             <TextBlock Text="Трансляция по Wi-Fi" FontFamily="{StaticResource TextFont}"
-                                       FontSize="12.5" FontWeight="SemiBold"
+                                       FontSize="13" FontWeight="SemiBold"
                                        Foreground="{StaticResource OnSurfaceBrush}"
-                                       VerticalAlignment="Center" Margin="9,0,0,0" />
+                                       VerticalAlignment="Center" Margin="10,0,0,0" />
                         </StackPanel>
-                        <Border x:Name="StreamStateChip" Background="#0F2FBF8F" CornerRadius="9"
-                                Padding="7,3" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Border x:Name="StreamStateChip" Background="#14121E" CornerRadius="10"
+                                Padding="8,3" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                BorderBrush="#2A2240" BorderThickness="1">
                             <TextBlock x:Name="StreamStateText" Text="LIVE"
-                                       FontFamily="{StaticResource TextFont}" FontSize="8.5"
-                                       FontWeight="Bold" Foreground="#177B5D" />
+                                       FontFamily="{StaticResource TextFont}" FontSize="9.5"
+                                       FontWeight="Bold" Foreground="#22D3EE" />
                         </Border>
                     </Grid>
 
-                    <Border Grid.Row="1" Height="37" Margin="0,10,0,0" Background="{StaticResource SurfaceSoftBrush}"
-                            CornerRadius="12" Padding="10,0,3,0">
+                    <Border Grid.Row="1" Height="39" Margin="0,11,0,0" Background="{StaticResource SurfaceSoftBrush}"
+                            CornerRadius="13" Padding="11,0,4,0"
+                            BorderBrush="#2A2240" BorderThickness="1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <TextBlock x:Name="StreamUrlText" Text="http://localhost:8737"
-                                       FontFamily="{StaticResource TextFont}" FontSize="10.5"
+                                       FontFamily="{StaticResource TextFont}" FontSize="11"
                                        Foreground="{StaticResource PrimaryBrush}"
                                        VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                             <Button x:Name="CopyStreamButton" Grid.Column="1"
-                                    Style="{StaticResource IconButtonStyle}" Width="30" Height="30"
+                                    Style="{StaticResource IconButtonStyle}" Width="32" Height="32"
                                     Background="Transparent" ToolTip="Скопировать ссылку">
-                                <TextBlock Text="&#xE8C8;" FontFamily="{StaticResource IconFont}" FontSize="11" />
+                                <TextBlock Text="&#xE8C8;" FontFamily="{StaticResource IconFont}" FontSize="12" />
                             </Button>
                         </Grid>
                     </Border>
 
                     <Button x:Name="OpenWebButton" Grid.Row="2" Style="{StaticResource TonalButtonStyle}"
-                            Content="Открыть веб-плеер" Height="34" FontSize="11.5" Padding="14,0"
-                            Margin="0,8,0,0" />
+                            Content="Открыть веб-плеер" Height="38" FontSize="12" Padding="16,0"
+                            Margin="0,10,0,0" />
 
                     <TextBlock Grid.Row="3" Text="Откройте ссылку на телефоне в той же Wi-Fi сети."
-                               Style="{StaticResource CaptionTextStyle}" FontSize="9.5"
-                               TextWrapping="Wrap" Margin="2,7,2,0" />
+                               Style="{StaticResource CaptionTextStyle}" FontSize="10"
+                               TextWrapping="Wrap" Margin="2,8,2,0" />
                 </Grid>
             </Border>
         </Grid>
