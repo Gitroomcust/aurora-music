@@ -65,9 +65,12 @@
 
 ## Скачать
 
-- **Windows:** [Lumen 1.0](https://github.com/Gitroomcust/aurora-music/releases/tag/v1.0.0) — `Lumen-1.0-win64.zip`
-- **Android:** [Aurora Music 1.1](https://github.com/Gitroomcust/aurora-music/releases/tag/android-v1.1.0) — `AuroraMusic.apk`
-- [Все релизы](https://github.com/Gitroomcust/aurora-music/releases)
+Актуальные сборки в собственной айдентике **Aurora Standalone**:
+
+- **Windows:** [Lumen 1.0 — «Свой стиль»](https://github.com/Gitroomcust/aurora-music/releases/tag/v1.0.0-style) — `Lumen-1.0-win64.zip`
+- **Android:** [Aurora Music 1.1 — «Свой стиль»](https://github.com/Gitroomcust/aurora-music/releases/tag/android-v1.1.0-style) — `AuroraMusic.apk`
+
+Предыдущие выпуски: [Lumen 1.0](https://github.com/Gitroomcust/aurora-music/releases/tag/v1.0.0) · [Aurora Music 1.1](https://github.com/Gitroomcust/aurora-music/releases/tag/android-v1.1.0) · [все релизы](https://github.com/Gitroomcust/aurora-music/releases)
 
 ## Быстрый старт
 
