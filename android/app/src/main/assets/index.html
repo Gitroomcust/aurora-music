@@ -1792,6 +1792,13 @@ body.player-open #bgVisualizer { opacity: 0.65; }
     var w = window.innerWidth, h = window.innerHeight;
     if (bgCanvas.width === 0) return;
 
+    // The ambient visualizer is only visible behind the full-screen player.
+    // Skip the expensive gradients on the regular pages.
+    if (!document.body.classList.contains("player-open")){
+      bgCtx.clearRect(0, 0, w, h);
+      return;
+    }
+
     bgCtx.clearRect(0, 0, w, h);
 
     var playingNow = (!audio.paused && audio.currentTime > 0) || (isLive && !liveAudio.paused);
