@@ -1,6 +1,9 @@
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 
+# Builds the Windows icon (PNG + ICO) in the Aurora palette.
+# Usage: powershell -ExecutionPolicy Bypass -File tools\make-icon.ps1
+
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $assets = Join-Path $root 'assets'
 New-Item -ItemType Directory -Force -Path $assets | Out-Null
@@ -10,6 +13,7 @@ $bitmap = New-Object System.Drawing.Bitmap($size, $size, [System.Drawing.Imaging
 $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
 $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
 $graphics.CompositingQuality = [System.Drawing.Drawing2D.CompositingQuality]::HighQuality
+$graphics.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
 $graphics.Clear([System.Drawing.Color]::Transparent)
 
 function New-RoundedRectangle([System.Drawing.RectangleF]$rect, [float]$radius) {
@@ -27,59 +31,70 @@ function New-RoundedRectangle([System.Drawing.RectangleF]$rect, [float]$radius) 
     return $path
 }
 
+function New-SparkPath([float]$cx, [float]$cy, [float]$outer, [float]$pull) {
+    $path = New-Object System.Drawing.Drawing2D.GraphicsPath
+    $points = @()
+    for ($i = 0; $i -lt 4; $i++) {
+        $angle = ((-90 + 90 * $i) * [Math]::PI) / 180
+        $points += New-Object System.Drawing.PointF(
+            ($cx + $outer * [Math]::Cos($angle)),
+            ($cy + $outer * [Math]::Sin($angle)))
+    }
+    $path.StartFigure()
+    for ($i = 0; $i -lt 4; $i++) {
+        $p0 = $points[$i]
+        $p1 = $points[($i + 1) % 4]
+        $c1 = New-Object System.Drawing.PointF(($cx + ($p0.X - $cx) * $pull), ($cy + ($p0.Y - $cy) * $pull))
+        $c2 = New-Object System.Drawing.PointF(($cx + ($p1.X - $cx) * $pull), ($cy + ($p1.Y - $cy) * $pull))
+        $path.AddBezier($p0, $c1, $c2, $p1)
+    }
+    $path.CloseFigure()
+    return $path
+}
+
 $outer = New-Object System.Drawing.RectangleF(8, 8, 240, 240)
 $outerPath = New-RoundedRectangle $outer 58
+
 $gradient = New-Object System.Drawing.Drawing2D.LinearGradientBrush(
-    (New-Object System.Drawing.PointF(20, 20)),
-    (New-Object System.Drawing.PointF(236, 236)),
-    [System.Drawing.Color]::FromArgb(255, 108, 80, 232),
-    [System.Drawing.Color]::FromArgb(255, 255, 105, 140))
+    (New-Object System.Drawing.PointF(8, 8)),
+    (New-Object System.Drawing.PointF(248, 248)),
+    [System.Drawing.ColorTranslator]::FromHtml('#8B5CF6'),
+    [System.Drawing.ColorTranslator]::FromHtml('#22D3EE'))
 $graphics.FillPath($gradient, $outerPath)
 
-$innerPen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(35, 255, 255, 255), 1.5)
-$graphics.DrawEllipse($innerPen, 170, -20, 170, 170)
-$graphics.DrawEllipse($innerPen, 205, 15, 100, 100)
-$graphics.DrawEllipse($innerPen, -30, 168, 120, 120)
+$graphics.SetClip($outerPath)
+$glowPath = New-Object System.Drawing.Drawing2D.GraphicsPath
+$glowPath.AddEllipse(24, 128, 208, 208)
+$glow = New-Object System.Drawing.Drawing2D.PathGradientBrush($glowPath)
+$glow.CenterColor = [System.Drawing.Color]::FromArgb(90, 244, 114, 182)
+$glow.SurroundColors = @([System.Drawing.Color]::FromArgb(0, 244, 114, 182))
+$graphics.FillPath($glow, $glowPath)
 
-$warmBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(62, 255, 255, 255))
-$graphics.FillEllipse($warmBrush, 62, 86, 132, 132)
+$highlight = New-Object System.Drawing.Drawing2D.LinearGradientBrush(
+    (New-Object System.Drawing.PointF(0, 0)),
+    (New-Object System.Drawing.PointF(0, 170)),
+    [System.Drawing.Color]::FromArgb(34, 255, 255, 255),
+    [System.Drawing.Color]::FromArgb(0, 255, 255, 255))
+$graphics.FillRectangle($highlight, 0, 0, $size, 170)
+$graphics.ResetClip()
 
-$barBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::White)
-$barHeights = @(54, 104, 78, 126, 66, 92)
-$barWidth = 13
-$gap = 9
-$totalWidth = ($barHeights.Count * $barWidth) + (($barHeights.Count - 1) * $gap)
-$startX = [float](($size - $totalWidth) / 2)
-$centerY = 128
-
-for ($i = 0; $i -lt $barHeights.Count; $i++) {
-    $height = $barHeights[$i]
-    $rect = New-Object System.Drawing.RectangleF(
-        ($startX + $i * ($barWidth + $gap)),
-        ($centerY - $height / 2),
-        $barWidth,
-        $height)
-    $barPath = New-RoundedRectangle $rect 6.5
-    if ($i -eq 0 -or $i -eq 5) {
-        $brush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(205, 255, 255, 255))
-    } else {
-        $brush = $barBrush
-    }
-    $graphics.FillPath($brush, $barPath)
-    $barPath.Dispose()
-    if ($i -eq 0 -or $i -eq 5) { $brush.Dispose() }
-}
+$ink = New-Object System.Drawing.SolidBrush ([System.Drawing.ColorTranslator]::FromHtml('#05050C'))
+$spark = New-SparkPath 126 126 74 0.42
+$graphics.FillPath($ink, $spark)
+$graphics.FillEllipse($ink, 176, 62, 20, 20)
 
 $pngPath = Join-Path $assets 'lumen-256.png'
 $bitmap.Save($pngPath, [System.Drawing.Imaging.ImageFormat]::Png)
 
+$spark.Dispose()
+$ink.Dispose()
+$highlight.Dispose()
+$glow.Dispose()
+$glowPath.Dispose()
+$gradient.Dispose()
+$outerPath.Dispose()
 $graphics.Dispose()
 $bitmap.Dispose()
-$outerPath.Dispose()
-$gradient.Dispose()
-$innerPen.Dispose()
-$warmBrush.Dispose()
-$barBrush.Dispose()
 
 $png = [System.IO.File]::ReadAllBytes($pngPath)
 $icoPath = Join-Path $assets 'lumen.ico'
