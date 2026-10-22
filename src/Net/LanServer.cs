@@ -67,6 +67,15 @@ namespace Lumen.Net
             {
                 if (_running) return;
 
+                try
+                {
+                    // Online playback is relayed through this process, so allow
+                    // several parallel range requests and modern TLS.
+                    ServicePointManager.DefaultConnectionLimit = 24;
+                    ServicePointManager.SecurityProtocol |= (SecurityProtocolType)3072;
+                }
+                catch { }
+
                 IPAddress address = FindLanAddress();
                 Exception lastError = null;
                 for (int port = 8737; port < 8758; port++)
@@ -206,8 +215,13 @@ namespace Lumen.Net
                     }
 
                     string path = target;
+                    string queryString = "";
                     int query = path.IndexOf('?');
-                    if (query >= 0) path = path.Substring(0, query);
+                    if (query >= 0)
+                    {
+                        queryString = path.Substring(query + 1);
+                        path = path.Substring(0, query);
+                    }
 
                     bool head = string.Equals(method, "HEAD", StringComparison.OrdinalIgnoreCase);
                     if (!string.Equals(method, "GET", StringComparison.OrdinalIgnoreCase) && !head)
@@ -235,6 +249,10 @@ namespace Lumen.Net
                     else if (path.StartsWith("/audio/", StringComparison.OrdinalIgnoreCase))
                     {
                         ServeAudio(stream, headers, path.Substring(7), head);
+                    }
+                    else if (path == "/proxy")
+                    {
+                        ServeProxy(stream, headers, queryString, head);
                     }
                     else if (path == "/live.wav")
                     {
@@ -364,6 +382,301 @@ namespace Lumen.Net
             catch (ObjectDisposedException)
             {
             }
+        }
+
+        // Relays an online audio stream (Internet Archive, radio, direct URL)
+        // through the PC. This keeps the web player same-origin, so the Web
+        // Audio analyser keeps working and streams without CORS headers can
+        // still be played on the phone.
+        private void ServeProxy(NetworkStream stream, Dictionary<string, string> requestHeaders,
+            string queryString, bool head)
+        {
+            string rawUrl = GetQueryValue(queryString, "url");
+            Uri uri;
+            if (string.IsNullOrWhiteSpace(rawUrl) ||
+                !Uri.TryCreate(rawUrl, UriKind.Absolute, out uri) ||
+                (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            {
+                WriteText(stream, 400, "Bad Request", "text/plain; charset=utf-8",
+                    "A valid http(s) stream URL is required.", head);
+                return;
+            }
+
+            if (IsPrivateTarget(uri))
+            {
+                WriteText(stream, 403, "Forbidden", "text/plain; charset=utf-8",
+                    "Local and private network addresses are not proxied.", head);
+                return;
+            }
+
+            HttpWebRequest request = null;
+            HttpWebResponse response = null;
+            bool headersSent = false;
+            try
+            {
+                request = (HttpWebRequest)WebRequest.Create(uri);
+                request.Method = head ? "HEAD" : "GET";
+                request.AllowAutoRedirect = true;
+                request.MaximumAutomaticRedirections = 8;
+                request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AuroraMusic/1.1";
+                request.Accept = "audio/*,application/ogg,*/*;q=0.8";
+                request.Timeout = 12000;
+                request.ReadWriteTimeout = 30000;
+                request.KeepAlive = false;
+                request.AutomaticDecompression = DecompressionMethods.None;
+                try { request.Headers["Icy-MetaData"] = "0"; }
+                catch { }
+
+                string range;
+                if (requestHeaders.TryGetValue("Range", out range)) ApplyRange(request, range);
+
+                try
+                {
+                    response = (HttpWebResponse)request.GetResponse();
+                }
+                catch (WebException ex)
+                {
+                    response = ex.Response as HttpWebResponse;
+                    if (response == null)
+                    {
+                        WriteText(stream, 502, "Bad Gateway", "text/plain; charset=utf-8",
+                            "Не удалось получить поток с источника.", head);
+                        return;
+                    }
+                }
+
+                using (response)
+                {
+                    int statusCode = (int)response.StatusCode;
+                    if (statusCode >= 400)
+                    {
+                        WriteText(stream, 502, "Bad Gateway", "text/plain; charset=utf-8",
+                            "Источник вернул ошибку " + statusCode.ToString(CultureInfo.InvariantCulture) + ".",
+                            head);
+                        return;
+                    }
+
+                    string contentType = response.ContentType;
+                    if (string.IsNullOrEmpty(contentType)) contentType = "application/octet-stream";
+                    if (!IsAudioContentType(contentType))
+                    {
+                        WriteText(stream, 415, "Unsupported Media Type", "text/plain; charset=utf-8",
+                            "Источник вернул не аудио (" + contentType + ").", head);
+                        return;
+                    }
+
+                    long contentLength = response.ContentLength;
+                    string contentRange = response.Headers["Content-Range"];
+                    string acceptRanges = response.Headers["Accept-Ranges"];
+                    string statusText = response.StatusDescription;
+                    if (string.IsNullOrEmpty(statusText))
+                    {
+                        statusText = statusCode == 206 ? "Partial Content" : "OK";
+                    }
+                    WriteProxyHeaders(stream, statusCode, statusText, contentType,
+                        contentLength, contentRange, acceptRanges);
+                    headersSent = true;
+                    if (head) return;
+
+                    try
+                    {
+                        using (Stream remote = response.GetResponseStream())
+                        {
+                            if (remote == null) return;
+                            byte[] buffer = new byte[65536];
+                            while (true)
+                            {
+                                int read = remote.Read(buffer, 0, buffer.Length);
+                                if (read <= 0) break;
+                                stream.Write(buffer, 0, read);
+                            }
+                            stream.Flush();
+                        }
+                    }
+                    catch (IOException)
+                    {
+                        // The player seeked or closed the tab.
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Write("Stream proxy failed", ex);
+                if (!headersSent)
+                {
+                    try
+                    {
+                        WriteText(stream, 502, "Bad Gateway", "text/plain; charset=utf-8",
+                            "Ошибка проксирования потока.", head);
+                    }
+                    catch { }
+                }
+                if (response != null) response.Dispose();
+            }
+        }
+
+        private static string GetQueryValue(string queryString, string key)
+        {
+            if (string.IsNullOrEmpty(queryString)) return null;
+            string[] pairs = queryString.Split('&');
+            for (int i = 0; i < pairs.Length; i++)
+            {
+                string pair = pairs[i];
+                if (pair.Length == 0) continue;
+                int equals = pair.IndexOf('=');
+                string name = equals >= 0 ? pair.Substring(0, equals) : pair;
+                if (!string.Equals(Uri.UnescapeDataString(name), key, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+                string value = equals >= 0 ? pair.Substring(equals + 1) : "";
+                return Uri.UnescapeDataString(value);
+            }
+            return null;
+        }
+
+        private static void ApplyRange(HttpWebRequest request, string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return;
+            if (!value.StartsWith("bytes=", StringComparison.OrdinalIgnoreCase)) return;
+            string spec = value.Substring(6).Trim();
+            int comma = spec.IndexOf(',');
+            if (comma >= 0) spec = spec.Substring(0, comma).Trim();
+            int dash = spec.IndexOf('-');
+            if (dash < 0) return;
+
+            string fromText = spec.Substring(0, dash).Trim();
+            string toText = spec.Substring(dash + 1).Trim();
+            long from;
+            long to;
+            if (fromText.Length == 0)
+            {
+                if (long.TryParse(toText, NumberStyles.Integer, CultureInfo.InvariantCulture, out to) && to > 0)
+                {
+                    request.AddRange(-to);
+                }
+                return;
+            }
+
+            if (!long.TryParse(fromText, NumberStyles.Integer, CultureInfo.InvariantCulture, out from) ||
+                from < 0) return;
+            if (toText.Length == 0)
+            {
+                request.AddRange(from);
+            }
+            else if (long.TryParse(toText, NumberStyles.Integer, CultureInfo.InvariantCulture, out to) &&
+                to >= from)
+            {
+                request.AddRange(from, to);
+            }
+            else
+            {
+                request.AddRange(from);
+            }
+        }
+
+        private static bool IsAudioContentType(string contentType)
+        {
+            if (string.IsNullOrEmpty(contentType)) return true;
+            string value = contentType.ToLowerInvariant();
+            return value.StartsWith("audio/") ||
+                   value.StartsWith("video/") ||
+                   value.StartsWith("application/ogg") ||
+                   value.StartsWith("application/octet-stream") ||
+                   value.StartsWith("binary/octet-stream");
+        }
+
+        private static bool IsPrivateTarget(Uri uri)
+        {
+            if (uri.IsLoopback) return true;
+            string host = uri.DnsSafeHost;
+            IPAddress literal;
+            if (IPAddress.TryParse(host, out literal)) return IsPrivateAddress(literal);
+
+            try
+            {
+                IPAddress[] addresses = Dns.GetHostAddresses(host);
+                for (int i = 0; i < addresses.Length; i++)
+                {
+                    if (IsPrivateAddress(addresses[i])) return true;
+                }
+            }
+            catch
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private static bool IsPrivateAddress(IPAddress address)
+        {
+            if (IPAddress.IsLoopback(address)) return true;
+            byte[] bytes = address.GetAddressBytes();
+            if (address.AddressFamily == AddressFamily.InterNetwork)
+            {
+                if (bytes[0] == 0 || bytes[0] >= 224) return true;
+                if (bytes[0] == 10) return true;
+                if (bytes[0] == 127) return true;
+                if (bytes[0] == 169 && bytes[1] == 254) return true;
+                if (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) return true;
+                if (bytes[0] == 192 && bytes[1] == 168) return true;
+                return false;
+            }
+
+            if (address.AddressFamily == AddressFamily.InterNetworkV6)
+            {
+                if (address.IsIPv6LinkLocal || address.IsIPv6SiteLocal || address.IsIPv6Multicast)
+                {
+                    return true;
+                }
+                if ((bytes[0] & 0xFE) == 0xFC) return true;
+                // IPv4-mapped ::ffff:a.b.c.d
+                if (bytes.Length == 16 && bytes[0] == 0 && bytes[1] == 0 && bytes[2] == 0 &&
+                    bytes[3] == 0 && bytes[4] == 0 && bytes[5] == 0 && bytes[6] == 0 &&
+                    bytes[7] == 0 && bytes[8] == 0 && bytes[9] == 0 && bytes[10] == 0xFF &&
+                    bytes[11] == 0xFF)
+                {
+                    IPAddress mapped = new IPAddress(new byte[] { bytes[12], bytes[13], bytes[14], bytes[15] });
+                    return IsPrivateAddress(mapped);
+                }
+                return false;
+            }
+
+            return true;
+        }
+
+        private static void WriteProxyHeaders(NetworkStream stream, int code, string status,
+            string contentType, long contentLength, string contentRange, string acceptRanges)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append("HTTP/1.1 ").Append(code).Append(' ').Append(status).Append("\r\n");
+            builder.Append("Content-Type: ").Append(contentType).Append("\r\n");
+            if (contentLength >= 0)
+            {
+                builder.Append("Content-Length: ")
+                    .Append(contentLength.ToString(CultureInfo.InvariantCulture)).Append("\r\n");
+            }
+            if (!string.IsNullOrEmpty(contentRange))
+            {
+                builder.Append("Content-Range: ").Append(contentRange).Append("\r\n");
+            }
+            if (!string.IsNullOrEmpty(acceptRanges))
+            {
+                builder.Append("Accept-Ranges: ").Append(acceptRanges).Append("\r\n");
+            }
+            else if (contentLength >= 0)
+            {
+                builder.Append("Accept-Ranges: bytes\r\n");
+            }
+            builder.Append("Access-Control-Allow-Origin: *\r\n");
+            builder.Append("Cache-Control: no-store\r\n");
+            builder.Append("Connection: close\r\n\r\n");
+            byte[] headerBytes = Encoding.ASCII.GetBytes(builder.ToString());
+            stream.Write(headerBytes, 0, headerBytes.Length);
+            stream.Flush();
         }
 
         private void ServeLive(NetworkStream stream, TcpClient client, bool head)

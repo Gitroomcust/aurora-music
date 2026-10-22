@@ -1248,6 +1248,7 @@ body.player-open #bgVisualizer { opacity: 0.7; }
   display: flex; align-items: center; justify-content: center;
 }
 .nav-icon svg { width: 24px; height: 24px; fill: currentColor; }
+.nav-icon svg[fill="none"] { fill: none; }
 .nav-item.active .nav-icon::after {
   content: ""; position: absolute; bottom: -5px; left: 50%;
   width: 5px; height: 5px; margin-left: -2.5px;
@@ -1282,6 +1283,124 @@ body.player-open #bgVisualizer { opacity: 0.7; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
 #phoneFileInput { display: none; }
+
+/* ---- Online ---- */
+.online-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px;
+  border-radius: var(--pill);
+  background: rgba(34, 211, 238, 0.09);
+  border: 1px solid rgba(34, 211, 238, 0.26);
+  color: var(--cyan);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.9px;
+  white-space: nowrap;
+}
+.online-badge .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.9);
+}
+.online-hint {
+  margin: 14px 2px 6px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.online-hint b { color: var(--ink-dim); font-weight: 700; }
+.stream-box { display: flex; gap: 8px; margin: 8px 0 4px; }
+.stream-input {
+  flex: 1;
+  min-width: 0;
+  height: 42px;
+  padding: 0 13px;
+  border-radius: 11px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+.stream-input:focus { border-color: var(--cyan); background: var(--surface-3); }
+.stream-input::placeholder { color: var(--soft); }
+.stream-btn {
+  flex: none;
+  height: 42px;
+  padding: 0 15px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, var(--cyan), #0891b2);
+  color: #001014;
+  font-size: 11.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 8px 20px rgba(34, 211, 238, 0.22);
+}
+.stream-btn:hover { filter: brightness(1.06); }
+.stream-btn:active { transform: scale(0.97); }
+.stream-btn svg { width: 14px; height: 14px; fill: currentColor; }
+.online-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 16px;
+  margin: 0 2px 8px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.online-status .spinner {
+  width: 13px; height: 13px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  border-top-color: var(--cyan);
+  animation: onlineSpin 0.7s linear infinite;
+}
+@keyframes onlineSpin { to { transform: rotate(360deg); } }
+.online-empty {
+  padding: 38px 22px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.65;
+  text-align: center;
+}
+.online-empty b { display: block; margin-bottom: 6px; color: var(--ink); font-size: 14px; }
+.online-more {
+  width: 100%;
+  height: 44px;
+  margin: 12px 0 6px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--ink-dim);
+  font-size: 12px;
+  font-weight: 700;
+}
+.online-more:hover { background: var(--surface-3); color: var(--ink); }
+.online-playall {
+  background: none;
+  color: var(--cyan);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+.online-playall:hover { color: var(--ink); }
+.track-cover.has-art .cover-letter { display: none; }
+.mini-cover.has-art .cover-letter { display: none; }
+.full-art.has-art .cover-letter { display: none; }
+.full-art.has-art .cover-sphere,
+.media-art.has-art .cover-sphere { opacity: 0; }
+.scrub-slider:disabled { opacity: 0.35; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
@@ -1429,6 +1548,7 @@ body.player-open #bgVisualizer { opacity: 0.7; }
     <div class="chips" id="libraryChips">
       <button class="chip active" type="button" data-filter="all">Все</button>
       <button class="chip" type="button" data-filter="favs">Избранное</button>
+      <button class="chip" type="button" data-filter="online">Онлайн</button>
       <button class="chip" type="button" data-filter="phone">С телефона</button>
     </div>
 
@@ -1476,6 +1596,58 @@ body.player-open #bgVisualizer { opacity: 0.7; }
           <span id="btnLiveActionText">Слушать эфир</span>
         </button>
       </div>
+    </div>
+  </main>
+
+  <!-- ONLINE -->
+  <main id="viewOnline" class="view" hidden>
+    <div class="library-head">
+      <h1 class="library-title">Онлайн</h1>
+      <span class="online-badge" id="onlineBadge"><span class="dot"></span>ARCHIVE.ORG</span>
+    </div>
+
+    <div class="search-wrap" id="onlineSearchWrap">
+      <span class="search-icon">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </span>
+      <input class="search-input" id="onlineSearchInput" type="text" autocomplete="off" placeholder="Песни, исполнители, станции...">
+      <button class="search-clear" id="onlineSearchClear" type="button" aria-label="Очистить поиск">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="chips" id="onlineChips">
+      <button class="chip active" type="button" data-online="featured">Обзор</button>
+      <button class="chip" type="button" data-online="jazz">Джаз</button>
+      <button class="chip" type="button" data-online="rock">Рок</button>
+      <button class="chip" type="button" data-online="electronic">Электроника</button>
+      <button class="chip" type="button" data-online="classical">Классика</button>
+      <button class="chip" type="button" data-online="radio">Радио</button>
+    </div>
+
+    <div class="list-meta">
+      <span id="onlineCount">Свободная музыка</span>
+      <button class="online-playall" id="onlinePlayAll" type="button" hidden>Играть всё</button>
+    </div>
+
+    <div class="online-status" id="onlineStatus" hidden></div>
+    <div class="track-list" id="onlineList"></div>
+    <div class="online-empty" id="onlineEmpty">
+      <b>Музыка из интернета</b>
+      Каталог свободной музыки Archive.org, интернет-радио и прямые ссылки на потоки — всё играет в общем плеере.
+    </div>
+    <button class="online-more" id="onlineMoreBtn" type="button" hidden>Показать ещё</button>
+
+    <div class="online-hint">
+      <b>Поток по ссылке</b><br>
+      Прямой адрес MP3, AAC или OGG. Плейлисты .m3u/.m3u8 не поддерживаются.
+    </div>
+    <div class="stream-box">
+      <input class="stream-input" id="streamUrlInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://radio.example/stream.mp3">
+      <button class="stream-btn" id="streamPlayBtn" type="button">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        Включить
+      </button>
     </div>
   </main>
 </div>
@@ -1587,6 +1759,12 @@ body.player-open #bgVisualizer { opacity: 0.7; }
     </span>
     <span class="nav-label">Медиатека</span>
   </button>
+  <button class="nav-item" id="navOnline" type="button">
+    <span class="nav-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.7 2.5 4.1 5.5 4.1 9s-1.4 6.5-4.1 9c-2.7-2.5-4.1-5.5-4.1-9S9.3 5.5 12 3z"/></svg>
+    </span>
+    <span class="nav-label">Онлайн</span>
+  </button>
   <button class="nav-item" id="navLive" type="button">
     <span class="nav-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4.9 4.9a10 10 0 0 0 0 14.2M7.8 7.8a6 6 0 0 0 0 8.4M16.2 7.8a6 6 0 0 1 0 8.4M19.1 4.9a10 10 0 0 1 0 14.2"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/></svg>
@@ -1632,9 +1810,24 @@ body.player-open #bgVisualizer { opacity: 0.7; }
   var visMode = localStorage.getItem("aurora.vismode") || "aurora";
   var toastTimer = null;
   var FAV_KEY = "aurora.favs";
+  var ONLINE_KEY = "aurora.online";
   var serverBase = "";
   try { serverBase = (localStorage.getItem("aurora.base") || "").replace(/\/+$/, ""); } catch(e){}
   var lastAndroidState = "";
+
+  // Online catalog state
+  var onlineMode = "featured";
+  var onlineItems = [];
+  var onlinePage = 1;
+  var onlineHasMore = false;
+  var onlineLoading = false;
+  var onlineRequestId = 0;
+  var onlineSearchTimer = null;
+  var archiveMetaCache = {};
+  var radioPage = 0;
+  var radioHasMore = false;
+  var playTimeout = null;
+  var playToken = 0;
 
   // The bundled Android app is served from file:// and must talk to the PC
   // server by absolute address. When the page is served by Lumen itself,
@@ -1708,6 +1901,7 @@ body.player-open #bgVisualizer { opacity: 0.7; }
   // ============================================================
   function favKeyOf(track){
     if (!track) return "";
+    if (track.source === "online" && track.url) return "online:" + track.url;
     return (track.artist || "") + "||" + (track.title || "");
   }
 
@@ -1753,6 +1947,121 @@ body.player-open #bgVisualizer { opacity: 0.7; }
     var active = isFav(track);
     $("fullFavBtn").classList.toggle("active", active);
     $("fullFavBtn").setAttribute("aria-pressed", active ? "true" : "false");
+  }
+
+  // ============================================================
+  // ONLINE HELPERS (queue persistence, covers, proxy URLs)
+  // ============================================================
+  function readOnlineTracks(){
+    try {
+      var raw = localStorage.getItem(ONLINE_KEY);
+      var list = raw ? JSON.parse(raw) : [];
+      if (Object.prototype.toString.call(list) !== "[object Array]") return [];
+      return list.filter(function(t){
+        return t && t.url && t.source === "online";
+      }).slice(-80);
+    } catch(e){
+      return [];
+    }
+  }
+
+  function saveOnlineTracks(){
+    try {
+      var list = tracks.filter(function(t){ return t.source === "online"; }).slice(-80);
+      localStorage.setItem(ONLINE_KEY, JSON.stringify(list));
+    } catch(e){}
+  }
+
+  function canProxyOnline(){
+    return !isFileMode() || !!serverBase;
+  }
+
+  function onlineMediaUrl(track, serverIndex){
+    if (track && track.url){
+      if (track.source === "online" && canProxyOnline()){
+        return apiUrl("/proxy?url=" + encodeURIComponent(track.url));
+      }
+      return track.url;
+    }
+    return apiUrl("/audio/" + serverIndex);
+  }
+
+  function safeArt(url){
+    return /^https?:\/\//i.test(String(url || "")) ? String(url) : "";
+  }
+
+  function coverBackground(track, index){
+    var pair = palettes[(Math.abs(index) || 0) % palettes.length];
+    var art = track ? safeArt(track.art) : "";
+    if (art){
+      return 'url("' + art.replace(/"/g, "%22") + '") center/cover, ' + grad(pair);
+    }
+    return grad(pair);
+  }
+
+  function applyCover(el, track, index){
+    if (!el) return;
+    el.style.background = coverBackground(track, index);
+    el.classList.toggle("has-art", !!(track && safeArt(track.art)));
+  }
+
+  function parseDuration(value){
+    if (value == null) return 0;
+    var text = String(value).trim();
+    if (!text) return 0;
+    if (text.indexOf(":") >= 0){
+      var parts = text.split(":");
+      var total = 0;
+      for (var i = 0; i < parts.length; i++){
+        var n = Number(parts[i]);
+        if (!isFinite(n)) return 0;
+        total = total * 60 + n;
+      }
+      return total;
+    }
+    var seconds = Number(text);
+    return isFinite(seconds) && seconds > 0 ? seconds : 0;
+  }
+
+  function findOnlineIndex(item){
+    if (!item || !item.url) return -1;
+    for (var i = 0; i < tracks.length; i++){
+      if (tracks[i].source === "online" && tracks[i].url === item.url) return i;
+    }
+    return -1;
+  }
+
+  function queueOnlineItem(item){
+    var existing = findOnlineIndex(item);
+    if (existing >= 0) return existing;
+    var copy = {};
+    for (var key in item){
+      if (Object.prototype.hasOwnProperty.call(item, key)) copy[key] = item[key];
+    }
+    copy.source = "online";
+    tracks.push(copy);
+    return tracks.length - 1;
+  }
+
+  function afterOnlineQueueChanged(){
+    saveOnlineTracks();
+    applyFilter();
+    renderHome();
+    updateActiveTrackUi();
+  }
+
+  function addOnlineTrack(item, playNow){
+    var index = findOnlineIndex(item);
+    var added = index < 0;
+    if (added) index = queueOnlineItem(item);
+    if (added){
+      afterOnlineQueueChanged();
+      showToast(playNow ? "Играет: " + item.title : "Добавлено в медиатеку");
+    } else if (!playNow){
+      showToast("Уже в медиатеке");
+    }
+    if (playNow) playTrack(index);
+    return index;
   }
 
   // ============================================================
@@ -2033,7 +2342,7 @@ body.player-open #bgVisualizer { opacity: 0.7; }
 
       var cover = document.createElement("div");
       cover.className = "track-cover";
-      cover.style.background = grad(pair);
+      applyCover(cover, item, item.originalIndex);
       cover.innerHTML = '<span class="cover-letter">' + escHtml(trackLetter(item)) + '</span>';
 
       var info = document.createElement("div");
@@ -2102,28 +2411,48 @@ body.player-open #bgVisualizer { opacity: 0.7; }
       $("miniArtist").textContent = esc(t.artist || "Аудиофайл");
       $("fullTitle").textContent = esc(t.title);
       $("fullArtist").textContent = esc(t.artist || "Аудиофайл");
+      var context = document.querySelector(".full-context b");
+      if (context){
+        context.textContent = t.source === "online"
+          ? "Онлайн"
+          : (t.source === "phone" ? "Телефон" : "Ваша медиатека");
+      }
 
       var pair = palettes[current % palettes.length];
-      var coverGrad = grad(pair);
       var letter = escHtml(trackLetter(t));
-      $("miniCover").style.background = coverGrad;
+      applyCover($("miniCover"), t, current);
       $("miniCover").innerHTML = '<span class="cover-letter">' + letter + '</span>';
-      $("fullArt").style.background = coverGrad;
+      applyCover($("fullArt"), t, current);
       $("fullArt").innerHTML = '<span class="cover-letter">' + letter + '</span>';
       $("fullPlayer").style.backgroundImage = "linear-gradient(180deg, " + hexA(pair[0], 0.30) + " 0%, " + hexA(pair[1], 0.10) + " 44%, rgba(0,0,0,0.97) 100%)";
+
+      if (t.stream){
+        $("fullScrub").disabled = true;
+        $("fullScrub").value = "0";
+        $("fullScrub").style.setProperty("--p", "0%");
+        $("miniProgressFill").style.width = "0%";
+        $("fullTimeCur").textContent = "LIVE";
+        $("fullTimeDur").textContent = "";
+      } else {
+        $("fullScrub").disabled = false;
+      }
 
       // Web MediaSession metadata (desktop browsers; the APK uses the native
       // PlaybackService session instead)
       if ("mediaSession" in navigator && !window.AndroidMedia){
+        var artwork = safeArt(t.art)
+          ? [{ src: t.art, sizes: "512x512" }]
+          : [{ src: apiUrl("/icon.png"), sizes: "256x256", type: "image/png" }];
         navigator.mediaSession.metadata = new MediaMetadata({
           title: t.title,
           artist: t.artist || "Aurora Music",
           album: t.album || "Lumen Player",
-          artwork: [{ src: apiUrl("/icon.png"), sizes: "256x256", type: "image/png" }]
+          artwork: artwork
         });
       }
     }
 
+    updateOnlinePlaying();
     syncFavButton();
     syncAndroidMedia();
   }
@@ -2146,13 +2475,53 @@ body.player-open #bgVisualizer { opacity: 0.7; }
     current = index;
     var track = tracks[index];
     var serverIndex = (typeof track.serverIndex === "number") ? track.serverIndex : index;
-    audio.src = track.url || apiUrl("/audio/" + serverIndex);
+
+    // Tear down the previous request before opening a new one: a half-dead
+    // radio stream can otherwise keep the next source waiting.
+    clearTimeout(playTimeout);
+    var token = ++playToken;
+    audio.pause();
+    audio.removeAttribute("src");
+    audio.load();
+
+    audio.src = onlineMediaUrl(track, serverIndex);
+    $("fullScrub").disabled = !!track.stream;
+    if (track.stream){
+      $("fullScrub").value = "0";
+      $("fullScrub").style.setProperty("--p", "0%");
+      $("miniProgressFill").style.width = "0%";
+      $("fullTimeCur").textContent = "LIVE";
+      $("fullTimeDur").textContent = "";
+    } else {
+      $("fullTimeCur").textContent = "0:00";
+      $("fullTimeDur").textContent = "0:00";
+    }
+
+    // Show the selected track right away, even if the stream is slow to open.
+    updateActiveTrackUi();
+
+    if (track.stream){
+      playTimeout = setTimeout(function(){
+        if (token !== playToken || current !== index) return;
+        if (audio.readyState < 2){
+          showToast("Станция не отвечает. Попробуйте другую.");
+          audio.pause();
+          syncPlayIcons();
+        }
+      }, 18000);
+    }
+
     audio.play().then(function(){
       isPlaying = true;
+      clearTimeout(playTimeout);
       syncPlayIcons();
       updateActiveTrackUi();
     }).catch(function(err){
-      showToast("Не удалось запустить трек.");
+      clearTimeout(playTimeout);
+      showToast(track.source === "online"
+        ? "Не удалось включить поток. Проверьте ссылку и интернет."
+        : "Не удалось запустить трек.");
+      syncPlayIcons();
     });
   }
 
@@ -2187,7 +2556,8 @@ body.player-open #bgVisualizer { opacity: 0.7; }
   function prevTrack(){
     haptic();
     if (!tracks.length) return;
-    if (audio.currentTime > 3){
+    var active = (current >= 0 && current < tracks.length) ? tracks[current] : null;
+    if (!(active && active.stream) && audio.currentTime > 3){
       audio.currentTime = 0;
       return;
     }
@@ -2267,6 +2637,17 @@ body.player-open #bgVisualizer { opacity: 0.7; }
 
   function updateProgress(){
     var dur = audio.duration;
+    var track = (current >= 0 && current < tracks.length) ? tracks[current] : null;
+    if (!isFinite(dur) || dur <= 0){
+      if (track && track.stream){
+        $("fullScrub").value = "0";
+        $("fullScrub").style.setProperty("--p", "0%");
+        $("miniProgressFill").style.width = "0%";
+        $("fullTimeCur").textContent = "LIVE";
+        $("fullTimeDur").textContent = "";
+      }
+      return;
+    }
     if (isFinite(dur) && dur > 0){
       if (!isSeeking){
         var cur = audio.currentTime;
@@ -2283,7 +2664,13 @@ body.player-open #bgVisualizer { opacity: 0.7; }
   audio.addEventListener("play", syncPlayIcons);
   audio.addEventListener("pause", syncPlayIcons);
   audio.addEventListener("timeupdate", updateProgress);
-  audio.addEventListener("loadedmetadata", updateProgress);
+  audio.addEventListener("loadedmetadata", function(){
+    clearTimeout(playTimeout);
+    updateProgress();
+  });
+  audio.addEventListener("playing", function(){
+    clearTimeout(playTimeout);
+  });
   audio.addEventListener("ended", function(){
     if (repeatMode === 2){
       audio.currentTime = 0;
@@ -2458,7 +2845,7 @@ body.player-open #bgVisualizer { opacity: 0.7; }
     var pair = palettes[index % palettes.length];
     var art = document.createElement("div");
     art.className = "media-art";
-    art.style.background = grad(pair);
+    applyCover(art, item, index);
     art.innerHTML = '<div class="cover-sphere"><div class="cover-glow"></div><span class="cover-letter">' + escHtml(trackLetter(item)) + '</span></div>' +
       '<div class="card-play"><svg viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72L9.5 4.28A1 1 0 0 0 8 5.14z"/></svg></div>';
 
@@ -2525,7 +2912,8 @@ body.player-open #bgVisualizer { opacity: 0.7; }
     filteredTracks = [];
     tracks.forEach(function(t, idx){
       if (libraryFilter === "favs" && !isFav(t)) return;
-      if (libraryFilter === "phone" && !t.url) return;
+      if (libraryFilter === "phone" && t.source !== "phone") return;
+      if (libraryFilter === "online" && t.source !== "online") return;
       if (q && (t.title || "").toLowerCase().indexOf(q) < 0 &&
                (t.artist || "").toLowerCase().indexOf(q) < 0) return;
       t.originalIndex = idx;
@@ -2595,7 +2983,8 @@ body.player-open #bgVisualizer { opacity: 0.7; }
         title: title,
         artist: artist,
         ext: ext,
-        url: URL.createObjectURL(file)
+        url: URL.createObjectURL(file),
+        source: "phone"
       });
     }
 
@@ -2660,6 +3049,549 @@ body.player-open #bgVisualizer { opacity: 0.7; }
   });
 
   // ============================================================
+  // ONLINE CATALOG: Archive.org + Radio Browser
+  // ============================================================
+  var ARCHIVE_BASE = "https://archive.org";
+  var ARCHIVE_COLLECTIONS = "collection:(netlabels OR audio_music OR opensource_audio OR etree)";
+  var ARCHIVE_EXCLUDE = '-subject:(audiobook OR "spoken word" OR podcast OR speech OR "old time radio") -collection:(librivoxaudio OR podcasts)';
+  var ONLINE_GENRES = {
+    jazz: "(subject:(jazz) OR title:(jazz))",
+    rock: "(subject:(rock) OR title:(rock))",
+    electronic: "(subject:(electronic) OR subject:(electronica) OR subject:(techno) OR subject:(house) OR title:(electronic))",
+    classical: '(subject:(classical) OR subject:("classical music") OR title:(classical))'
+  };
+  var RADIO_HOSTS = [
+    "https://de1.api.radio-browser.info",
+    "https://de2.api.radio-browser.info",
+    "https://nl1.api.radio-browser.info"
+  ];
+  var radioHost = 0;
+
+  function sanitizeArchiveQuery(text){
+    return String(text || "")
+      .replace(/[\\:()\[\]{}"^~!+\-]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function setOnlineStatus(text, busy){
+    var el = $("onlineStatus");
+    el.innerHTML = "";
+    el.hidden = !text;
+    if (!text) return;
+    if (busy){
+      var spinner = document.createElement("span");
+      spinner.className = "spinner";
+      el.appendChild(spinner);
+    }
+    var label = document.createElement("span");
+    label.textContent = text;
+    el.appendChild(label);
+  }
+
+  function setOnlineBadge(text){
+    $("onlineBadge").innerHTML = '<span class="dot"></span>' + escHtml(text);
+  }
+
+  function encodeArchivePath(name){
+    return String(name).split("/").map(encodeURIComponent).join("/");
+  }
+
+  function buildArchiveQuery(mode, query){
+    var parts = ["mediatype:(audio)", ARCHIVE_COLLECTIONS, ARCHIVE_EXCLUDE];
+    if (mode !== "featured" && ONLINE_GENRES[mode]) parts.push(ONLINE_GENRES[mode]);
+    var clean = sanitizeArchiveQuery(query);
+    if (clean) parts.push("(" + clean + ")");
+    return parts.join(" AND ");
+  }
+
+  function fetchJson(url, timeoutMs, cacheMode){
+    return new Promise(function(resolve, reject){
+      var controller = null;
+      var timer = null;
+      var settled = false;
+      function finish(ok, value){
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        if (ok) resolve(value); else reject(value);
+      }
+      try {
+        if (typeof AbortController !== "undefined") controller = new AbortController();
+      } catch(e){}
+      timer = setTimeout(function(){
+        if (controller){
+          try { controller.abort(); } catch(e){}
+        }
+        finish(false, new Error("timeout"));
+      }, timeoutMs || 15000);
+      var options = { cache: cacheMode || "no-store" };
+      if (controller) options.signal = controller.signal;
+      fetch(url, options).then(function(res){
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.json();
+      }).then(function(json){
+        finish(true, json);
+      }).catch(function(err){
+        finish(false, err);
+      });
+    });
+  }
+
+  function fetchArchiveMeta(identifier){
+    if (!identifier) return Promise.resolve(null);
+    if (archiveMetaCache[identifier]) return Promise.resolve(archiveMetaCache[identifier]);
+    return fetchJson(ARCHIVE_BASE + "/metadata/" + encodeURIComponent(identifier), 9000)
+      .then(function(json){
+        archiveMetaCache[identifier] = json;
+        return json;
+      })
+      .catch(function(){ return null; });
+  }
+
+  function archiveTracks(doc, meta){
+    var files = (meta && meta.files) || [];
+    var best = {};
+    var order = [];
+    for (var i = 0; i < files.length; i++){
+      var file = files[i] || {};
+      var name = String(file.name || "");
+      var dot = name.lastIndexOf(".");
+      if (dot < 1) continue;
+      var ext = name.substring(dot + 1).toLowerCase();
+      var priority = ext === "mp3" ? 0
+        : (ext === "m4a" || ext === "aac" ? 1
+        : (ext === "ogg" || ext === "opus" ? 2
+        : (ext === "flac" ? 3 : -1)));
+      if (priority < 0) continue;
+      if (String(file.private) === "true") continue;
+      var lower = name.toLowerCase();
+      if (lower.indexOf("sample") >= 0 || lower.indexOf("__ia_thumb") >= 0) continue;
+      var size = Number(file.size || 0);
+      if (size > 0 && size < 100000) continue;
+
+      var base = name.substring(0, dot).toLowerCase();
+      if (!best[base]){
+        order.push(base);
+        best[base] = { file: file, ext: ext, priority: priority };
+      } else if (priority < best[base].priority){
+        best[base].file = file;
+        best[base].ext = ext;
+        best[base].priority = priority;
+      }
+    }
+
+    var creator = meta && meta.metadata ? meta.metadata.creator : null;
+    if (Object.prototype.toString.call(creator) === "[object Array]") creator = creator.join(", ");
+    if (Object.prototype.toString.call(doc.creator) === "[object Array]") creator = doc.creator.join(", ");
+    creator = String(creator || doc.creator || "").trim();
+
+    var album = String((meta && meta.metadata && meta.metadata.title) || doc.title || "").trim();
+    var identifier = doc.identifier;
+    var art = ARCHIVE_BASE + "/services/img/" + encodeURIComponent(identifier);
+    var out = [];
+
+    for (var j = 0; j < order.length && out.length < 8; j++){
+      var entry = best[order[j]];
+      var audio = entry.file;
+      var rawName = String(audio.name);
+      var rawBase = rawName.substring(0, rawName.lastIndexOf("."));
+      var title = String(audio.title || rawBase).replace(/_/g, " ").replace(/\s+/g, " ").trim();
+      if (creator){
+        var prefix = creator.toLowerCase() + " - ";
+        if (title.toLowerCase().indexOf(prefix) === 0) title = title.substring(prefix.length).trim();
+      }
+      title = title.replace(/^\d{1,3}\s*[-–.)]\s*/, "").trim();
+      if (!title) title = album || "Без названия";
+
+      var artist = String(audio.artist || audio.creator || creator || "Archive.org").trim();
+      out.push({
+        title: title,
+        artist: artist,
+        album: album,
+        ext: entry.ext.toUpperCase(),
+        url: ARCHIVE_BASE + "/download/" + encodeURIComponent(identifier) + "/" + encodeArchivePath(rawName),
+        art: art,
+        duration: parseDuration(audio.length),
+        source: "online",
+        stream: false
+      });
+    }
+    return out;
+  }
+
+  function mapLimit(items, limit, fn){
+    var results = [];
+    var index = 0;
+    function next(){
+      if (index >= items.length) return Promise.resolve(results);
+      var chunk = items.slice(index, index + limit);
+      index += limit;
+      return Promise.all(chunk.map(fn)).then(function(part){
+        results = results.concat(part);
+        return next();
+      });
+    }
+    return next();
+  }
+
+  function dedupeOnlineItems(items){
+    var seen = {};
+    return items.filter(function(item){
+      if (!item || !item.url || seen[item.url]) return false;
+      seen[item.url] = true;
+      return true;
+    });
+  }
+
+  async function searchArchive(reset){
+    var token = ++onlineRequestId;
+    onlineLoading = true;
+    var query = $("onlineSearchInput").value.trim();
+    if (reset){
+      onlinePage = 1;
+      onlineItems = [];
+      renderOnlineResults();
+    } else {
+      onlinePage += 1;
+    }
+    $("onlineMoreBtn").hidden = true;
+    setOnlineStatus(reset ? "Ищем в Archive.org…" : "Загружаем ещё…", true);
+
+    try {
+      var q = buildArchiveQuery(onlineMode, query);
+      var url = ARCHIVE_BASE + "/advancedsearch.php?q=" + encodeURIComponent(q) +
+        "&fl%5B%5D=identifier&fl%5B%5D=title&fl%5B%5D=creator&fl%5B%5D=year" +
+        "&rows=12&page=" + onlinePage + "&output=json" +
+        "&sort%5B%5D=" + encodeURIComponent("downloads desc");
+      var data = await fetchJson(url, 15000);
+      if (token !== onlineRequestId) return;
+
+      var docs = (data.response && data.response.docs) || [];
+      var metas = await mapLimit(docs, 12, function(doc){
+        if (token !== onlineRequestId) return null;
+        return fetchArchiveMeta(doc.identifier);
+      });
+      if (token !== onlineRequestId) return;
+
+      var found = [];
+      for (var i = 0; i < docs.length; i++){
+        if (!metas[i]) continue;
+        found = found.concat(archiveTracks(docs[i], metas[i]));
+        if (found.length >= 48) break;
+      }
+
+      onlineItems = dedupeOnlineItems(reset ? found : onlineItems.concat(found));
+      onlineHasMore = docs.length >= 12 && onlineItems.length < 120 && found.length > 0;
+      renderOnlineResults();
+      if (!onlineItems.length){
+        setOnlineStatus("Ничего не нашлось. Попробуйте другой запрос.", false);
+      } else {
+        setOnlineStatus("", false);
+      }
+    } catch(e){
+      if (token !== onlineRequestId) return;
+      $("onlineEmpty").hidden = !!onlineItems.length;
+      setOnlineStatus("Не удалось загрузить Archive.org. Проверьте интернет.", false);
+    } finally {
+      if (token === onlineRequestId){
+        onlineLoading = false;
+        $("onlineMoreBtn").hidden = !onlineHasMore;
+      }
+    }
+  }
+
+  function radioTrack(station){
+    var tags = String(station.tags || "").split(",").slice(0, 2).map(function(tag){
+      return tag.trim();
+    }).filter(Boolean).join(", ");
+    var parts = [];
+    if (tags) parts.push(tags);
+    if (station.bitrate) parts.push(station.bitrate + " kbps");
+    if (station.country) parts.push(station.country);
+    return {
+      title: String(station.name || "Интернет-радио").trim() || "Интернет-радио",
+      artist: "Интернет-радио",
+      detail: parts.join(" · ") || "Прямой эфир",
+      ext: "LIVE",
+      stream: true,
+      url: station.url_resolved || station.url,
+      art: "",
+      source: "online"
+    };
+  }
+
+  async function fetchRadio(path){
+    var lastError = null;
+    for (var attempt = 0; attempt < RADIO_HOSTS.length; attempt++){
+      var hostIndex = (radioHost + attempt) % RADIO_HOSTS.length;
+      try {
+        var data = await fetchJson(RADIO_HOSTS[hostIndex] + path, 15000);
+        radioHost = hostIndex;
+        return data;
+      } catch(e){
+        lastError = e;
+      }
+    }
+    throw lastError || new Error("radio");
+  }
+
+  async function searchRadio(reset){
+    var token = ++onlineRequestId;
+    onlineLoading = true;
+    var query = $("onlineSearchInput").value.trim();
+    if (reset){
+      radioPage = 0;
+      onlineItems = [];
+      renderOnlineResults();
+    } else {
+      radioPage += 1;
+    }
+    $("onlineMoreBtn").hidden = true;
+    setOnlineStatus(reset ? "Ищем радиостанции…" : "Загружаем ещё…", true);
+
+    try {
+      var params = [
+        "limit=40",
+        "offset=" + (radioPage * 40),
+        "hidebroken=true",
+        "order=clickcount",
+        "reverse=true"
+      ];
+      if (query) params.push("name=" + encodeURIComponent(query));
+      var data = await fetchRadio("/json/stations/search?" + params.join("&"));
+      if (token !== onlineRequestId) return;
+
+      var stations = (data || []).filter(function(station){
+        var u = station && (station.url_resolved || station.url);
+        if (!u || !/^https?:\/\//i.test(u)) return false;
+        if (/\.m3u8(\?|$)/i.test(u)) return false;
+        var codec = String(station.codec || "").toUpperCase();
+        if (codec && codec !== "MP3" && codec !== "AAC" && codec !== "AAC+" && codec !== "OGG") return false;
+        return true;
+      }).map(radioTrack);
+
+      onlineItems = dedupeOnlineItems(reset ? stations : onlineItems.concat(stations));
+      onlineHasMore = (data || []).length >= 40 && onlineItems.length < 160;
+      renderOnlineResults();
+      if (!onlineItems.length){
+        setOnlineStatus("Станции не найдены. Попробуйте другое название.", false);
+      } else {
+        setOnlineStatus("", false);
+      }
+    } catch(e){
+      if (token !== onlineRequestId) return;
+      $("onlineEmpty").hidden = !!onlineItems.length;
+      setOnlineStatus("Не удалось загрузить Radio Browser. Проверьте интернет.", false);
+    } finally {
+      if (token === onlineRequestId){
+        onlineLoading = false;
+        $("onlineMoreBtn").hidden = !onlineHasMore;
+      }
+    }
+  }
+
+  function setOnlineMode(mode){
+    onlineMode = mode;
+    document.querySelectorAll("#onlineChips .chip").forEach(function(chip){
+      chip.classList.toggle("active", chip.getAttribute("data-online") === mode);
+    });
+    if (mode === "radio"){
+      setOnlineBadge("RADIO BROWSER");
+      $("onlineSearchInput").placeholder = "Название станции или жанр...";
+      $("onlinePlayAll").hidden = true;
+      searchRadio(true);
+    } else {
+      setOnlineBadge("ARCHIVE.ORG");
+      $("onlineSearchInput").placeholder = "Песни, исполнители, альбомы...";
+      searchArchive(true);
+    }
+  }
+
+  function ensureOnlineLoaded(){
+    if (isFileMode() && !serverBase){
+      showToast("Для онлайн-музыки подключите ПК в разделе «Главная»");
+    }
+    if (onlineItems.length || onlineLoading) return;
+    if (onlineMode === "radio") searchRadio(true);
+    else searchArchive(true);
+  }
+
+  function updateOnlinePlaying(){
+    var rows = document.querySelectorAll("#onlineList .track-item");
+    if (!rows.length) return;
+    rows.forEach(function(row, idx){
+      var item = onlineItems[idx];
+      var queued = findOnlineIndex(item);
+      row.classList.toggle("playing", queued >= 0 && queued === current);
+      var fav = row.querySelector(".track-fav");
+      if (fav) fav.classList.toggle("active", isFav(item));
+    });
+  }
+
+  function renderOnlineResults(){
+    var list = $("onlineList");
+    list.innerHTML = "";
+    var isRadio = onlineMode === "radio";
+    $("onlineCount").textContent = onlineItems.length
+      ? (onlineItems.length + " " + (isRadio ? "станций" : pluralTracks(onlineItems.length)))
+      : (isRadio ? "Интернет-радио" : "Свободная музыка");
+    $("onlineEmpty").hidden = !!onlineItems.length || onlineLoading;
+    $("onlinePlayAll").hidden = isRadio || !onlineItems.length;
+    $("onlineMoreBtn").hidden = !onlineHasMore || onlineLoading;
+
+    onlineItems.forEach(function(item, idx){
+      var queued = findOnlineIndex(item);
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "track-item" + (queued >= 0 && queued === current ? " playing" : "");
+
+      var cover = document.createElement("div");
+      cover.className = "track-cover";
+      applyCover(cover, item, idx);
+      cover.innerHTML = '<span class="cover-letter">' + escHtml(trackLetter(item)) + '</span>';
+
+      var info = document.createElement("div");
+      info.className = "track-info";
+      var title = document.createElement("div");
+      title.className = "track-title";
+      title.textContent = item.title || "Без названия";
+      var sub = document.createElement("div");
+      sub.className = "track-artist";
+      sub.textContent = item.detail || item.artist || "Онлайн";
+      info.appendChild(title);
+      info.appendChild(sub);
+
+      var badge = document.createElement("span");
+      badge.className = "track-badge";
+      badge.textContent = item.stream ? "LIVE" : (item.ext || "AUDIO");
+
+      var fav = document.createElement("span");
+      fav.className = "track-fav" + (isFav(item) ? " active" : "");
+      fav.setAttribute("role", "button");
+      fav.setAttribute("tabindex", "0");
+      fav.setAttribute("aria-label", "В избранное");
+      fav.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+      fav.addEventListener("click", function(e){
+        e.stopPropagation();
+        haptic();
+        var added = toggleFavorite(item);
+        if (added){
+          queueOnlineItem(item);
+          afterOnlineQueueChanged();
+        }
+        this.classList.toggle("active", added);
+        showToast(added ? "Добавлено в избранное" : "Удалено из избранного");
+      });
+
+      btn.appendChild(cover);
+      btn.appendChild(info);
+      btn.appendChild(badge);
+      btn.appendChild(fav);
+      btn.addEventListener("click", function(){
+        haptic();
+        addOnlineTrack(item, true);
+      });
+      list.appendChild(btn);
+    });
+
+    updateOnlinePlaying();
+  }
+
+  document.querySelectorAll("#onlineChips .chip").forEach(function(chip){
+    chip.addEventListener("click", function(){
+      haptic();
+      setOnlineMode(this.getAttribute("data-online"));
+    });
+  });
+
+  $("onlineSearchInput").addEventListener("input", function(){
+    $("onlineSearchWrap").classList.toggle("has-value", !!this.value.trim());
+    clearTimeout(onlineSearchTimer);
+    onlineSearchTimer = setTimeout(function(){
+      if (onlineMode === "radio") searchRadio(true);
+      else searchArchive(true);
+    }, 600);
+  });
+
+  $("onlineSearchInput").addEventListener("keydown", function(e){
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    clearTimeout(onlineSearchTimer);
+    if (onlineMode === "radio") searchRadio(true);
+    else searchArchive(true);
+  });
+
+  $("onlineSearchClear").addEventListener("click", function(){
+    $("onlineSearchInput").value = "";
+    $("onlineSearchWrap").classList.remove("has-value");
+    if (onlineMode === "radio") searchRadio(true);
+    else searchArchive(true);
+    $("onlineSearchInput").focus();
+  });
+
+  $("onlineMoreBtn").addEventListener("click", function(){
+    if (onlineLoading) return;
+    haptic();
+    if (onlineMode === "radio") searchRadio(false);
+    else searchArchive(false);
+  });
+
+  $("onlinePlayAll").addEventListener("click", function(){
+    haptic();
+    if (!onlineItems.length) return;
+    var first = -1;
+    onlineItems.forEach(function(item){
+      if (item.stream) return;
+      var index = queueOnlineItem(item);
+      if (first < 0) first = index;
+    });
+    if (first < 0){
+      showToast("В этой подборке нет треков для очереди");
+      return;
+    }
+    afterOnlineQueueChanged();
+    showToast("Очередь: " + onlineItems.length + " " + pluralTracks(onlineItems.length));
+    playTrack(first);
+  });
+
+  $("streamPlayBtn").addEventListener("click", function(){
+    var url = $("streamUrlInput").value.trim();
+    if (!/^https?:\/\//i.test(url)){
+      showToast("Нужна прямая http(s)-ссылка на поток");
+      return;
+    }
+    if (/\.m3u8(\?|$)/i.test(url)){
+      showToast("HLS-плейлисты (.m3u8) не поддерживаются");
+      return;
+    }
+    var host = url.replace(/^https?:\/\//i, "").split("/")[0];
+    var track = {
+      title: host.replace(/^www\./i, "") || "Интернет-поток",
+      artist: "Поток по ссылке",
+      detail: "Прямой эфир",
+      ext: "LIVE",
+      stream: true,
+      url: url,
+      art: "",
+      source: "online"
+    };
+    haptic();
+    var index = queueOnlineItem(track);
+    afterOnlineQueueChanged();
+    playTrack(index);
+    $("streamUrlInput").value = "";
+    showToast("Поток добавлен в очередь");
+  });
+
+  $("streamUrlInput").addEventListener("keydown", function(e){
+    if (e.key === "Enter"){
+      e.preventDefault();
+      $("streamPlayBtn").click();
+    }
+  });
+
+  // ============================================================
   // NAVIGATION (Bottom bar & Quick cards)
   // ============================================================
   function switchView(viewName){
@@ -2667,11 +3599,13 @@ body.player-open #bgVisualizer { opacity: 0.7; }
     var showLibrary = viewName === "library" || viewName === "search";
     $("viewHome").hidden = viewName !== "home";
     $("viewLibrary").hidden = !showLibrary;
+    $("viewOnline").hidden = viewName !== "online";
     $("viewLive").hidden = viewName !== "live";
 
     $("navHome").classList.toggle("active", viewName === "home");
     $("navSearch").classList.toggle("active", viewName === "search");
     $("navLibrary").classList.toggle("active", viewName === "library");
+    $("navOnline").classList.toggle("active", viewName === "online");
     $("navLive").classList.toggle("active", viewName === "live");
 
     if (showLibrary){
@@ -2683,12 +3617,16 @@ body.player-open #bgVisualizer { opacity: 0.7; }
     if (viewName === "home"){
       renderHome();
     }
+    if (viewName === "online"){
+      ensureOnlineLoaded();
+    }
     window.scrollTo(0, 0);
   }
 
   $("navHome").addEventListener("click", function(){ switchView("home"); });
   $("navSearch").addEventListener("click", function(){ switchView("search"); });
   $("navLibrary").addEventListener("click", function(){ switchView("library"); });
+  $("navOnline").addEventListener("click", function(){ switchView("online"); });
   $("navLive").addEventListener("click", function(){ switchView("live"); });
 
   $("btnQuickLibrary").addEventListener("click", function(){
@@ -2790,15 +3728,16 @@ body.player-open #bgVisualizer { opacity: 0.7; }
         : null;
       var previousSignature = librarySignature(tracks);
 
-      // Keep phone-imported tracks and remember each server track's own index:
-      // /audio/N follows the server order, which differs from the combined
-      // (phone + server) playlist once phone files are added.
-      var phoneTracks = tracks.filter(function(t){ return !!t.url; });
+      // Keep phone-imported and online tracks, and remember each server track's
+      // own index: /audio/N follows the server order, which differs from the
+      // combined playlist once phone or online tracks are added.
+      var localTracks = tracks.filter(function(t){ return t.source && t.source !== "server"; });
       var serverTracks = (data.tracks || []).map(function(t, idx){
         t.serverIndex = idx;
+        t.source = "server";
         return t;
       });
-      tracks = phoneTracks.concat(serverTracks);
+      tracks = localTracks.concat(serverTracks);
 
       if (previousKey){
         for (var i = 0; i < tracks.length; i++){
@@ -2817,6 +3756,7 @@ body.player-open #bgVisualizer { opacity: 0.7; }
   }
 
   // Initialization
+  tracks = readOnlineTracks();
   setVisMode(visMode);
   syncFavButton();
   resizeCanvases();
