@@ -1798,6 +1798,7 @@ body.player-open #bgVisualizer { opacity: 0.7; }
 
   var audio = $("audio");
   var liveAudio = $("liveAudio");
+  try { liveAudio.crossOrigin = "anonymous"; } catch(e){}
   var tracks = [];
   var filteredTracks = [];
   var current = -1;
@@ -1811,6 +1812,10 @@ body.player-open #bgVisualizer { opacity: 0.7; }
   var toastTimer = null;
   var FAV_KEY = "aurora.favs";
   var ONLINE_KEY = "aurora.online";
+  var NOW_KEY = "aurora.now";
+  var pendingSeek = 0;
+  var queueRestored = false;
+  var saveNowTimer = null;
   var serverBase = "";
   try { serverBase = (localStorage.getItem("aurora.base") || "").replace(/\/+$/, ""); } catch(e){}
   var lastAndroidState = "";
@@ -1984,6 +1989,17 @@ body.player-open #bgVisualizer { opacity: 0.7; }
       return track.url;
     }
     return apiUrl("/audio/" + serverIndex);
+  }
+
+  // Remote audio has to request CORS explicitly: the bundled APK runs from
+  // file:// and routes <audio> through WebAudio, and a tainted source would
+  // mute the analyser (and playback) even though the stream itself is fine.
+  function setMediaCors(url){
+    var remote = /^https?:\/\//i.test(String(url || ""));
+    var desired = remote ? "anonymous" : null;
+    if (audio.crossOrigin !== desired){
+      audio.crossOrigin = desired;
+    }
   }
 
   function safeArt(url){
@@ -2457,7 +2473,7 @@ body.player-open #bgVisualizer { opacity: 0.7; }
     syncAndroidMedia();
   }
 
-  function playTrack(index){
+  function playTrack(index, autoplay){
     if (index < 0 || index >= tracks.length) return;
     initAudioContext();
 
@@ -2468,6 +2484,7 @@ body.player-open #bgVisualizer { opacity: 0.7; }
     }
 
     if (index === current){
+      if (autoplay === false) return;
       togglePlay();
       return;
     }
@@ -2484,7 +2501,9 @@ body.player-open #bgVisualizer { opacity: 0.7; }
     audio.removeAttribute("src");
     audio.load();
 
-    audio.src = onlineMediaUrl(track, serverIndex);
+    var mediaUrl = onlineMediaUrl(track, serverIndex);
+    setMediaCors(mediaUrl);
+    audio.src = mediaUrl;
     $("fullScrub").disabled = !!track.stream;
     if (track.stream){
       $("fullScrub").value = "0";
@@ -2499,6 +2518,13 @@ body.player-open #bgVisualizer { opacity: 0.7; }
 
     // Show the selected track right away, even if the stream is slow to open.
     updateActiveTrackUi();
+
+    // Restoring the previous session: load the source but wait for a tap.
+    if (autoplay === false){
+      try { audio.load(); } catch(e){}
+      syncPlayIcons();
+      return;
+    }
 
     if (track.stream){
       playTimeout = setTimeout(function(){
@@ -2516,6 +2542,7 @@ body.player-open #bgVisualizer { opacity: 0.7; }
       clearTimeout(playTimeout);
       syncPlayIcons();
       updateActiveTrackUi();
+      saveNowPlaying();
     }).catch(function(err){
       clearTimeout(playTimeout);
       showToast(track.source === "online"
@@ -2661,12 +2688,87 @@ body.player-open #bgVisualizer { opacity: 0.7; }
     }
   }
 
+  // ============================================================
+  // RESUME: remember the current track and playback position
+  // ============================================================
+  function trackKeyOf(track){
+    if (!track) return "";
+    if (track.url) return "url:" + track.url;
+    if (typeof track.serverIndex === "number") return "srv:" + track.serverIndex;
+    return "";
+  }
+
+  function saveNowPlaying(){
+    if (current < 0 || current >= tracks.length) return;
+    try {
+      var position = isFinite(audio.currentTime) ? Math.round(audio.currentTime) : 0;
+      localStorage.setItem(NOW_KEY, JSON.stringify({
+        key: trackKeyOf(tracks[current]),
+        time: position > 0 ? position : 0,
+        shuffle: !!shuffleMode,
+        repeat: repeatMode | 0
+      }));
+    } catch(e){}
+  }
+
+  function scheduleSaveNow(){
+    if (saveNowTimer) return;
+    saveNowTimer = setTimeout(function(){
+      saveNowTimer = null;
+      saveNowPlaying();
+    }, 5000);
+  }
+
+  function restoreNowPlaying(){
+    if (queueRestored) return;
+    queueRestored = true;
+    // The user already picked something while the library was loading.
+    if (current >= 0 && !audio.paused) return;
+
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem(NOW_KEY) || "null"); } catch(e){}
+    if (!saved) return;
+
+    if (saved.shuffle){
+      shuffleMode = true;
+      var shuffleBtn = $("btnShuffle");
+      if (shuffleBtn) shuffleBtn.classList.add("active");
+    }
+    repeatMode = (saved.repeat | 0) % 3;
+    var repeatBtn = $("btnRepeat");
+    if (repeatBtn) repeatBtn.classList.toggle("active", repeatMode > 0);
+
+    if (!saved.key) return;
+    var index = -1;
+    for (var i = 0; i < tracks.length; i++){
+      if (trackKeyOf(tracks[i]) === saved.key){ index = i; break; }
+    }
+    if (index < 0) return;
+
+    // Load the source without autoplaying: browsers block sound until a tap.
+    var seconds = Number(saved.time) || 0;
+    pendingSeek = seconds > 2 ? seconds : 0;
+    playTrack(index, false);
+  }
+
   audio.addEventListener("play", syncPlayIcons);
-  audio.addEventListener("pause", syncPlayIcons);
+  audio.addEventListener("pause", function(){
+    syncPlayIcons();
+    saveNowPlaying();
+  });
+  audio.addEventListener("timeupdate", scheduleSaveNow);
   audio.addEventListener("timeupdate", updateProgress);
   audio.addEventListener("loadedmetadata", function(){
     clearTimeout(playTimeout);
+    if (pendingSeek > 0){
+      var target = pendingSeek;
+      pendingSeek = 0;
+      if (isFinite(audio.duration) && audio.duration > target + 1){
+        try { audio.currentTime = target; } catch(e){}
+      }
+    }
     updateProgress();
+    syncPlayIcons();
   });
   audio.addEventListener("playing", function(){
     clearTimeout(playTimeout);
@@ -2949,20 +3051,94 @@ body.player-open #bgVisualizer { opacity: 0.7; }
   $("btnQuickFav").addEventListener("click", openFavorites);
   $("emptyAddBtn").addEventListener("click", function(){
     haptic();
-    $("phoneFileInput").click();
+    openPhoneLibrary();
   });
 
   // ============================================================
-  // LOCAL PHONE FILE PICKER
+  // PHONE LIBRARY (Android MediaStore) + FILE PICKER FALLBACK
   // ============================================================
-  $("navPhone").addEventListener("click", function(){
+  function hasPhoneBridge(){
+    return !!(window.AndroidMedia && typeof window.AndroidMedia.listAudio === "function");
+  }
+
+  function openPhoneLibrary(){
     haptic();
-    $("phoneFileInput").click();
-  });
-  $("btnQuickPhone").addEventListener("click", function(){
-    haptic();
-    $("phoneFileInput").click();
-  });
+    if (!hasPhoneBridge()){
+      $("phoneFileInput").click();
+      return;
+    }
+    try {
+      if (window.AndroidMedia.hasAudioPermission &&
+          !window.AndroidMedia.hasAudioPermission()){
+        window.AndroidMedia.requestAudioPermission();
+        return;
+      }
+    } catch(e){}
+    loadPhoneLibrary(true);
+  }
+
+  // Called by MainActivity after the runtime permission dialog closes.
+  window.onAuroraAudioPermission = function(granted){
+    if (granted) loadPhoneLibrary(true);
+    else showToast("Нет доступа к аудио на телефоне");
+  };
+
+  // MediaStore ids are stable across restarts, so the URL doubles as a key.
+  function phoneTrackKey(track){
+    return track && track.url ? String(track.url) : "";
+  }
+
+  function loadPhoneLibrary(announce){
+    if (!hasPhoneBridge()) return;
+    var raw = "";
+    try { raw = window.AndroidMedia.listAudio(); } catch(e){ return; }
+    var items;
+    try { items = JSON.parse(raw || "[]"); } catch(e){ return; }
+
+    var activeKey = (current >= 0 && current < tracks.length)
+      ? phoneTrackKey(tracks[current])
+      : "";
+
+    var phoneTracks = (items || []).map(function(item){
+      return {
+        title: item && item.title ? String(item.title) : "Аудиофайл",
+        artist: item && item.artist ? String(item.artist) : "С телефона",
+        album: item && item.album ? String(item.album) : "",
+        ext: item && item.ext ? String(item.ext).toUpperCase() : "",
+        url: item && item.url ? String(item.url) : "",
+        art: item && item.art ? String(item.art) : "",
+        source: "phone"
+      };
+    }).filter(function(t){ return !!t.url; });
+
+    if (!phoneTracks.length){
+      if (announce) showToast("На телефоне не нашлось музыки");
+      return;
+    }
+
+    // The MediaStore query is the source of truth: replace previous phone
+    // tracks instead of appending duplicates on every refresh.
+    tracks = phoneTracks.concat(tracks.filter(function(t){ return t.source !== "phone"; }));
+
+    if (activeKey){
+      for (var i = 0; i < tracks.length; i++){
+        if (phoneTrackKey(tracks[i]) === activeKey){ current = i; break; }
+      }
+    }
+    if (current >= tracks.length) current = tracks.length - 1;
+
+    applyFilter();
+    renderHome();
+    updateActiveTrackUi();
+    if (announce){
+      showToast("В телефоне " + phoneTracks.length + " " + pluralTracks(phoneTracks.length));
+      setLibraryFilter("phone");
+      switchView("library");
+    }
+  }
+
+  $("navPhone").addEventListener("click", function(){ openPhoneLibrary(); });
+  $("btnQuickPhone").addEventListener("click", function(){ openPhoneLibrary(); });
 
   $("phoneFileInput").addEventListener("change", function(e){
     var files = e.target.files;
@@ -3764,8 +3940,20 @@ body.player-open #bgVisualizer { opacity: 0.7; }
   renderLiveCard();
   applyFilter();
   renderHome();
+
+  // The Android bridge queries MediaStore on every launch, so phone tracks are
+  // no longer limited to files that were picked in this session.
+  if (hasPhoneBridge()){
+    try {
+      if (!window.AndroidMedia.hasAudioPermission ||
+          window.AndroidMedia.hasAudioPermission()){
+        loadPhoneLibrary(false);
+      }
+    } catch(e){}
+  }
+
   initConnectCard();
-  loadLibrary();
+  loadLibrary().then(function(){ restoreNowPlaying(); });
   pollState();
 
   setInterval(pollState, 3000);

@@ -27,6 +27,9 @@ namespace Lumen
 
         public event EventHandler BackRequested;
 
+        /// <summary>Raised with title, artist and play state whenever the current track changes.</summary>
+        public event Action<string, string, bool> NowPlayingChanged;
+
         private readonly AppState _state;
         private MfPlayAudioEngine _player;
         private string _playerError;
@@ -390,7 +393,7 @@ namespace Lumen
                     }
                     try
                     {
-                        Track track = Track.FromFile(result.Files[i]);
+                        Track track = TrackCache.GetOrCreate(result.Files[i]);
                         if (track != null) result.Tracks.Add(track);
                     }
                     catch (Exception ex)
@@ -398,6 +401,8 @@ namespace Lumen
                         Log.Write("Track scan failed: " + result.Files[i], ex);
                     }
                 }
+
+                TrackCache.Save();
             }
             catch (Exception ex)
             {
@@ -681,6 +686,22 @@ namespace Lumen
             {
                 _nowPlayingDot.Fill = new SolidColorBrush(Color.FromRgb(251, 191, 36));
             }
+            NotifyNowPlaying();
+        }
+
+        private void NotifyNowPlaying()
+        {
+            Action<string, string, bool> handler = NowPlayingChanged;
+            if (handler == null) return;
+            Track track = (_currentIndex >= 0 && _currentIndex < _tracks.Count)
+                ? _tracks[_currentIndex]
+                : null;
+            if (track == null)
+            {
+                handler("", "", false);
+                return;
+            }
+            handler(track.Title ?? "", track.Artist ?? "", _isPlaying);
         }
 
         private void UpdateTransportEnabled(bool enabled)

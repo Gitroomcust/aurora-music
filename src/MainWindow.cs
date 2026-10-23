@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -25,6 +26,22 @@ namespace Lumen
         private readonly DispatcherTimer _toastTimer;
         private UserControl _currentView;
         private bool _closing;
+        private TrayController _tray;
+        private HwndSource _hwndSource;
+
+        private const int WmHotkey = 0x0312;
+        private const int HotkeyPlayPause = 1;
+        private const int HotkeyNext = 2;
+        private const int HotkeyPrevious = 3;
+        private const uint VkMediaNextTrack = 0xB0;
+        private const uint VkMediaPrevTrack = 0xB1;
+        private const uint VkMediaPlayPause = 0xB3;
+
+        [DllImport("user32.dll")]
+        private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
+
+        [DllImport("user32.dll")]
+        private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
         public MainWindow(AppState state)
         {
@@ -68,6 +85,7 @@ namespace Lumen
             _welcome.CaptureRequested += delegate { ShowCapture(); };
             _local.BackRequested += delegate { ShowWelcome(); };
             _capture.BackRequested += delegate { ShowWelcome(); };
+            _local.NowPlayingChanged += OnNowPlayingChanged;
 
             _toastTimer = new DispatcherTimer();
             _toastTimer.Interval = TimeSpan.FromSeconds(2.6);
@@ -81,6 +99,7 @@ namespace Lumen
             Loaded += OnLoaded;
             Closed += OnClosed;
             PreviewKeyDown += OnPreviewKeyDown;
+            SourceInitialized += OnSourceInitialized;
 
             try
             {
@@ -105,6 +124,7 @@ namespace Lumen
             Top = area.Top + Math.Max(0, (area.Height - Height) / 2);
 
             BeginAnimation(OpacityProperty, new DoubleAnimation(1, TimeSpan.FromMilliseconds(280)));
+            CreateTray();
 
             if (_state.StartupView == "local")
             {
@@ -229,6 +249,140 @@ namespace Lumen
             }
         }
 
+        private void OnSourceInitialized(object sender, EventArgs e)
+        {
+            _hwndSource = PresentationSource.FromVisual(this) as HwndSource;
+            if (_hwndSource == null) return;
+            _hwndSource.AddHook(OnWndProc);
+            try
+            {
+                // Media keys on the keyboard and headsets work even when Lumen
+                // is minimized or in the background. Another player may already
+                // own a key; that is not fatal, so only log it.
+                if (!RegisterHotKey(_hwndSource.Handle, HotkeyPlayPause, 0, VkMediaPlayPause))
+                {
+                    Log.Write("Media key Play/Pause is already taken by another app");
+                }
+                if (!RegisterHotKey(_hwndSource.Handle, HotkeyNext, 0, VkMediaNextTrack))
+                {
+                    Log.Write("Media key Next is already taken by another app");
+                }
+                if (!RegisterHotKey(_hwndSource.Handle, HotkeyPrevious, 0, VkMediaPrevTrack))
+                {
+                    Log.Write("Media key Previous is already taken by another app");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Write("Global media keys failed", ex);
+            }
+        }
+
+        private IntPtr OnWndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            if (msg != WmHotkey) return IntPtr.Zero;
+            int id = wParam.ToInt32();
+            if (id == HotkeyPlayPause)
+            {
+                _local.TogglePlayback();
+                handled = true;
+            }
+            else if (id == HotkeyNext)
+            {
+                _local.PlayNext();
+                handled = true;
+            }
+            else if (id == HotkeyPrevious)
+            {
+                _local.PlayPrevious();
+                handled = true;
+            }
+            return IntPtr.Zero;
+        }
+
+        private void CreateTray()
+        {
+            try
+            {
+                System.Drawing.Icon icon = System.Drawing.Icon.ExtractAssociatedIcon(
+                    Assembly.GetExecutingAssembly().Location);
+                if (icon == null) return;
+                _tray = new TrayController(icon, ShowFromTray, ToggleFromTray,
+                    NextFromTray, PreviousFromTray, ExitFromTray);
+            }
+            catch (Exception ex)
+            {
+                Log.Write("Tray icon failed", ex);
+            }
+        }
+
+        private void ShowFromTray()
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.BeginInvoke(new Action(ShowFromTray));
+                return;
+            }
+            Show();
+            if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
+            Activate();
+            Topmost = true;
+            Topmost = false;
+        }
+
+        private void ToggleFromTray()
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.BeginInvoke(new Action(ToggleFromTray));
+                return;
+            }
+            _local.TogglePlayback();
+        }
+
+        private void NextFromTray()
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.BeginInvoke(new Action(NextFromTray));
+                return;
+            }
+            _local.PlayNext();
+        }
+
+        private void PreviousFromTray()
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.BeginInvoke(new Action(PreviousFromTray));
+                return;
+            }
+            _local.PlayPrevious();
+        }
+
+        private void ExitFromTray()
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.BeginInvoke(new Action(ExitFromTray));
+                return;
+            }
+            Close();
+        }
+
+        private void OnNowPlayingChanged(string title, string artist, bool playing)
+        {
+            TrayController tray = _tray;
+            if (tray == null) return;
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.BeginInvoke(new Action<string, string, bool>(OnNowPlayingChanged),
+                    title, artist, playing);
+                return;
+            }
+            tray.Update(title, artist, playing);
+        }
+
         private void ShowToast(string message)
         {
             if (_closing || string.IsNullOrWhiteSpace(message)) return;
@@ -258,6 +412,26 @@ namespace Lumen
             catch { }
             try { _state.Server.Dispose(); }
             catch { }
+
+            if (_hwndSource != null)
+            {
+                try
+                {
+                    UnregisterHotKey(_hwndSource.Handle, HotkeyPlayPause);
+                    UnregisterHotKey(_hwndSource.Handle, HotkeyNext);
+                    UnregisterHotKey(_hwndSource.Handle, HotkeyPrevious);
+                    _hwndSource.RemoveHook(OnWndProc);
+                }
+                catch { }
+                _hwndSource = null;
+            }
+
+            if (_tray != null)
+            {
+                try { _tray.Dispose(); }
+                catch { }
+                _tray = null;
+            }
         }
     }
 }

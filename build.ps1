@@ -61,6 +61,7 @@ $compilerArgs = @(
     '/debug:pdbonly',
     '/langversion:5',
     '/utf8output',
+    '/codepage:65001',
     ('/out:' + $output),
     ('/win32icon:' + $icon),
     ('/win32manifest:' + $manifest),
